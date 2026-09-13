@@ -3,232 +3,342 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#0b1220">
 <title>Pró Ativos • Frios | Rede Market</title>
-<!-- Bibliotecas externas -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
+/* ============================================================
+   PRÓ ATIVOS • FRIOS — Design System v2 (mobile-first)
+   ============================================================ */
 :root {
   --primary: #0066b2;
-  --primary-hover: #004d87;
+  --primary-600: #005a9e;
+  --primary-700: #004d87;
+  --primary-soft: #e8f3fb;
   --accent-red: #e30613;
-  --bg-main: #f8fafc;
+  --accent-red-soft: #fdecec;
+  --accent-green: #0e9f6e;
+  --accent-green-soft: #e6f7f0;
+  --accent-amber: #d97706;
+  --accent-amber-soft: #fef4e2;
+
+  --bg-main: #f1f5f9;
   --card-bg: #ffffff;
   --text-main: #0f172a;
   --text-muted: #64748b;
   --border-color: #e2e8f0;
-  --accent-green: #10b981;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.05);
+  --shadow-md: 0 6px 18px rgba(15,23,42,.08);
+  --shadow-lg: 0 12px 32px rgba(15,23,42,.14);
+  --ring: 0 0 0 4px rgba(0,102,178,.14);
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: var(--text-main);
-  background-color: var(--bg-main);
+  background:
+    radial-gradient(1200px 400px at 100% -10%, rgba(0,102,178,.08), transparent 60%),
+    var(--bg-main);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Header Moderno e Profissional */
+/* ---------- Header ---------- */
 .top {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background: linear-gradient(135deg, #0b1220 0%, #16233d 55%, #0f3a5f 100%);
   color: #fff;
-  padding: 24px 16px;
+  padding: 22px 16px 20px;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-lg);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.top::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(96,165,250,.5), transparent);
 }
 .header-title-container {
   display: flex;
   align-items: center;
-  gap: 18px;
-  max-width: 800px;
+  gap: 16px;
+  max-width: 820px;
   margin: 0 auto;
 }
 .logo-container {
-  background: #ffffff;
+  background: rgba(255,255,255,.97);
   padding: 8px 14px;
-  border-radius: 12px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 20px rgba(0,0,0,.35);
   flex-shrink: 0;
 }
-.header-logo {
-  height: 38px;
-  width: auto;
-  object-fit: contain;
-}
+.header-logo { height: 36px; width: auto; object-fit: contain; }
 .header-text h1 {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 19px;
+  font-weight: 800;
   margin: 0;
-  letter-spacing: -0.3px;
-  color: #ffffff;
+  letter-spacing: -.4px;
 }
 .header-text .sub {
-  color: #94a3b8;
+  color: #93b4d4;
   font-size: 12px;
   margin-top: 3px;
-  font-weight: 400;
+  font-weight: 500;
   display: flex;
   align-items: center;
   gap: 6px;
 }
+.sub .dot { width: 6px; height: 6px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399; }
 
-.wrap {
-  max-width: 800px;
-  margin: auto;
-  padding: 16px;
-}
+.wrap { max-width: 820px; margin: auto; padding: 18px 16px 96px; }
 
-/* Cards Estilizados */
+/* ---------- Cards ---------- */
 .card {
   background: var(--card-bg);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 16px;
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  margin-bottom: 18px;
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: cardIn .35s ease both;
 }
+@keyframes cardIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
 .card-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.step-badge {
+  width: 28px; height: 28px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, var(--primary), #3b9fe0);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0,102,178,.35);
 }
 .card-header h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: 15.5px;
   font-weight: 700;
-  color: var(--text-main);
+  letter-spacing: -.2px;
 }
 
+/* ---------- Form fields ---------- */
 label {
   display: block;
-  font-size: 12px;
-  font-weight: 600;
-  margin: 12px 0 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  margin: 14px 0 6px;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: .6px;
 }
+label:first-of-type { margin-top: 0; }
 
 input, select {
   font: inherit;
   width: 100%;
-  padding: 12px 14px;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
+  padding: 13px 14px;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
   background: #f8fafc;
   color: var(--text-main);
-  transition: all 0.2s ease;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
 }
+input:hover, select:hover { border-color: #cbd5e1; }
 input:focus, select:focus {
   outline: none;
   border-color: var(--primary);
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(0, 102, 178, 0.15);
+  box-shadow: var(--ring);
 }
+input::placeholder { color: #94a3b8; }
+input[type="date"] { min-height: 48px; }
 
+/* ---------- Buttons ---------- */
 button {
   font: inherit;
   border: 0;
-  border-radius: 10px;
-  padding: 12px 16px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  padding: 13px 18px;
+  font-weight: 700;
   font-size: 14px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.2s ease;
+  transition: transform .12s ease, box-shadow .2s ease, background .2s ease, filter .2s ease;
+  user-select: none;
 }
-button:active { transform: scale(0.98); }
+button:active { transform: scale(.96); }
+button .ico { font-size: 16px; }
 
-.primary { background: var(--primary); color: #fff; }
-.primary:hover { background: var(--primary-hover); }
-.secondary { background: #f0f7ff; color: var(--primary); }
-.secondary:hover { background: #e0f0ff; }
-.danger { background: #fef2f2; color: var(--accent-red); }
-.danger:hover { background: #fee2e2; }
+.primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-600) 100%);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(0,102,178,.35);
+}
+.primary:hover { filter: brightness(1.08); box-shadow: 0 8px 22px rgba(0,102,178,.45); }
+
+.secondary {
+  background: var(--primary-soft);
+  color: var(--primary-700);
+  border: 1.5px solid #cfe6f5;
+}
+.secondary:hover { background: #d9edfa; border-color: #aed8f2; }
+
+.danger {
+  background: var(--accent-red-soft);
+  color: var(--accent-red);
+  border: 1.5px solid #fbd5d5;
+}
+.danger:hover { background: #fddede; }
+
+/* Botão de excluir item (quadrado compacto) */
+.item button {
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+}
 
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.actions button { flex: 1 1 auto; }
 
-/* Container do Scanner */
+/* Barra de ações fixa (exportar/limpar) */
+.sticky-actions {
+  position: sticky;
+  bottom: 14px;
+  z-index: 50;
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  gap: 10px;
+}
+
+/* ---------- Scanner ---------- */
 #reader-container {
   width: 100%;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   background: #000;
   position: relative;
   margin-top: 14px;
   box-shadow: var(--shadow-md);
+  border: 1px solid #1e293b;
 }
 #reader { width: 100%; min-height: 300px; }
 #reader video { width: 100%!important; height: 100%!important; object-fit: cover!important; }
 
-/* Painel de Zoom */
 .camera-controls {
   background: #f1f5f9;
+  border: 1px solid var(--border-color);
   padding: 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   margin-top: 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 .zoom-slider { display: flex; align-items: center; gap: 12px; }
-.zoom-slider label { margin: 0; white-space: nowrap; text-transform: none; }
-.zoom-slider input { flex: 1; }
+.zoom-slider label { margin: 0; white-space: nowrap; text-transform: none; font-size: 13px; color: var(--text-main); }
+.zoom-slider input { flex: 1; accent-color: var(--primary); padding: 0; border: 0; background: transparent; box-shadow: none; }
+.zoom-slider input:focus { box-shadow: none; }
 
-.notice { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+/* ---------- Status / avisos ---------- */
+.notice { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+.status-box {
+  margin-top: 12px;
+  padding: 11px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  background: #f1f5f9;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  min-height: 20px;
+  transition: all .2s ease;
+}
+.status-box.ok   { background: var(--accent-green-soft); border-color: #bfe9d9; color: var(--accent-green); }
+.status-box.warn { background: var(--accent-amber-soft); border-color: #fbe3bd; color: var(--accent-amber); }
+.status-box.err  { background: var(--accent-red-soft); border-color: #fbd0d0; color: var(--accent-red); }
 .ok { color: var(--accent-green); font-weight: 700; }
-.warn { color: #d97706; }
+.warn { color: var(--accent-amber); }
 .err { color: var(--accent-red); font-weight: 700; }
 
-/* Itens da Lista */
+/* ---------- Lista de itens ---------- */
 .item {
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 12px 14px;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 13px 14px;
   margin-top: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
   background: #fff;
+  transition: border-color .18s ease, box-shadow .18s ease;
 }
-.item strong { display: block; font-size: 14px; }
-.item small { color: var(--text-muted); font-size: 12px; }
-.empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 14px; }
+.item:hover { border-color: #cbd5e1; box-shadow: var(--shadow-sm); }
+.item strong { display: block; font-size: 14px; letter-spacing: -.1px; }
+.item small { color: var(--text-muted); font-size: 12px; line-height: 1.5; display: block; margin-top: 3px; }
+.empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+  background: #f8fafc;
+  border: 1.5px dashed var(--border-color);
+  border-radius: var(--radius-md);
+}
 .pill {
-  display: inline-block;
-  padding: 2px 10px;
+  display: inline-flex;
+  align-items: center;
+  min-width: 30px;
+  justify-content: center;
+  padding: 3px 11px;
   border-radius: 99px;
-  background: #e2e8f0;
+  background: var(--primary-soft);
+  border: 1px solid #cfe6f5;
   font-size: 12px;
-  font-weight: 700;
-  color: var(--text-main);
+  font-weight: 800;
+  color: var(--primary-700);
 }
 .hidden { display: none!important; }
 
-/* Assinatura e Rodapé */
+/* ---------- Footer ---------- */
 footer {
   text-align: center;
-  padding: 24px 16px 40px;
+  padding: 8px 16px 40px;
   color: var(--text-muted);
   font-size: 12px;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 .signature-badge {
   display: inline-flex;
@@ -236,22 +346,23 @@ footer {
   gap: 6px;
   background: #ffffff;
   border: 1px solid var(--border-color);
-  padding: 8px 16px;
+  padding: 9px 18px;
   border-radius: 99px;
-  margin-top: 10px;
-  font-weight: 600;
+  margin-top: 12px;
+  font-weight: 700;
   color: var(--text-main);
   box-shadow: var(--shadow-sm);
 }
 
-@media(max-width: 520px) {
+@media (max-width: 520px) {
   .row { grid-template-columns: 1fr; }
-  .top { padding: 18px 16px; padding-top: calc(18px + env(safe-area-inset-top)); }
-  .header-title-container { gap: 14px; }
-  .header-logo { height: 32px; }
+  .top { padding: 16px; padding-top: calc(16px + env(safe-area-inset-top)); }
+  .header-title-container { gap: 12px; }
+  .header-logo { height: 30px; }
   .logo-container { padding: 6px 10px; }
-  .header-text h1 { font-size: 18px; }
-  .header-text .sub { font-size: 11px; }
+  .header-text h1 { font-size: 17px; }
+  .card { padding: 18px; }
+  .sticky-actions { bottom: calc(10px + env(safe-area-inset-bottom)); }
 }
 </style>
 </head>
@@ -272,6 +383,7 @@ footer {
     <div class="header-text">
       <h1>Pró Ativos • Frios</h1>
       <div class="sub">
+        <span class="dot"></span>
         <span>Controle de Validades e Estoque</span>
       </div>
     </div>
@@ -279,7 +391,12 @@ footer {
 </header>
 
 <main class="wrap">
+  <!-- Cabeçalho do formulário -->
   <section class="card">
+    <div class="card-header">
+      <span class="step-badge">✎</span>
+      <h3>Dados do levantamento</h3>
+    </div>
     <div class="row">
       <div><label>Loja</label><input id="loja" value="PATITIBA"></div>
       <div><label>Quem digitou?</label><input id="digitou" placeholder="Seu nome"></div>
@@ -291,41 +408,45 @@ footer {
     <label>Data do levantamento</label><input id="data" type="date">
   </section>
 
+  <!-- Scanner -->
   <section class="card">
     <div class="card-header">
-      <h3>1. Escanear produto</h3>
+      <span class="step-badge">1</span>
+      <h3>Escanear produto</h3>
     </div>
-    <div class="notice">Abra a câmera e enquadre o código na mira central.</div>
+    <div class="notice">Abra a câmera e enquadre o código na mira central, ou envie uma foto do código.</div>
     <div class="actions">
-      <button class="primary" id="start">📷 Abrir Câmera</button>
-      <button class="secondary" id="btnFoto">🖼️ Enviar foto / Tirar foto</button>
+      <button class="primary" id="start"><span class="ico">📷</span> Abrir Câmera</button>
+      <button class="secondary" id="btnFoto"><span class="ico">🖼️</span> Enviar foto</button>
       <input type="file" id="fileInput" accept="image/*" capture="environment" class="hidden">
-      <button class="secondary hidden" id="stop">Parar câmera</button>
+      <button class="danger hidden" id="stop"><span class="ico">⏹️</span> Parar</button>
     </div>
-    
+
     <div id="reader-container" class="hidden">
       <div id="reader"></div>
     </div>
 
     <div id="cameraControls" class="camera-controls hidden">
       <div class="zoom-slider">
-        <label>🔍 Zoom: <span id="zoomVal">1.0</span>x</label>
+        <label>🔍 <span id="zoomVal">1.0</span>x</label>
         <input type="range" id="zoomRange" min="1" max="5" step="0.1" value="1">
       </div>
       <div class="actions" style="margin:0">
-        <button type="button" class="secondary" id="btnFlash">💡 Ligar Lanterna</button>
+        <button type="button" class="secondary" id="btnFlash"><span class="ico">💡</span> Ligar Lanterna</button>
       </div>
     </div>
 
     <label>Código de barras</label>
     <input id="codigo" inputmode="numeric" placeholder="Ex.: 789...">
-    <div class="actions"><button class="primary" id="buscar">🔎 Buscar produto</button></div>
-    <div id="status" class="notice" style="margin-top:10px"></div>
+    <div class="actions"><button class="primary" id="buscar"><span class="ico">🔎</span> Buscar produto</button></div>
+    <div id="status" class="status-box"></div>
   </section>
 
+  <!-- Conferência -->
   <section class="card">
     <div class="card-header">
-      <h3>2. Conferência</h3>
+      <span class="step-badge">2</span>
+      <h3>Conferência</h3>
     </div>
     <label>Descrição do produto</label><input id="descricao" placeholder="Preenchida automaticamente ou digite aqui">
     <div class="row">
@@ -337,29 +458,33 @@ footer {
       <div><label>Valor unitário (R$)</label><input id="valor" inputmode="decimal" value="0.00"></div>
     </div>
     <div class="actions">
-      <button class="primary" id="adicionar">➕ Adicionar à lista</button>
-      <button class="secondary" id="salvarCatalogo">💾 Salvar descrição no catálogo</button>
+      <button class="primary" id="adicionar"><span class="ico">➕</span> Adicionar à lista</button>
+      <button class="secondary" id="salvarCatalogo"><span class="ico">💾</span> Salvar no catálogo</button>
     </div>
   </section>
 
+  <!-- Lista -->
   <section class="card">
     <div class="card-header" style="justify-content: space-between;">
-      <h3>3. Produtos lançados</h3>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="step-badge">3</span>
+        <h3 style="margin:0;">Produtos lançados</h3>
+      </div>
       <span id="contador" class="pill">0</span>
     </div>
     <div id="lista" class="empty">Nenhum produto lançado ainda.</div>
-    <div class="actions" style="margin-top: 16px;">
-      <button class="primary" id="exportar">📊 Gerar Excel padrão com Logo e Cores</button>
-      <button class="danger" id="limpar">Limpar lista</button>
-    </div>
-    <div class="notice" style="margin-top:12px">O arquivo exportado salva mantendo o modelo visual completo da empresa com logo e formatações cinzas.</div>
+    <div class="notice" style="margin-top:12px">O Excel exportado mantém o modelo visual da empresa com logo e formatações.</div>
   </section>
+
+  <!-- Barra de ações fixa -->
+  <div class="sticky-actions">
+    <button class="primary" id="exportar"><span class="ico">📊</span> Gerar Excel</button>
+    <button class="danger" id="limpar" style="flex:0 0 auto;"><span class="ico">🗑️</span> Limpar</button>
+  </div>
 
   <footer>
     <div>Catálogo local e consulta externa via Open Food Facts.</div>
-    <div class="signature-badge">
-      ✍️ Encarregado Felipe Farizeli desde 2026
-    </div>
+    <div class="signature-badge">✍️ Encarregado Felipe Farizeli desde 2026</div>
   </footer>
 </main>
 
@@ -371,21 +496,15 @@ function tocarBipe() {
     const ctx = new AudioContext();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    
     osc.type = "square";
     osc.frequency.setValueAtTime(1200, ctx.currentTime);
-    
     gain.gain.setValueAtTime(0.3, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
-    
     osc.connect(gain);
     gain.connect(ctx.destination);
-    
     osc.start();
     osc.stop(ctx.currentTime + 0.12);
-  } catch (e) {
-    console.error("Erro no áudio:", e);
-  }
+  } catch (e) { console.error("Erro no áudio:", e); }
 }
 
 const produtosPreCadastrados = {
@@ -446,7 +565,6 @@ el('btnFoto').addEventListener('click', () => el('fileInput').click());
 el('fileInput').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
-
   mostrarStatus('Lendo foto capturada...', '');
   const qrScanner = new Html5Qrcode("reader");
   qrScanner.scanFile(file, true)
@@ -459,6 +577,7 @@ el('fileInput').addEventListener('change', (e) => {
       mostrarStatus('Não foi possível identificar um código claro nesta imagem.', 'warn');
       qrScanner.clear();
     });
+  e.target.value = '';
 });
 
 el('start').addEventListener('click', async () => {
@@ -468,18 +587,13 @@ el('start').addEventListener('click', async () => {
   el('stop').classList.remove('hidden');
   mostrarStatus('Abrindo câmera...', '');
 
-  if (!html5QrCode) {
-    html5QrCode = new Html5Qrcode("reader");
-  }
+  if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
 
   const config = {
     fps: 15,
     qrbox: function(viewfinderWidth, viewfinderHeight) {
       let minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-      return {
-        width: Math.floor(minEdge * 0.8),
-        height: Math.floor(minEdge * 0.45)
-      };
+      return { width: Math.floor(minEdge * 0.8), height: Math.floor(minEdge * 0.45) };
     },
     formatsToSupport: [
       Html5QrcodeSupportedFormats.EAN_13,
@@ -490,24 +604,20 @@ el('start').addEventListener('click', async () => {
   try {
     const devices = await Html5Qrcode.getCameras();
     let backCameraId = null;
-
     if (devices && devices.length > 0) {
-      const backCam = devices.find(d => 
-        d.label.toLowerCase().includes('back') || 
-        d.label.toLowerCase().includes('traseira') || 
+      const backCam = devices.find(d =>
+        d.label.toLowerCase().includes('back') ||
+        d.label.toLowerCase().includes('traseira') ||
         d.label.toLowerCase().includes('environment')
       );
       backCameraId = backCam ? backCam.id : devices[devices.length - 1].id;
     }
-
     const cameraParam = backCameraId ? backCameraId : { facingMode: "environment" };
 
     await html5QrCode.start(
       cameraParam,
       config,
-      (decodedText) => {
-        processarCodigoLido(decodedText);
-      },
+      (decodedText) => { processarCodigoLido(decodedText); },
       () => {}
     );
 
@@ -518,10 +628,8 @@ el('start').addEventListener('click', async () => {
       if (videoElement && videoElement.srcObject) {
         const stream = videoElement.srcObject;
         videoTrack = stream.getVideoTracks()[0];
-
         if (videoTrack && videoTrack.getCapabilities) {
           const caps = videoTrack.getCapabilities();
-
           if (caps.zoom) {
             el('zoomRange').min = caps.zoom.min || 1;
             el('zoomRange').max = caps.zoom.max || 5;
@@ -531,7 +639,6 @@ el('start').addEventListener('click', async () => {
         }
       }
     }, 400);
-
   } catch (err) {
     mostrarStatus('Erro ao abrir câmera. Verifique se deu permissão no navegador.', 'err');
     pararCamera();
@@ -544,40 +651,32 @@ function aplicarZoomNativo(val) {
   if (videoTrack && videoTrack.getCapabilities) {
     const caps = videoTrack.getCapabilities();
     if (caps.zoom) {
-      videoTrack.applyConstraints({
-        advanced: [{ zoom: zoomVal }]
-      }).catch(e => console.log('Erro de zoom:', e));
+      videoTrack.applyConstraints({ advanced: [{ zoom: zoomVal }] })
+        .catch(e => console.log('Erro de zoom:', e));
     }
   }
 }
 
-el('zoomRange').addEventListener('input', (e) => {
-  aplicarZoomNativo(e.target.value);
-});
+el('zoomRange').addEventListener('input', (e) => aplicarZoomNativo(e.target.value));
 
 el('btnFlash').addEventListener('click', () => {
   if (!videoTrack) return;
   lanternaAtiva = !lanternaAtiva;
-  videoTrack.applyConstraints({
-    advanced: [{ torch: lanternaAtiva }]
-  }).then(() => {
-    el('btnFlash').innerText = lanternaAtiva ? '💡 Desligar Lanterna' : '💡 Ligar Lanterna';
-  }).catch(() => {
-    mostrarStatus('Lanterna não disponível nesta câmera.', 'warn');
-  });
+  videoTrack.applyConstraints({ advanced: [{ torch: lanternaAtiva }] })
+    .then(() => {
+      el('btnFlash').innerHTML = lanternaAtiva
+        ? '<span class="ico">💡</span> Desligar Lanterna'
+        : '<span class="ico">💡</span> Ligar Lanterna';
+    })
+    .catch(() => mostrarStatus('Lanterna não disponível nesta câmera.', 'warn'));
 });
 
 el('stop').addEventListener('click', pararCamera);
 
 function pararCamera() {
   if (html5QrCode && html5QrCode.isScanning) {
-    html5QrCode.stop().then(() => {
-      html5QrCode.clear();
-      resetarUI();
-    }).catch(err => {
-      console.error(err);
-      resetarUI();
-    });
+    html5QrCode.stop().then(() => { html5QrCode.clear(); resetarUI(); })
+      .catch(err => { console.error(err); resetarUI(); });
   } else {
     resetarUI();
   }
@@ -601,19 +700,13 @@ async function consultarOpenFoodFacts(codigoEan) {
     if (data.status === 1 && data.product) {
       return data.product.product_name_pt || data.product.product_name || data.product.abbreviated_product_name;
     }
-  } catch (err) {
-    console.error(err);
-  }
+  } catch (err) { console.error(err); }
   return null;
 }
 
 async function buscarProduto() {
   const cod = el('codigo').value.trim();
-  if (!cod) {
-    mostrarStatus('Por favor, informe um código de barras.', 'warn');
-    return;
-  }
-
+  if (!cod) { mostrarStatus('Por favor, informe um código de barras.', 'warn'); return; }
   mostrarStatus('Buscando produto...', '');
 
   if (catalogoLocal[cod]) {
@@ -621,7 +714,6 @@ async function buscarProduto() {
     mostrarStatus('Produto encontrado no catálogo local!', 'ok');
     return;
   }
-
   if (produtosPreCadastrados[cod]) {
     el('descricao').value = produtosPreCadastrados[cod];
     mostrarStatus('Produto encontrado no cadastro interno!', 'ok');
@@ -645,10 +737,7 @@ async function buscarProduto() {
 el('salvarCatalogo').addEventListener('click', () => {
   const cod = el('codigo').value.trim();
   const desc = el('descricao').value.trim();
-  if (!cod || !desc) {
-    mostrarStatus('Código de barras e Descrição são obrigatórios para salvar.', 'err');
-    return;
-  }
+  if (!cod || !desc) { mostrarStatus('Código e Descrição são obrigatórios para salvar.', 'err'); return; }
   catalogoLocal[cod] = desc;
   localStorage.setItem('proativos_catalogo', JSON.stringify(catalogoLocal));
   mostrarStatus('Descrição salva com sucesso no catálogo local!', 'ok');
@@ -660,22 +749,15 @@ el('adicionar').addEventListener('click', () => {
   const quantidade = parseFloat(el('quantidade').value.replace(',', '.'));
   const unidade = el('unidade').value.trim() || 'und';
   const validade = el('validade').value;
-  const valor = parseFloat(el('valor').value.replace(',', '.')) || 0;
+  const valorRaw = parseFloat(el('valor').value.replace(',', '.'));
 
-  if (!codigo || !descricao) {
-    mostrarStatus('Código e Descrição são obrigatórios.', 'err');
-    return;
-  }
-  if (isNaN(quantidade) || quantidade <= 0) {
-    mostrarStatus('Informe uma quantidade válida.', 'err');
-    return;
-  }
-  if (!validade) {
-    mostrarStatus('Informe a data de validade.', 'err');
-    return;
-  }
+  if (!codigo || !descricao) { mostrarStatus('Código e Descrição são obrigatórios.', 'err'); return; }
+  if (isNaN(quantidade) || quantidade <= 0) { mostrarStatus('Informe uma quantidade válida.', 'err'); return; }
+  if (!validade) { mostrarStatus('Informe a data de validade.', 'err'); return; }
+  if (isNaN(valorRaw) || valorRaw < 0) { mostrarStatus('Valor unitário inválido. Use apenas números.', 'err'); return; }
+  const valor = valorRaw;
 
-  const item = {id: Date.now(), codigo, descricao, quantidade, unidade, validade, valor};
+  const item = { id: Date.now(), codigo, descricao, quantidade, unidade, validade, valor };
   itensLancados.push(item);
   localStorage.setItem('proativos_itens', JSON.stringify(itensLancados));
 
@@ -709,7 +791,7 @@ function atualizarListaUI() {
   el('contador').innerText = itensLancados.length;
   if (itensLancados.length === 0) {
     listaDiv.className = 'empty';
-    listaDiv.innerHTML = 'Nenhum produto lançado ainda.';
+    listaDiv.innerHTML = '📦<br><br>Nenhum produto lançado ainda.';
     return;
   }
   listaDiv.className = '';
@@ -743,16 +825,12 @@ window.removerItem = function(id) {
 };
 
 el('exportar').addEventListener('click', async () => {
-  if (itensLancados.length === 0) {
-    mostrarStatus('Não há itens lançados para exportar.', 'warn');
-    return;
-  }
-
+  if (itensLancados.length === 0) { mostrarStatus('Não há itens lançados para exportar.', 'warn'); return; }
   mostrarStatus('Gerando planilha estilizada...', '');
 
   try {
     const req = await fetch('planilha_padrao_original.xlsx');
-    if (!req.ok) throw new Error('Não foi possível carregar o arquivo modelo.');
+    if (!req.ok) throw new Error('Arquivo modelo "planilha_padrao_original.xlsx" não encontrado junto ao HTML.');
     const buffer = await req.arrayBuffer();
 
     const workbook = await XlsxPopulate.fromDataAsync(buffer);
@@ -764,10 +842,8 @@ el('exportar').addEventListener('click', async () => {
     sheet.cell("H4").value(el('digitou').value);
 
     let startRow = 7;
-
     itensLancados.forEach((item, idx) => {
       let r = startRow + idx;
-      
       sheet.cell(`A${r}`).value(idx + 1);
       sheet.cell(`B${r}`).value(el('comprador').value);
       sheet.cell(`C${r}`).value(el('loja').value);
@@ -777,19 +853,15 @@ el('exportar').addEventListener('click', async () => {
       sheet.cell(`G${r}`).value(item.unidade);
       sheet.cell(`H${r}`).value(formatarDataBR(item.validade));
       sheet.cell(`I${r}`).value(item.valor);
-
-      ["A", "B", "C", "D", "E", "F", "G", "H", "I"].forEach(col => {
-        sheet.cell(`${col}${r}`).style({
-          border: true,
-          fontSize: 10
-        });
+      ["A","B","C","D","E","F","G","H","I"].forEach(col => {
+        sheet.cell(`${col}${r}`).style({ border: true, fontSize: 10 });
       });
     });
 
     const outBuffer = await workbook.outputAsync();
     const blob = new Blob([outBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     const url = URL.createObjectURL(blob);
-    
+
     const lojaArquivo = (el('loja').value.trim() || 'Loja').replace(/[\/:*?"<>|]/g, '_');
     const dataArquivo = el('data').value || 'sem-data';
     const a = document.createElement('a');
@@ -810,7 +882,7 @@ el('exportar').addEventListener('click', async () => {
 function mostrarStatus(mensagem, tipo) {
   const statusDiv = el('status');
   statusDiv.innerText = mensagem;
-  statusDiv.className = 'notice ' + (tipo || '');
+  statusDiv.className = 'status-box ' + (tipo || '');
 }
 </script>
 </body>
