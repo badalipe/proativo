@@ -4,21 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f172a">
-<title>Pró Ativos • Frios</title>
+<title>Pró Ativos • Frios | Rede Market</title>
 <!-- Bibliotecas externas -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 :root {
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  --primary: #0066b2;
+  --primary-hover: #004d87;
+  --accent-red: #e30613;
   --bg-main: #f8fafc;
   --card-bg: #ffffff;
   --text-main: #0f172a;
   --text-muted: #64748b;
   --border-color: #e2e8f0;
   --accent-green: #10b981;
-  --accent-red: #ef4444;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
 }
@@ -36,7 +36,7 @@ body {
 .top {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   color: #fff;
-  padding: 24px 20px;
+  padding: 20px 16px;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -45,14 +45,24 @@ body {
 .header-title-container {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   max-width: 800px;
   margin: 0 auto;
 }
-.header-icon {
-  width: 32px;
-  height: 32px;
-  fill: #38bdf8;
+.logo-container {
+  background: #ffffff;
+  padding: 6px 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  flex-shrink: 0;
+}
+.header-logo {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
 }
 h1 {
   font-size: 22px;
@@ -120,7 +130,7 @@ input:focus, select:focus {
   outline: none;
   border-color: var(--primary);
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 3px rgba(0, 102, 178, 0.15);
 }
 
 button {
@@ -141,8 +151,8 @@ button:active { transform: scale(0.98); }
 
 .primary { background: var(--primary); color: #fff; }
 .primary:hover { background: var(--primary-hover); }
-.secondary { background: #eff6ff; color: var(--primary); }
-.secondary:hover { background: #dbeafe; }
+.secondary { background: #f0f7ff; color: var(--primary); }
+.secondary:hover { background: #e0f0ff; }
 .danger { background: #fef2f2; color: var(--accent-red); }
 .danger:hover { background: #fee2e2; }
 
@@ -232,6 +242,10 @@ footer {
 @media(max-width: 520px) {
   .row { grid-template-columns: 1fr; }
   .top { padding-top: calc(18px + env(safe-area-inset-top)); }
+  .header-title-container { flex-direction: row; gap: 12px; }
+  .header-logo { height: 34px; }
+  .logo-container { padding: 4px 8px; }
+  h1 { font-size: 18px; }
 }
 </style>
 </head>
@@ -239,10 +253,9 @@ footer {
 
 <header class="top">
   <div class="header-title-container">
-    <!-- Ícone de Carrinho de Mercado -->
-    <svg class="header-icon" viewBox="0 0 24 24">
-      <path d="M17 18c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zM7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm0-3l1.1-2h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.37-.66-.11-1.48-.87-1.48H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2z"/>
-    </svg>
+    <div class="logo-container">
+      <img src="Rede.png" alt="Rede Market" class="header-logo">
+    </div>
     <div>
       <h1>Pró Ativos • Frios</h1>
       <div class="sub">Escaneie → confira a descrição → informe quantidade e validade → exporte para o Excel padrão</div>
