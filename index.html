@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b5cff">
 <title>Pró Ativos • Frios</title>
-<!-- Carregamento de bibliotecas externas com fallback -->
+<!-- Biblioteca Excel -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
-<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/index.min.js';"></script>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#18212f;background:#f4f6f8}
 *{box-sizing:border-box} body{margin:0}.top{background:#0b5cff;color:#fff;padding:18px 16px;position:sticky;top:0;z-index:10}
@@ -52,7 +51,7 @@ footer{font-size:11px;color:#7b8492;text-align:center;padding:10px 0 30px}
     <button class="secondary hidden" id="stop">Parar câmera</button>
   </div>
   <div id="reader" class="hidden" style="margin-top:12px">
-    <video id="video-preview"></video>
+    <video id="video-preview" autoplay playsinline muted></video>
   </div>
   <label>Código de barras</label>
   <input id="codigo" inputmode="numeric" placeholder="Ex.: 789...">
@@ -92,7 +91,8 @@ footer{font-size:11px;color:#7b8492;text-align:center;padding:10px 0 30px}
 <script>
 let catalogoLocal = JSON.parse(localStorage.getItem('proativos_catalogo') || '{}');
 let itensLancados = JSON.parse(localStorage.getItem('proativos_itens') || '[]');
-let codeReader = null;
+let mediaStream = null;
+let animFrame = null;
 const el = id => document.getElementById(id);
 
 function formatarDataBR(dataISO) {
@@ -124,36 +124,48 @@ atualizarListaUI();
 });
 
 el('start').addEventListener('click', async () => {
-  if (typeof ZXing === 'undefined') {
-    mostrarStatus('Biblioteca do leitor de câmera ainda não carregou. Verifique sua conexão e recarregue a página.', 'err');
+  if (!('BarcodeDetector' in window)) {
+    mostrarStatus('O leitor nativo não é suportado neste navegador. Digite o código de barras manualmente.', 'warn');
     return;
   }
 
   try {
-    codeReader = new ZXing.BrowserMultiFormatReader();
-    const videoInputDevices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
-    if (videoInputDevices.length === 0) {
-      mostrarStatus('Nenhuma câmera foi encontrada neste dispositivo.', 'err');
-      return;
-    }
-    let selectedDeviceId = videoInputDevices[0].deviceId;
-    for (const device of videoInputDevices) {
-      if (/back|traseira|rear|environment/i.test(device.label)) {
-        selectedDeviceId = device.deviceId;
-        break;
-      }
-    }
+    const video = el('video-preview');
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { exact: "environment" } }
+    }).catch(async () => {
+      return await navigator.mediaDevices.getUserMedia({ video: true });
+    });
+
+    video.srcObject = mediaStream;
+    await video.play();
+
     el('reader').classList.remove('hidden');
     el('start').classList.add('hidden');
     el('stop').classList.remove('hidden');
-    codeReader.decodeFromVideoDevice(selectedDeviceId, 'video-preview', (result, err) => {
-      if (result) {
-        el('codigo').value = result.getText();
-        pararCamera();
-        buscarProduto();
-      }
-    });
     mostrarStatus('Câmera iniciada. Aproxime o código de barras.', 'ok');
+
+    const barcodeDetector = new BarcodeDetector({
+      formats: ['ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e']
+    });
+
+    const detect = async () => {
+      if (!mediaStream) return;
+      try {
+        const barcodes = await barcodeDetector.detect(video);
+        if (barcodes.length > 0) {
+          el('codigo').value = barcodes[0].rawValue;
+          pararCamera();
+          buscarProduto();
+          return;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+      animFrame = requestAnimationFrame(detect);
+    };
+
+    detect();
   } catch (err) {
     mostrarStatus('Erro ao acessar a câmera: ' + err.message, 'err');
     pararCamera();
@@ -163,9 +175,13 @@ el('start').addEventListener('click', async () => {
 el('stop').addEventListener('click', pararCamera);
 
 function pararCamera() {
-  if (codeReader) {
-    codeReader.reset();
-    codeReader = null;
+  if (animFrame) {
+    cancelAnimationFrame(animFrame);
+    animFrame = null;
+  }
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(track => track.stop());
+    mediaStream = null;
   }
   el('reader').classList.add('hidden');
   el('start').classList.remove('hidden');
