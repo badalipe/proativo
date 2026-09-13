@@ -3,114 +3,336 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b5cff">
+<meta name="theme-color" content="#0f172a">
 <title>Pró Ativos • Frios</title>
 <!-- Bibliotecas externas -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
-:root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#18212f;background:#f4f6f8}
-*{box-sizing:border-box} body{margin:0}.top{background:#0b5cff;color:#fff;padding:18px 16px;position:sticky;top:0;z-index:10}
-h1{font-size:21px;margin:0 0 4px}.sub{opacity:.9;font-size:13px}.wrap{max-width:760px;margin:auto;padding:14px}
-.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px #0000000d}
-label{display:block;font-size:12px;font-weight:700;margin:10px 0 5px;color:#4a5565}
-input,button,select{font:inherit}input,select{width:100%;padding:13px;border:1px solid #d6dbe3;border-radius:10px;background:#fff}
-button{border:0;border-radius:11px;padding:12px 14px;font-weight:700;cursor:pointer}
-.primary{background:#0b5cff;color:#fff}.secondary{background:#eaf0ff;color:#0b5cff}.danger{background:#ffe9e9;color:#b42318}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --bg-main: #f8fafc;
+  --card-bg: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text-main);
+  background-color: var(--bg-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header Moderno */
+.top {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #fff;
+  padding: 24px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+}
+.header-title-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.header-icon {
+  width: 32px;
+  height: 32px;
+  fill: #38bdf8;
+}
+h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+.sub {
+  opacity: 0.8;
+  font-size: 13px;
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+.wrap {
+  max-width: 800px;
+  margin: auto;
+  padding: 16px;
+}
+
+/* Cards Estilizados */
+.card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.card-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 12px 0 6px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+input, select {
+  font: inherit;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: #f8fafc;
+  color: var(--text-main);
+  transition: all 0.2s ease;
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+button {
+  font: inherit;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+button:active { transform: scale(0.98); }
+
+.primary { background: var(--primary); color: #fff; }
+.primary:hover { background: var(--primary-hover); }
+.secondary { background: #eff6ff; color: var(--primary); }
+.secondary:hover { background: #dbeafe; }
+.danger { background: #fef2f2; color: var(--accent-red); }
+.danger:hover { background: #fee2e2; }
+
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 
 /* Container do Scanner */
-#reader-container{width:100%;border-radius:12px;overflow:hidden;background:#000;position:relative;margin-top:12px}
-#reader{width:100%;min-height:300px}
-#reader video{width:100%!important;height:100%!important;object-fit:cover!important}
+#reader-container {
+  width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+  position: relative;
+  margin-top: 14px;
+  box-shadow: var(--shadow-md);
+}
+#reader { width: 100%; min-height: 300px; }
+#reader video { width: 100%!important; height: 100%!important; object-fit: cover!important; }
 
 /* Painel de Zoom */
-.camera-controls{background:#eef4ff;padding:12px;border-radius:12px;margin-top:10px;display:flex;flex-direction:column;gap:10px}
-.zoom-slider{display:flex;align-items:center;gap:10px}
-.zoom-slider label{margin:0;white-space:nowrap}
-.zoom-slider input{flex:1}
+.camera-controls {
+  background: #f1f5f9;
+  padding: 14px;
+  border-radius: 12px;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.zoom-slider { display: flex; align-items: center; gap: 12px; }
+.zoom-slider label { margin: 0; white-space: nowrap; text-transform: none; }
+.zoom-slider input { flex: 1; }
 
-.notice{font-size:13px;color:#5a6575;line-height:1.4}.ok{color:#087443;font-weight:700}.warn{color:#a15c00}.err{color:#b42318;font-weight:700}
-.item{border:1px solid #e0e4ea;border-radius:12px;padding:11px;margin-top:9px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.item strong{display:block}.item small{color:#667085}.empty{text-align:center;padding:20px;color:#667085}
-.pill{display:inline-block;padding:3px 8px;border-radius:99px;background:#eef2f7;font-size:11px}
-.hidden{display:none!important}
-footer{font-size:11px;color:#7b8492;text-align:center;padding:10px 0 30px}
-@media(max-width:520px){.row{grid-template-columns:1fr}.top{padding-top:calc(14px + env(safe-area-inset-top))}}
+.notice { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+.ok { color: var(--accent-green); font-weight: 700; }
+.warn { color: #d97706; }
+.err { color: var(--accent-red); font-weight: 700; }
+
+/* Itens da Lista */
+.item {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+}
+.item strong { display: block; font-size: 14px; }
+.item small { color: var(--text-muted); font-size: 12px; }
+.empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 14px; }
+.pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 99px;
+  background: #e2e8f0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.hidden { display: none!important; }
+
+/* Assinatura e Rodapé */
+footer {
+  text-align: center;
+  padding: 24px 16px 40px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.signature-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 99px;
+  margin-top: 10px;
+  font-weight: 600;
+  color: var(--text-main);
+  box-shadow: var(--shadow-sm);
+}
+
+@media(max-width: 520px) {
+  .row { grid-template-columns: 1fr; }
+  .top { padding-top: calc(18px + env(safe-area-inset-top)); }
+}
 </style>
 </head>
 <body>
-<header class="top"><h1>Pró Ativos • Frios</h1><div class="sub">Escaneie → confira a descrição → informe quantidade e validade → exporte para o Excel padrão</div></header>
+
+<header class="top">
+  <div class="header-title-container">
+    <!-- Ícone de Carrinho de Mercado -->
+    <svg class="header-icon" viewBox="0 0 24 24">
+      <path d="M17 18c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zM7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm0-3l1.1-2h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.37-.66-.11-1.48-.87-1.48H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2z"/>
+    </svg>
+    <div>
+      <h1>Pró Ativos • Frios</h1>
+      <div class="sub">Escaneie → confira a descrição → informe quantidade e validade → exporte para o Excel padrão</div>
+    </div>
+  </div>
+</header>
+
 <main class="wrap">
-<section class="card">
-  <div class="row">
-    <div><label>Loja</label><input id="loja" value="PATITIBA"></div>
-    <div><label>Quem digitou?</label><input id="digitou" placeholder="Seu nome"></div>
-  </div>
-  <div class="row">
-    <div><label>Gerente / Avaliação</label><input id="gerente"></div>
-    <div><label>Comprador</label><input id="comprador"></div>
-  </div>
-  <label>Data do levantamento</label><input id="data" type="date">
-</section>
-
-<section class="card">
-  <h3 style="margin:0 0 6px">1. Escanear produto</h3>
-  <div class="notice">Abra a câmera e enquadre o código na mira central.</div>
-  <div class="actions">
-    <button class="primary" id="start">📷 Abrir Câmera</button>
-    <button class="secondary" id="btnFoto">🖼️ Enviar foto / Tirar foto</button>
-    <input type="file" id="fileInput" accept="image/*" capture="environment" class="hidden">
-    <button class="secondary hidden" id="stop">Parar câmera</button>
-  </div>
-  
-  <div id="reader-container" class="hidden">
-    <div id="reader"></div>
-  </div>
-
-  <div id="cameraControls" class="camera-controls hidden">
-    <div class="zoom-slider">
-      <label>🔍 Zoom: <span id="zoomVal">1.0</span>x</label>
-      <input type="range" id="zoomRange" min="1" max="5" step="0.1" value="1">
+  <section class="card">
+    <div class="row">
+      <div><label>Loja</label><input id="loja" value="PATITIBA"></div>
+      <div><label>Quem digitou?</label><input id="digitou" placeholder="Seu nome"></div>
     </div>
-    <div class="actions" style="margin:0">
-      <button type="button" class="secondary" id="btnFlash">💡 Ligar Lanterna</button>
+    <div class="row">
+      <div><label>Gerente / Avaliação</label><input id="gerente"></div>
+      <div><label>Comprador</label><input id="comprador"></div>
     </div>
-  </div>
+    <label>Data do levantamento</label><input id="data" type="date">
+  </section>
 
-  <label>Código de barras</label>
-  <input id="codigo" inputmode="numeric" placeholder="Ex.: 789...">
-  <div class="actions"><button class="primary" id="buscar">🔎 Buscar produto</button></div>
-  <div id="status" class="notice" style="margin-top:8px"></div>
-</section>
+  <section class="card">
+    <div class="card-header">
+      <h3>1. Escanear produto</h3>
+    </div>
+    <div class="notice">Abra a câmera e enquadre o código na mira central.</div>
+    <div class="actions">
+      <button class="primary" id="start">📷 Abrir Câmera</button>
+      <button class="secondary" id="btnFoto">🖼️ Enviar foto / Tirar foto</button>
+      <input type="file" id="fileInput" accept="image/*" capture="environment" class="hidden">
+      <button class="secondary hidden" id="stop">Parar câmera</button>
+    </div>
+    
+    <div id="reader-container" class="hidden">
+      <div id="reader"></div>
+    </div>
 
-<section class="card">
-  <h3 style="margin:0 0 6px">2. Conferência</h3>
-  <label>Descrição do produto</label><input id="descricao" placeholder="Preenchida automaticamente ou digite aqui">
-  <div class="row">
-    <div><label>Quantidade no estoque *</label><input id="quantidade" inputmode="decimal" placeholder="Ex.: 12"></div>
-    <div><label>Unidade / Caixa / Fardo</label><input id="unidade" value="und"></div>
-  </div>
-  <div class="row">
-    <div><label>Data de validade *</label><input id="validade" type="date"></div>
-    <div><label>Valor unitário (R$)</label><input id="valor" inputmode="decimal" value="0.00"></div>
-  </div>
-  <div class="actions">
-    <button class="primary" id="adicionar">➕ Adicionar à lista</button>
-    <button class="secondary" id="salvarCatalogo">💾 Salvar descrição no catálogo</button>
-  </div>
-</section>
+    <div id="cameraControls" class="camera-controls hidden">
+      <div class="zoom-slider">
+        <label>🔍 Zoom: <span id="zoomVal">1.0</span>x</label>
+        <input type="range" id="zoomRange" min="1" max="5" step="0.1" value="1">
+      </div>
+      <div class="actions" style="margin:0">
+        <button type="button" class="secondary" id="btnFlash">💡 Ligar Lanterna</button>
+      </div>
+    </div>
 
-<section class="card">
-  <h3 style="margin:0">3. Produtos lançados <span id="contador" class="pill">0</span></h3>
-  <div id="lista" class="empty">Nenhum produto lançado ainda.</div>
-  <div class="actions">
-    <button class="primary" id="exportar">📊 Gerar Excel padrão com Logo e Cores</button>
-    <button class="danger" id="limpar">Limpar lista</button>
-  </div>
-  <div class="notice" style="margin-top:10px">O arquivo exportado salva mantendo o modelo visual completo da empresa com logo e formatações cinzas.</div>
-</section>
-<footer>Catálogo local e consulta externa via Open Food Facts.</footer>
+    <label>Código de barras</label>
+    <input id="codigo" inputmode="numeric" placeholder="Ex.: 789...">
+    <div class="actions"><button class="primary" id="buscar">🔎 Buscar produto</button></div>
+    <div id="status" class="notice" style="margin-top:10px"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-header">
+      <h3>2. Conferência</h3>
+    </div>
+    <label>Descrição do produto</label><input id="descricao" placeholder="Preenchida automaticamente ou digite aqui">
+    <div class="row">
+      <div><label>Quantidade no estoque *</label><input id="quantidade" inputmode="decimal" placeholder="Ex.: 12"></div>
+      <div><label>Unidade / Caixa / Fardo</label><input id="unidade" value="und"></div>
+    </div>
+    <div class="row">
+      <div><label>Data de validade *</label><input id="validade" type="date"></div>
+      <div><label>Valor unitário (R$)</label><input id="valor" inputmode="decimal" value="0.00"></div>
+    </div>
+    <div class="actions">
+      <button class="primary" id="adicionar">➕ Adicionar à lista</button>
+      <button class="secondary" id="salvarCatalogo">💾 Salvar descrição no catálogo</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-header" style="justify-content: space-between;">
+      <h3>3. Produtos lançados</h3>
+      <span id="contador" class="pill">0</span>
+    </div>
+    <div id="lista" class="empty">Nenhum produto lançado ainda.</div>
+    <div class="actions" style="margin-top: 16px;">
+      <button class="primary" id="exportar">📊 Gerar Excel padrão com Logo e Cores</button>
+      <button class="danger" id="limpar">Limpar lista</button>
+    </div>
+    <div class="notice" style="margin-top:12px">O arquivo exportado salva mantendo o modelo visual completo da empresa com logo e formatações cinzas.</div>
+  </section>
+
+  <footer>
+    <div>Catálogo local e consulta externa via Open Food Facts.</div>
+    <div class="signature-badge">
+      ✍️ Encarregado Felipe Farizeli desde 2026
+    </div>
+  </footer>
 </main>
 
 <script>
@@ -140,7 +362,8 @@ function tocarBipe() {
 
 const produtosPreCadastrados = {
   "7896045112098": "Refresco em Pó Frisco Abacaxi 18g",
-  "7896183210120": "Leite Glória"
+  "7896183210120": "Leite Glória",
+  "7908077452537": "Caderno Universitário 80 Fls 1 Matéria Capa Dura Unicórnio Foroni"
 };
 
 let catalogoLocal = JSON.parse(localStorage.getItem('proativos_catalogo') || '{}');
@@ -180,7 +403,6 @@ atualizarListaUI();
 
 function processarCodigoLido(decodedText) {
   const codigoLimpo = decodedText.trim();
-  // Aceita apenas EAN de produtos (numérico com 8 a 14 dígitos)
   if (!/^\d{8,14}$/.test(codigoLimpo)) {
     mostrarStatus('Código inválido detectado. Enquadre apenas o código de barras comercial.', 'warn');
     return false;
@@ -212,7 +434,6 @@ el('fileInput').addEventListener('change', (e) => {
     });
 });
 
-// Inicialização restrita a EAN-13 e EAN-8
 el('start').addEventListener('click', async () => {
   el('reader-container').classList.remove('hidden');
   el('cameraControls').classList.remove('hidden');
@@ -233,7 +454,6 @@ el('start').addEventListener('click', async () => {
         height: Math.floor(minEdge * 0.45)
       };
     },
-    // Restringe aos padrões numéricos comerciais de produtos
     formatsToSupport: [
       Html5QrcodeSupportedFormats.EAN_13,
       Html5QrcodeSupportedFormats.EAN_8
