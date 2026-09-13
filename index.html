@@ -7,7 +7,8 @@
 <title>Pró Ativos • Frios</title>
 <!-- Bibliotecas externas -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
+<!-- Biblioteca otimizada para scanner de alta performance -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#18212f;background:#f4f6f8}
 *{box-sizing:border-box} body{margin:0}.top{background:#0b5cff;color:#fff;padding:18px 16px;position:sticky;top:0;z-index:10}
@@ -19,17 +20,12 @@ button{border:0;border-radius:11px;padding:12px 14px;font-weight:700;cursor:poin
 .primary{background:#0b5cff;color:#fff}.secondary{background:#eaf0ff;color:#0b5cff}.danger{background:#ffe9e9;color:#b42318}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 
-/* Câmera e Miras Visuais */
-#reader{width:100%;border-radius:12px;overflow:hidden;background:#111;min-height:300px;position:relative}
-#reader viewport{width:100%;height:100%}
-#reader video{width:100%;height:100%;object-fit:cover;display:block}
-#reader canvas.drawingBuffer{position:absolute;top:0;left:0;width:100%;height:100%}
+/* Container do Scanner */
+#reader-container{width:100%;border-radius:12px;overflow:hidden;background:#000;position:relative;margin-top:12px}
+#reader{width:100%;min-height:300px}
+#reader video{object-fit:cover!important}
 
-/* Guia de Enquadramento */
-.scan-guide{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;height:140px;border:2px dashed #00ff66;border-radius:10px;pointer-events:none;z-index:5;box-shadow:0 0 0 4000px rgba(0,0,0,0.4)}
-.scan-guide::after{content:'Posicione o código aqui';position:absolute;top:-25px;left:0;width:100%;text-align:center;color:#00ff66;font-size:12px;font-weight:bold;text-shadow:0 1px 3px #000}
-
-/* Painel de Zoom */
+/* Controles de Zoom e Lanterna */
 .camera-controls{background:#eef4ff;padding:12px;border-radius:12px;margin-top:10px;display:flex;flex-direction:column;gap:10px}
 .zoom-slider{display:flex;align-items:center;gap:10px}
 .zoom-slider label{margin:0;white-space:nowrap}
@@ -61,22 +57,22 @@ footer{font-size:11px;color:#7b8492;text-align:center;padding:10px 0 30px}
 
 <section class="card">
   <h3 style="margin:0 0 6px">1. Escanear produto</h3>
-  <div class="notice">Abra a câmera e enquadre o código na mira central.</div>
+  <div class="notice">Abra a câmera e aponte para o código de barras.</div>
   <div class="actions">
-    <button class="primary" id="start">📷 Abrir Câmera HD + Auto Zoom</button>
+    <button class="primary" id="start">📷 Abrir Câmera HD</button>
     <button class="secondary" id="btnFoto">🖼️ Enviar foto / Tirar foto</button>
     <input type="file" id="fileInput" accept="image/*" capture="environment" class="hidden">
     <button class="secondary hidden" id="stop">Parar câmera</button>
   </div>
   
-  <div id="reader" class="hidden" style="margin-top:12px">
-    <div class="scan-guide"></div>
+  <div id="reader-container" class="hidden">
+    <div id="reader"></div>
   </div>
 
   <div id="cameraControls" class="camera-controls hidden">
     <div class="zoom-slider">
-      <label>🔍 Zoom Câmera: <span id="zoomVal">2.5</span>x</label>
-      <input type="range" id="zoomRange" min="1" max="5" step="0.1" value="2.5">
+      <label>🔍 Zoom: <span id="zoomVal">2.0</span>x</label>
+      <input type="range" id="zoomRange" min="1" max="5" step="0.1" value="2">
     </div>
     <div class="actions" style="margin:0">
       <button type="button" class="secondary" id="btnFlash">💡 Ligar Lanterna</button>
@@ -115,11 +111,10 @@ footer{font-size:11px;color:#7b8492;text-align:center;padding:10px 0 30px}
   </div>
   <div class="notice" style="margin-top:10px">O arquivo exportado salva mantendo o modelo visual completo da empresa com logo e formatações cinzas.</div>
 </section>
-<footer>Catálogo local e consulta externa via Open Food Facts.</footer>
+footer>Catálogo local e consulta externa via Open Food Facts.</footer>
 </main>
 
 <script>
-// Bipe sonoro ao ler código
 function tocarBipe() {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -150,9 +145,9 @@ const produtosPreCadastrados = {
 
 let catalogoLocal = JSON.parse(localStorage.getItem('proativos_catalogo') || '{}');
 let itensLancados = JSON.parse(localStorage.getItem('proativos_itens') || '[]');
-let cameraAtiva = false;
-let lanternaAtiva = false;
+let html5QrCode = null;
 let videoTrack = null;
+let lanternaAtiva = false;
 const el = id => document.getElementById(id);
 
 function formatarDataBR(dataISO) {
@@ -183,117 +178,109 @@ atualizarListaUI();
   el(id).addEventListener('input', e => localStorage.setItem('proativos_head_' + id, e.target.value));
 });
 
-// Envio de Foto com Leitura Direct-Decode
+// Leitura via Arquivo/Foto
 el('btnFoto').addEventListener('click', () => el('fileInput').click());
 el('fileInput').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
-  mostrarStatus('Processando imagem capturada...', '');
-  const url = URL.createObjectURL(file);
-
-  Quagga.decodeSingle({
-    src: url,
-    numOfWorkers: 0,
-    inputStream: { size: 1920 },
-    decoder: { readers: ["ean_reader", "ean_8_reader", "code_128_reader"] }
-  }, function(result) {
-    URL.revokeObjectURL(url);
-    if (result && result.codeResult && result.codeResult.code) {
+  mostrarStatus('Lendo foto capturada...', '');
+  const qrScanner = new Html5Qrcode("reader");
+  qrScanner.scanFile(file, true)
+    .then(decodedText => {
       tocarBipe();
-      el('codigo').value = result.codeResult.code;
-      mostrarStatus('Código lido com sucesso através da foto!', 'ok');
+      el('codigo').value = decodedText;
+      mostrarStatus('Código lido com sucesso da foto!', 'ok');
       buscarProduto();
-    } else {
-      mostrarStatus('Não foi possível identificar o código na foto. Enquadre mais perto.', 'warn');
-    }
-  });
+      qrScanner.clear();
+    })
+    .catch(err => {
+      mostrarStatus('Não foi possível identificar um código claro nesta imagem.', 'warn');
+      qrScanner.clear();
+    });
 });
 
-// Inicialização da Câmera com Zoom Impartido Direto
+// Inicialização Direta do Leitor ao Vivo
 el('start').addEventListener('click', () => {
-  if (typeof Quagga === 'undefined') {
-    mostrarStatus('Carregando biblioteca de câmera...', 'warn');
-    return;
-  }
-
-  el('reader').classList.remove('hidden');
+  el('reader-container').classList.remove('hidden');
   el('cameraControls').classList.remove('hidden');
   el('start').classList.add('hidden');
   el('stop').classList.remove('hidden');
-  mostrarStatus('Abrindo câmera e aplicando Zoom de 2.5x...', '');
+  mostrarStatus('Iniciando câmera...', '');
 
-  Quagga.init({
-    inputStream: {
-      name: "Live",
-      type: "LiveStream",
-      target: document.querySelector('#reader'),
-      constraints: {
-        facingMode: "environment",
-        width: { ideal: 1920 },
-        height: { ideal: 1080 }
-      },
-      // Limita a área de decodificação no retângulo focal verde
-      area: {
-        top: "25%",
-        right: "10%",
-        left: "10%",
-        bottom: "25%"
-      }
-    },
-    locator: { patchSize: "medium", halfSample: false },
-    numOfWorkers: 2,
-    decoder: { readers: ["ean_reader", "ean_8_reader", "code_128_reader"] },
-    locate: true
-  }, function(err) {
-    if (err) {
-      mostrarStatus('Erro ao iniciar câmera: ' + err.message, 'err');
+  if (!html5QrCode) {
+    html5QrCode = new Html5Qrcode("reader");
+  }
+
+  const config = {
+    fps: 15,
+    qrbox: { width: 280, height: 160 },
+    aspectRatio: 1.333333,
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.EAN_8,
+      Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.UPC_A
+    ]
+  };
+
+  html5QrCode.start(
+    { facingMode: "environment" },
+    config,
+    (decodedText) => {
+      tocarBipe();
+      el('codigo').value = decodedText;
       pararCamera();
-      return;
+      buscarProduto();
+    },
+    (errorMessage) => {
+      // Ignora erros contínuos de varredura quadro a quadro
     }
-    Quagga.start();
-    cameraAtiva = true;
-
-    // Aplicação imediata de Zoom no Hardware da Câmera
+  ).then(() => {
+    mostrarStatus('Câmera pronta. Ajuste o zoom se necessário.', 'ok');
+    
+    // Configurar track de mídia para controle de Zoom nativo e Lanterna
     setTimeout(() => {
-      videoTrack = Quagga.CameraAccess.getActiveTrack();
-      if (videoTrack) {
-        aplicarHardwareZoom(2.5);
+      const videoElement = document.querySelector("#reader video");
+      if (videoElement && videoElement.srcObject) {
+        const stream = videoElement.srcObject;
+        videoTrack = stream.getVideoTracks()[0];
+        
+        if (videoTrack && videoTrack.getCapabilities) {
+          const caps = videoTrack.getCapabilities();
+          if (caps.zoom) {
+            el('zoomRange').min = caps.zoom.min || 1;
+            el('zoomRange').max = caps.zoom.max || 5;
+            el('zoomRange').value = Math.min(2.5, caps.zoom.max || 5);
+            aplicarZoomNativo(el('zoomRange').value);
+          }
+        }
       }
-    }, 400);
+    }, 500);
 
-    mostrarStatus('Câmera pronta! Posicione o código dentro da mira verde.', 'ok');
+  }).catch(err => {
+    mostrarStatus('Erro ao acessar câmera: ' + err, 'err');
+    pararCamera();
   });
 });
 
-function aplicarHardwareZoom(zoomLevel) {
-  if (!videoTrack || !videoTrack.getCapabilities) return;
-  
-  const caps = videoTrack.getCapabilities();
-  if (caps.zoom) {
-    const minZ = caps.zoom.min || 1;
-    const maxZ = caps.zoom.max || 5;
-    const targetZoom = Math.min(Math.max(zoomLevel, minZ), maxZ);
-
-    el('zoomRange').min = minZ;
-    el('zoomRange').max = maxZ;
-    el('zoomRange').value = targetZoom;
-    el('zoomVal').innerText = parseFloat(targetZoom).toFixed(1);
-
-    videoTrack.applyConstraints({
-      advanced: [{ zoom: targetZoom }]
-    }).catch(err => console.error("Erro ao aplicar zoom óptico:", err));
-  } else {
-    mostrarStatus('Câmera aberta. (Seu modelo de smartphone não aceita zoom nativo pelo navegador).', 'warn');
+function aplicarZoomNativo(val) {
+  const zoomVal = parseFloat(val);
+  el('zoomVal').innerText = zoomVal.toFixed(1);
+  if (videoTrack && videoTrack.getCapabilities) {
+    const caps = videoTrack.getCapabilities();
+    if (caps.zoom) {
+      videoTrack.applyConstraints({
+        advanced: [{ zoom: zoomVal }]
+      }).catch(e => console.log('Erro de zoom:', e));
+    }
   }
 }
 
-// Slider de Controle Manual do Zoom
 el('zoomRange').addEventListener('input', (e) => {
-  aplicarHardwareZoom(parseFloat(e.target.value));
+  aplicarZoomNativo(e.target.value);
 });
 
-// Controle da Lanterna
 el('btnFlash').addEventListener('click', () => {
   if (!videoTrack) return;
   lanternaAtiva = !lanternaAtiva;
@@ -302,32 +289,30 @@ el('btnFlash').addEventListener('click', () => {
   }).then(() => {
     el('btnFlash').innerText = lanternaAtiva ? '💡 Desligar Lanterna' : '💡 Ligar Lanterna';
   }).catch(() => {
-    mostrarStatus('Lanterna não disponível neste aparelho.', 'warn');
+    mostrarStatus('Lanterna não disponível nesta câmera.', 'warn');
   });
-});
-
-Quagga.onDetected((result) => {
-  if (result && result.codeResult && result.codeResult.code) {
-    const code = result.codeResult.code;
-    if (code.length === 13 || code.length === 8 || code.length === 12) {
-      tocarBipe();
-      el('codigo').value = code;
-      pararCamera();
-      buscarProduto();
-    }
-  }
 });
 
 el('stop').addEventListener('click', pararCamera);
 
 function pararCamera() {
-  if (cameraAtiva) {
-    Quagga.stop();
-    cameraAtiva = false;
-    videoTrack = null;
-    lanternaAtiva = false;
+  if (html5QrCode && html5QrCode.isScanning) {
+    html5QrCode.stop().then(() => {
+      html5QrCode.clear();
+      resetarUI();
+    }).catch(err => {
+      console.error(err);
+      resetarUI();
+    });
+  } else {
+    resetarUI();
   }
-  el('reader').classList.add('hidden');
+}
+
+function resetarUI() {
+  videoTrack = null;
+  lanternaAtiva = false;
+  el('reader-container').classList.add('hidden');
   el('cameraControls').classList.add('hidden');
   el('start').classList.remove('hidden');
   el('stop').classList.add('hidden');
