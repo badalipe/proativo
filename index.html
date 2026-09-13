@@ -139,7 +139,8 @@ function tocarBipe() {
 }
 
 const produtosPreCadastrados = {
-  "7896045112098": "Refresco em Pó Frisco Abacaxi 18g"
+  "7896045112098": "Refresco em Pó Frisco Abacaxi 18g",
+  "7896183210120": "Leite Glória"
 };
 
 let catalogoLocal = JSON.parse(localStorage.getItem('proativos_catalogo') || '{}');
@@ -177,6 +178,20 @@ atualizarListaUI();
   el(id).addEventListener('input', e => localStorage.setItem('proativos_head_' + id, e.target.value));
 });
 
+function processarCodigoLido(decodedText) {
+  const codigoLimpo = decodedText.trim();
+  // Aceita apenas EAN de produtos (numérico com 8 a 14 dígitos)
+  if (!/^\d{8,14}$/.test(codigoLimpo)) {
+    mostrarStatus('Código inválido detectado. Enquadre apenas o código de barras comercial.', 'warn');
+    return false;
+  }
+  tocarBipe();
+  el('codigo').value = codigoLimpo;
+  pararCamera();
+  buscarProduto();
+  return true;
+}
+
 // Leitura via Arquivo/Foto
 el('btnFoto').addEventListener('click', () => el('fileInput').click());
 el('fileInput').addEventListener('change', (e) => {
@@ -187,10 +202,8 @@ el('fileInput').addEventListener('change', (e) => {
   const qrScanner = new Html5Qrcode("reader");
   qrScanner.scanFile(file, true)
     .then(decodedText => {
-      tocarBipe();
-      el('codigo').value = decodedText;
-      mostrarStatus('Código lido com sucesso da foto!', 'ok');
-      buscarProduto();
+      const OK = processarCodigoLido(decodedText);
+      if (OK) mostrarStatus('Código lido com sucesso da foto!', 'ok');
       qrScanner.clear();
     })
     .catch(() => {
@@ -199,7 +212,7 @@ el('fileInput').addEventListener('change', (e) => {
     });
 });
 
-// Inicialização Estável e Direta
+// Inicialização restrita a EAN-13 e EAN-8
 el('start').addEventListener('click', async () => {
   el('reader-container').classList.remove('hidden');
   el('cameraControls').classList.remove('hidden');
@@ -220,11 +233,10 @@ el('start').addEventListener('click', async () => {
         height: Math.floor(minEdge * 0.45)
       };
     },
+    // Restringe aos padrões numéricos comerciais de produtos
     formatsToSupport: [
       Html5QrcodeSupportedFormats.EAN_13,
-      Html5QrcodeSupportedFormats.EAN_8,
-      Html5QrcodeSupportedFormats.CODE_128,
-      Html5QrcodeSupportedFormats.UPC_A
+      Html5QrcodeSupportedFormats.EAN_8
     ]
   };
 
@@ -247,10 +259,7 @@ el('start').addEventListener('click', async () => {
       cameraParam,
       config,
       (decodedText) => {
-        tocarBipe();
-        el('codigo').value = decodedText;
-        pararCamera();
-        buscarProduto();
+        processarCodigoLido(decodedText);
       },
       () => {}
     );
