@@ -32,49 +32,54 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Header Moderno */
+/* Header Moderno e Profissional */
 .top {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   color: #fff;
-  padding: 20px 16px;
+  padding: 24px 16px;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 .header-title-container {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
   max-width: 800px;
   margin: 0 auto;
 }
 .logo-container {
   background: #ffffff;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   flex-shrink: 0;
 }
 .header-logo {
-  height: 42px;
+  height: 38px;
   width: auto;
   object-fit: contain;
 }
-h1 {
-  font-size: 22px;
+.header-text h1 {
+  font-size: 20px;
   font-weight: 700;
   margin: 0;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
+  color: #ffffff;
 }
-.sub {
-  opacity: 0.8;
-  font-size: 13px;
-  margin-top: 4px;
+.header-text .sub {
+  color: #94a3b8;
+  font-size: 12px;
+  margin-top: 3px;
   font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .wrap {
@@ -241,11 +246,12 @@ footer {
 
 @media(max-width: 520px) {
   .row { grid-template-columns: 1fr; }
-  .top { padding-top: calc(18px + env(safe-area-inset-top)); }
-  .header-title-container { flex-direction: row; gap: 12px; }
-  .header-logo { height: 34px; }
-  .logo-container { padding: 4px 8px; }
-  h1 { font-size: 18px; }
+  .top { padding: 18px 16px; padding-top: calc(18px + env(safe-area-inset-top)); }
+  .header-title-container { gap: 14px; }
+  .header-logo { height: 32px; }
+  .logo-container { padding: 6px 10px; }
+  .header-text h1 { font-size: 18px; }
+  .header-text .sub { font-size: 11px; }
 }
 </style>
 </head>
@@ -255,21 +261,19 @@ footer {
   <div class="header-title-container">
     <div class="logo-container">
       <svg class="header-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
-        <rect width="540" height="180" fill="#ffffff" rx="15"/>
-        <!-- Letra R estilizada em azul -->
         <path d="M 30,120 L 30,55 C 30,35 45,20 65,20 L 115,20 C 145,20 165,40 165,70 C 165,95 145,115 120,120 L 155,160 L 125,160 L 95,120 L 65,120 L 65,160 L 30,160 Z M 65,50 L 65,95 L 110,95 C 125,95 135,85 135,72 C 135,60 125,50 110,50 Z" fill="#0066b2"/>
-        <!-- Círculos superior e inferior esquerdo do logotipo oficial -->
         <circle cx="30" cy="35" r="14" fill="#0066b2"/>
         <circle cx="30" cy="145" r="14" fill="#0066b2"/>
-        <!-- Textos: rede e market -->
         <text x="175" y="68" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="52" fill="#0066b2" letter-spacing="-1">rede</text>
         <text x="170" y="145" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
         <text x="492" y="72" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="18" fill="#e30613">®</text>
       </svg>
     </div>
-    <div>
+    <div class="header-text">
       <h1>Pró Ativos • Frios</h1>
-      <div class="sub">Escaneie → confira a descrição → informe quantidade e validade → exporte para o Excel padrão</div>
+      <div class="sub">
+        <span>Controle de Validades e Estoque</span>
+      </div>
     </div>
   </div>
 </header>
