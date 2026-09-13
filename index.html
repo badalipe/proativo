@@ -20,10 +20,15 @@ button{border:0;border-radius:11px;padding:12px 14px;font-weight:700;cursor:poin
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 
 /* Estilização da Câmera Quagga */
-#reader{width:100%;border-radius:12px;overflow:hidden;background:#111;min-height:220px;position:relative}
+#reader{width:100%;border-radius:12px;overflow:hidden;background:#111;min-height:260px;position:relative}
 #reader viewport{width:100%;height:100%}
 #reader video{width:100%;height:100%;object-fit:cover;display:block}
 #reader canvas.drawingBuffer{position:absolute;top:0;left:0;width:100%;height:100%}
+
+/* Controle de Zoom */
+.zoom-container{margin-top:10px;background:#f0f4f9;padding:10px;border-radius:10px;display:flex;align-items:center;gap:10px}
+.zoom-container label{margin:0;white-space:nowrap}
+.zoom-container input[type=range]{flex:1}
 
 .notice{font-size:13px;color:#5a6575;line-height:1.4}.ok{color:#087443;font-weight:700}.warn{color:#a15c00}.err{color:#b42318;font-weight:700}
 .item{border:1px solid #e0e4ea;border-radius:12px;padding:11px;margin-top:9px;display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -51,14 +56,22 @@ footer{font-size:11px;color:#7b8492;text-align:center;padding:10px 0 30px}
 
 <section class="card">
   <h3 style="margin:0 0 6px">1. Escanear produto</h3>
-  <div class="notice">Use a câmera ao vivo ou tire uma foto focada da embalagem.</div>
+  <div class="notice">Use a câmera ao vivo com super zoom ou tire uma foto focada.</div>
   <div class="actions">
-    <button class="primary" id="start">📷 Abrir câmera ao vivo</button>
+    <button class="primary" id="start">📷 Abrir câmera (Máxima Qualidade)</button>
     <button class="secondary" id="btnFoto">🖼️ Enviar foto / Tirar foto</button>
     <input type="file" id="fileInput" accept="image/*" capture="environment" class="hidden">
     <button class="secondary hidden" id="stop">Parar câmera</button>
   </div>
+  
   <div id="reader" class="hidden" style="margin-top:12px"></div>
+  
+  <!-- Controle de Zoom em Tempo Real -->
+  <div id="zoomBox" class="zoom-container hidden">
+    <label>🔍 Zoom: <span id="zoomVal">2.0</span>x</label>
+    <input type="range" id="zoomRange" min="1" max="5" step="0.1" value="2">
+  </div>
+
   <label>Código de barras</label>
   <input id="codigo" inputmode="numeric" placeholder="Ex.: 789...">
   <div class="actions"><button class="primary" id="buscar">🔎 Buscar produto</button></div>
@@ -95,7 +108,7 @@ footer{font-size:11px;color:#7b8492;text-align:center;padding:10px 0 30px}
 </main>
 
 <script>
-// Função para gerar o som de BIPE do scanner
+// Gerar som de bipe
 function tocarBipe() {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -104,8 +117,8 @@ function tocarBipe() {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     
-    osc.type = "square"; // Frequência quadrada simula som metálico de scanner
-    osc.frequency.setValueAtTime(1200, ctx.currentTime); // Frequência do bipe em Hz
+    osc.type = "square";
+    osc.frequency.setValueAtTime(1200, ctx.currentTime);
     
     gain.gain.setValueAtTime(0.3, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
@@ -116,11 +129,10 @@ function tocarBipe() {
     osc.start();
     osc.stop(ctx.currentTime + 0.12);
   } catch (e) {
-    console.error("Erro ao emitir áudio:", e);
+    console.error("Erro no áudio:", e);
   }
 }
 
-// Base nativa pré-cadastrada no código
 const produtosPreCadastrados = {
   "7896045112098": "Refresco em Pó Frisco Abacaxi 18g"
 };
@@ -128,6 +140,7 @@ const produtosPreCadastrados = {
 let catalogoLocal = JSON.parse(localStorage.getItem('proativos_catalogo') || '{}');
 let itensLancados = JSON.parse(localStorage.getItem('proativos_itens') || '[]');
 let cameraAtiva = false;
+let trackDeVideo = null;
 const el = id => document.getElementById(id);
 
 function formatarDataBR(dataISO) {
@@ -158,9 +171,8 @@ atualizarListaUI();
   el(id).addEventListener('input', e => localStorage.setItem('proativos_head_' + id, e.target.value));
 });
 
-// Opção 1: Leitura via foto capturada
+// Opção foto
 el('btnFoto').addEventListener('click', () => el('fileInput').click());
-
 el('fileInput').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -171,32 +183,33 @@ el('fileInput').addEventListener('change', (e) => {
   Quagga.decodeSingle({
     src: url,
     numOfWorkers: 0,
-    inputStream: { size: 1920 },
+    inputStream: { size: 3840 }, // Alta resolução para fotos
     decoder: { readers: ["ean_reader", "ean_8_reader", "code_128_reader"] }
   }, function(result) {
     URL.revokeObjectURL(url);
     if (result && result.codeResult && result.codeResult.code) {
-      tocarBipe(); // Bipe ao ler código por foto
+      tocarBipe();
       el('codigo').value = result.codeResult.code;
       mostrarStatus('Código lido com sucesso através da foto!', 'ok');
       buscarProduto();
     } else {
-      mostrarStatus('Não foi possível identificar o código na foto. Tente tirar a foto mais de perto.', 'warn');
+      mostrarStatus('Não foi possível identificar o código na foto.', 'warn');
     }
   });
 });
 
-// Opção 2: Câmera Ao Vivo com resolução HD
+// Câmera ao Vivo com Máxima Resolução e Zoom Automático
 el('start').addEventListener('click', () => {
   if (typeof Quagga === 'undefined') {
-    mostrarStatus('Carregando leitor de alta precisão... Aguarde um segundo e tente novamente.', 'warn');
+    mostrarStatus('Carregando leitor... Aguarde um segundo.', 'warn');
     return;
   }
 
   el('reader').classList.remove('hidden');
+  el('zoomBox').classList.remove('hidden');
   el('start').classList.add('hidden');
   el('stop').classList.remove('hidden');
-  mostrarStatus('Iniciando câmera HD...', '');
+  mostrarStatus('Iniciando câmera em 4K/Full HD com Zoom...', '');
 
   Quagga.init({
     inputStream: {
@@ -205,13 +218,13 @@ el('start').addEventListener('click', () => {
       target: document.querySelector('#reader'),
       constraints: {
         facingMode: "environment",
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
+        width: { min: 1280, ideal: 3840, max: 3840 },
+        height: { min: 720, ideal: 2160, max: 2160 },
         focusMode: "continuous"
       }
     },
-    locator: { patchSize: "large", halfSample: false },
-    numOfWorkers: 2,
+    locator: { patchSize: "medium", halfSample: false },
+    numOfWorkers: 4,
     decoder: { readers: ["ean_reader", "ean_8_reader", "code_128_reader"] },
     locate: true
   }, function(err) {
@@ -222,15 +235,56 @@ el('start').addEventListener('click', () => {
     }
     Quagga.start();
     cameraAtiva = true;
-    mostrarStatus('Câmera iniciada. Aproxime devagar o código.', 'ok');
+    aplicarZoomEMaximaQualidade();
   });
+});
+
+// Aplica o Zoom por hardware da câmera do celular
+function aplicarZoomEMaximaQualidade() {
+  const track = Quagga.CameraAccess.getActiveTrack();
+  if (track) {
+    trackDeVideo = track;
+    const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+
+    if (capabilities.zoom) {
+      const minZoom = capabilities.zoom.min || 1;
+      const maxZoom = capabilities.zoom.max || 5;
+      
+      el('zoomRange').min = minZoom;
+      el('zoomRange').max = maxZoom;
+      
+      // Define o Zoom Inicial para 2x (ou o limite máximo se for menor que 2)
+      const zoomInicial = Math.min(2.0, maxZoom);
+      el('zoomRange').value = zoomInicial;
+      el('zoomVal').innerText = zoomInicial.toFixed(1);
+
+      track.applyConstraints({
+        advanced: [{ zoom: zoomInicial }]
+      }).catch(e => console.error("Erro ao aplicar zoom:", e));
+
+      mostrarStatus('Câmera em alta definição e Zoom ativado! Aproxime o código à distância.', 'ok');
+    } else {
+      mostrarStatus('Câmera iniciada em alta definição (Seu dispositivo não suporta zoom óptico via navegador).', 'ok');
+    }
+  }
+}
+
+// Controle manual de slider de Zoom
+el('zoomRange').addEventListener('input', (e) => {
+  const val = parseFloat(e.target.value);
+  el('zoomVal').innerText = val.toFixed(1);
+  if (trackDeVideo) {
+    trackDeVideo.applyConstraints({
+      advanced: [{ zoom: val }]
+    }).catch(err => console.error(err));
+  }
 });
 
 Quagga.onDetected((result) => {
   if (result && result.codeResult && result.codeResult.code) {
     const code = result.codeResult.code;
     if (code.length === 13 || code.length === 8 || code.length === 12) {
-      tocarBipe(); // Bipe ao ler código pela câmera ao vivo
+      tocarBipe();
       el('codigo').value = code;
       pararCamera();
       buscarProduto();
@@ -260,8 +314,10 @@ function pararCamera() {
   if (cameraAtiva) {
     Quagga.stop();
     cameraAtiva = false;
+    trackDeVideo = null;
   }
   el('reader').classList.add('hidden');
+  el('zoomBox').classList.add('hidden');
   el('start').classList.remove('hidden');
   el('stop').classList.add('hidden');
 }
@@ -312,7 +368,7 @@ async function buscarProduto() {
     mostrarStatus('Produto encontrado online!', 'ok');
   } else {
     el('descricao').value = '';
-    mostrarStatus('Produto não cadastrado online. Digite a descrição e adicione à lista (será salvo automaticamente para os próximos).', 'warn');
+    mostrarStatus('Produto não cadastrado online. Digite a descrição e adicione à lista.', 'warn');
   }
 }
 
