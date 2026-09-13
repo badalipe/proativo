@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -20,12 +19,12 @@ button{border:0;border-radius:11px;padding:12px 14px;font-weight:700;cursor:poin
 .primary{background:#0b5cff;color:#fff}.secondary{background:#eaf0ff;color:#0b5cff}.danger{background:#ffe9e9;color:#b42318}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 
-/* Container do Scanner HD */
+/* Container do Scanner */
 #reader-container{width:100%;border-radius:12px;overflow:hidden;background:#000;position:relative;margin-top:12px}
-#reader{width:100%;min-height:320px}
-#reader video{object-fit:cover!important}
+#reader{width:100%;min-height:300px}
+#reader video{width:100%!important;height:100%!important;object-fit:cover!important}
 
-/* Controles de Zoom e Lanterna */
+/* Painel de Zoom */
 .camera-controls{background:#eef4ff;padding:12px;border-radius:12px;margin-top:10px;display:flex;flex-direction:column;gap:10px}
 .zoom-slider{display:flex;align-items:center;gap:10px}
 .zoom-slider label{margin:0;white-space:nowrap}
@@ -59,7 +58,7 @@ footer{font-size:11px;color:#7b8492;text-align:center;padding:10px 0 30px}
   <h3 style="margin:0 0 6px">1. Escanear produto</h3>
   <div class="notice">Abra a câmera e enquadre o código na mira central.</div>
   <div class="actions">
-    <button class="primary" id="start">📷 Abrir Câmera HD (Foco Rápido)</button>
+    <button class="primary" id="start">📷 Abrir Câmera</button>
     <button class="secondary" id="btnFoto">🖼️ Enviar foto / Tirar foto</button>
     <input type="file" id="fileInput" accept="image/*" capture="environment" class="hidden">
     <button class="secondary hidden" id="stop">Parar câmera</button>
@@ -71,8 +70,8 @@ footer{font-size:11px;color:#7b8492;text-align:center;padding:10px 0 30px}
 
   <div id="cameraControls" class="camera-controls hidden">
     <div class="zoom-slider">
-      <label>🔍 Zoom: <span id="zoomVal">1.5</span>x</label>
-      <input type="range" id="zoomRange" min="1" max="5" step="0.1" value="1.5">
+      <label>🔍 Zoom: <span id="zoomVal">1.0</span>x</label>
+      <input type="range" id="zoomRange" min="1" max="5" step="0.1" value="1">
     </div>
     <div class="actions" style="margin:0">
       <button type="button" class="secondary" id="btnFlash">💡 Ligar Lanterna</button>
@@ -194,38 +193,32 @@ el('fileInput').addEventListener('change', (e) => {
       buscarProduto();
       qrScanner.clear();
     })
-    .catch(err => {
+    .catch(() => {
       mostrarStatus('Não foi possível identificar um código claro nesta imagem.', 'warn');
       qrScanner.clear();
     });
 });
 
-// Inicialização com Resolução Full HD e Foco Contínuo Forçados
+// Inicialização Estável e Direta
 el('start').addEventListener('click', async () => {
   el('reader-container').classList.remove('hidden');
   el('cameraControls').classList.remove('hidden');
   el('start').classList.add('hidden');
   el('stop').classList.remove('hidden');
-  mostrarStatus('Solicitando câmera em Full HD...', '');
+  mostrarStatus('Abrindo câmera...', '');
 
   if (!html5QrCode) {
     html5QrCode = new Html5Qrcode("reader");
   }
 
-  // Configuração de Restrições Rígidas de Hardware
-  const cameraConstraints = {
-    facingMode: "environment",
-    width: { min: 1280, ideal: 1920, max: 3840 },
-    height: { min: 720, ideal: 1080, max: 2160 },
-    focusMode: { ideal: "continuous" }
-  };
-
   const config = {
-    fps: 20,
-    qrbox: { width: 300, height: 160 },
-    aspectRatio: 1.777778,
-    experimentalFeatures: {
-      useBarCodeDetectorIfSupported: true
+    fps: 15,
+    qrbox: function(viewfinderWidth, viewfinderHeight) {
+      let minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+      return {
+        width: Math.floor(minEdge * 0.8),
+        height: Math.floor(minEdge * 0.45)
+      };
     },
     formatsToSupport: [
       Html5QrcodeSupportedFormats.EAN_13,
@@ -236,8 +229,23 @@ el('start').addEventListener('click', async () => {
   };
 
   try {
+    // Tenta primeiro selecionar explicitamente a câmera traseira padrão
+    const devices = await Html5Qrcode.getCameras();
+    let backCameraId = null;
+
+    if (devices && devices.length > 0) {
+      const backCam = devices.find(d => 
+        d.label.toLowerCase().includes('back') || 
+        d.label.toLowerCase().includes('traseira') || 
+        d.label.toLowerCase().includes('environment')
+      );
+      backCameraId = backCam ? backCam.id : devices[devices.length - 1].id;
+    }
+
+    const cameraParam = backCameraId ? backCameraId : { facingMode: "environment" };
+
     await html5QrCode.start(
-      cameraConstraints,
+      cameraParam,
       config,
       (decodedText) => {
         tocarBipe();
@@ -245,14 +253,12 @@ el('start').addEventListener('click', async () => {
         pararCamera();
         buscarProduto();
       },
-      (errorMessage) => {
-        // Ignora leituras incompletas frame a frame
-      }
+      () => {}
     );
 
-    mostrarStatus('Câmera HD ativada com sucesso.', 'ok');
+    mostrarStatus('Câmera ativa! Posicione o código no retângulo verde.', 'ok');
 
-    // Aplicar configurações avançadas de foco e zoom no stream ativo
+    // Mapeamento do Track de Vídeo para Zoom e Lanterna
     setTimeout(() => {
       const videoElement = document.querySelector("#reader video");
       if (videoElement && videoElement.srcObject) {
@@ -262,41 +268,19 @@ el('start').addEventListener('click', async () => {
         if (videoTrack && videoTrack.getCapabilities) {
           const caps = videoTrack.getCapabilities();
 
-          // Tenta aplicar foco contínuo no hardware da câmera
-          if (caps.focusMode && caps.focusMode.includes("continuous")) {
-            videoTrack.applyConstraints({
-              advanced: [{ focusMode: "continuous" }]
-            }).catch(() => {});
-          }
-
-          // Ajusta slider de Zoom conforme capacidades reais da lente
           if (caps.zoom) {
             el('zoomRange').min = caps.zoom.min || 1;
             el('zoomRange').max = caps.zoom.max || 5;
-            el('zoomRange').value = Math.min(1.5, caps.zoom.max || 5);
-            aplicarZoomNativo(el('zoomRange').value);
+            el('zoomRange').value = 1;
+            el('zoomVal').innerText = "1.0";
           }
         }
       }
     }, 400);
 
   } catch (err) {
-    mostrarStatus('Erro ao carregar câmera HD. Tentando modo básico...', 'warn');
-    // Fallback simples caso o celular bloqueie restrições de Full HD
-    html5QrCode.start(
-      { facingMode: "environment" },
-      config,
-      (decodedText) => {
-        tocarBipe();
-        el('codigo').value = decodedText;
-        pararCamera();
-        buscarProduto();
-      },
-      () => {}
-    ).catch(e => {
-      mostrarStatus('Não foi possível acessar a câmera: ' + e, 'err');
-      pararCamera();
-    });
+    mostrarStatus('Erro ao abrir câmera. Verifique se deu permissão no navegador.', 'err');
+    pararCamera();
   }
 });
 
@@ -308,7 +292,7 @@ function aplicarZoomNativo(val) {
     if (caps.zoom) {
       videoTrack.applyConstraints({
         advanced: [{ zoom: zoomVal }]
-      }).catch(e => console.log('Erro ao aplicar zoom:', e));
+      }).catch(e => console.log('Erro de zoom:', e));
     }
   }
 }
@@ -577,3 +561,4 @@ function mostrarStatus(mensagem, tipo) {
 </script>
 </body>
 </html>
+
