@@ -1,0 +1,14 @@
+PRÓ ATIVOS • FRIOS — aplicativo web
+
+Como usar:
+1. Abra index.html em um navegador. Para usar a câmera, publique a pasta em um endereço HTTPS (por exemplo, GitHub Pages, Netlify ou servidor próprio).
+2. Informe loja/nome/dados do cabeçalho.
+3. Toque em Abrir câmera e aponte para o código de barras. Se a câmera não funcionar, digite o código.
+4. O app procura primeiro no catálogo da planilha enviada. Se não encontrar, consulta o Open Food Facts.
+5. Confira a descrição, digite quantidade e validade e toque em Adicionar à lista.
+6. Ao terminar, toque em Gerar Excel padrão. O arquivo mantém a estrutura da planilha enviada e cria as linhas com os produtos lançados.
+7. “Salvar descrição” grava produtos novos no catálogo local do aparelho para acelerar os próximos levantamentos.
+
+Observação:
+- A consulta pública depende de internet e pode não ter todos os produtos brasileiros. Nesses casos, digite a descrição manualmente e salve no catálogo.
+- O arquivo foi preparado para celular. A câmera do navegador normalmente exige HTTPS.
