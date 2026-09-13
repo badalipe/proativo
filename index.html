@@ -51,9 +51,11 @@ footer{font-size:11px;color:#7b8492;text-align:center;padding:10px 0 30px}
 
 <section class="card">
   <h3 style="margin:0 0 6px">1. Escanear produto</h3>
-  <div class="notice">Centralize o código de barras na área de leitura para melhor precisão.</div>
+  <div class="notice">Use a câmera ao vivo ou tire uma foto focada da embalagem.</div>
   <div class="actions">
-    <button class="primary" id="start">📷 Abrir câmera</button>
+    <button class="primary" id="start">📷 Abrir câmera ao vivo</button>
+    <button class="secondary" id="btnFoto">🖼️ Enviar foto / Tirar foto</button>
+    <input type="file" id="fileInput" accept="image/*" capture="environment" class="hidden">
     <button class="secondary hidden" id="stop">Parar câmera</button>
   </div>
   <div id="reader" class="hidden" style="margin-top:12px"></div>
@@ -126,6 +128,38 @@ atualizarListaUI();
   el(id).addEventListener('input', e => localStorage.setItem('proativos_head_' + id, e.target.value));
 });
 
+// Opção 1: Leitura via foto capturada (Alta Precisão)
+el('btnFoto').addEventListener('click', () => el('fileInput').click());
+
+el('fileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  mostrarStatus('Processando imagem capturada...', '');
+  const url = URL.createObjectURL(file);
+
+  Quagga.decodeSingle({
+    src: url,
+    numOfWorkers: 0,
+    inputStream: {
+      size: 1920
+    },
+    decoder: {
+      readers: ["ean_reader", "ean_8_reader", "code_128_reader"]
+    }
+  }, function(result) {
+    URL.revokeObjectURL(url);
+    if (result && result.codeResult && result.codeResult.code) {
+      el('codigo').value = result.codeResult.code;
+      mostrarStatus('Código lido com sucesso através da foto!', 'ok');
+      buscarProduto();
+    } else {
+      mostrarStatus('Não foi possível identificar o código na foto. Tente tirar a foto mais de perto.', 'warn');
+    }
+  });
+});
+
+// Opção 2: Câmera Ao Vivo com resolução HD
 el('start').addEventListener('click', () => {
   if (typeof Quagga === 'undefined') {
     mostrarStatus('Carregando leitor de alta precisão... Aguarde um segundo e tente novamente.', 'warn');
@@ -135,7 +169,7 @@ el('start').addEventListener('click', () => {
   el('reader').classList.remove('hidden');
   el('start').classList.add('hidden');
   el('stop').classList.remove('hidden');
-  mostrarStatus('Iniciando câmera...', '');
+  mostrarStatus('Iniciando câmera HD...', '');
 
   Quagga.init({
     inputStream: {
@@ -144,13 +178,14 @@ el('start').addEventListener('click', () => {
       target: document.querySelector('#reader'),
       constraints: {
         facingMode: "environment",
-        width: { min: 640, ideal: 1280 },
-        height: { min: 480, ideal: 720 }
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        focusMode: "continuous"
       }
     },
     locator: {
-      patchSize: "medium",
-      halfSample: true
+      patchSize: "large",
+      halfSample: false
     },
     numOfWorkers: 2,
     decoder: {
@@ -165,14 +200,13 @@ el('start').addEventListener('click', () => {
     }
     Quagga.start();
     cameraAtiva = true;
-    mostrarStatus('Câmera aberta. Centralize as barras na tela.', 'ok');
+    mostrarStatus('Câmera iniciada. Aproxime devagar o código.', 'ok');
   });
 });
 
 Quagga.onDetected((result) => {
   if (result && result.codeResult && result.codeResult.code) {
     const code = result.codeResult.code;
-    // Validação básica de tamanho para evitar leituras parciais
     if (code.length === 13 || code.length === 8 || code.length === 12) {
       el('codigo').value = code;
       pararCamera();
