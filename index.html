@@ -19,16 +19,17 @@ button{border:0;border-radius:11px;padding:12px 14px;font-weight:700;cursor:poin
 .primary{background:#0b5cff;color:#fff}.secondary{background:#eaf0ff;color:#0b5cff}.danger{background:#ffe9e9;color:#b42318}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 
-/* Estilização da Câmera Quagga */
-#reader{width:100%;border-radius:12px;overflow:hidden;background:#111;min-height:260px;position:relative}
+/* Container de Vídeo com Zoom Digital e Foco */
+#reader{width:100%;border-radius:12px;overflow:hidden;background:#111;min-height:280px;position:relative}
 #reader viewport{width:100%;height:100%}
-#reader video{width:100%;height:100%;object-fit:cover;display:block}
+#reader video{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.2s ease}
 #reader canvas.drawingBuffer{position:absolute;top:0;left:0;width:100%;height:100%}
 
-/* Controle de Zoom */
-.zoom-container{margin-top:10px;background:#f0f4f9;padding:10px;border-radius:10px;display:flex;align-items:center;gap:10px}
-.zoom-container label{margin:0;white-space:nowrap}
-.zoom-container input[type=range]{flex:1}
+/* Painel de Controles da Câmera */
+.camera-controls{background:#eef4ff;padding:12px;border-radius:12px;margin-top:10px;display:flex;flex-direction:column;gap:10px}
+.zoom-slider{display:flex;align-items:center;gap:10px}
+.zoom-slider label{margin:0;white-space:nowrap}
+.zoom-slider input{flex:1}
 
 .notice{font-size:13px;color:#5a6575;line-height:1.4}.ok{color:#087443;font-weight:700}.warn{color:#a15c00}.err{color:#b42318;font-weight:700}
 .item{border:1px solid #e0e4ea;border-radius:12px;padding:11px;margin-top:9px;display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -56,20 +57,25 @@ footer{font-size:11px;color:#7b8492;text-align:center;padding:10px 0 30px}
 
 <section class="card">
   <h3 style="margin:0 0 6px">1. Escanear produto</h3>
-  <div class="notice">Use a câmera ao vivo com super zoom ou tire uma foto focada.</div>
+  <div class="notice">Abra a câmera e ajuste o Zoom para capturar de longe.</div>
   <div class="actions">
-    <button class="primary" id="start">📷 Abrir câmera (Máxima Qualidade)</button>
+    <button class="primary" id="start">📷 Abrir Câmera HD + Zoom</button>
     <button class="secondary" id="btnFoto">🖼️ Enviar foto / Tirar foto</button>
     <input type="file" id="fileInput" accept="image/*" capture="environment" class="hidden">
     <button class="secondary hidden" id="stop">Parar câmera</button>
   </div>
   
   <div id="reader" class="hidden" style="margin-top:12px"></div>
-  
-  <!-- Controle de Zoom em Tempo Real -->
-  <div id="zoomBox" class="zoom-container hidden">
-    <label>🔍 Zoom: <span id="zoomVal">2.0</span>x</label>
-    <input type="range" id="zoomRange" min="1" max="5" step="0.1" value="2">
+
+  <!-- Controles de Zoom e Lanterna -->
+  <div id="cameraControls" class="camera-controls hidden">
+    <div class="zoom-slider">
+      <label>🔍 Zoom: <span id="zoomVal">2.0</span>x</label>
+      <input type="range" id="zoomRange" min="1" max="4" step="0.1" value="2">
+    </div>
+    <div class="actions" style="margin:0">
+      <button type="button" class="secondary" id="btnFlash">💡 Ligar Lanterna</button>
+    </div>
   </div>
 
   <label>Código de barras</label>
@@ -108,7 +114,7 @@ footer{font-size:11px;color:#7b8492;text-align:center;padding:10px 0 30px}
 </main>
 
 <script>
-// Gerar som de bipe
+// Função de Bipe Sonoro
 function tocarBipe() {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -140,7 +146,8 @@ const produtosPreCadastrados = {
 let catalogoLocal = JSON.parse(localStorage.getItem('proativos_catalogo') || '{}');
 let itensLancados = JSON.parse(localStorage.getItem('proativos_itens') || '[]');
 let cameraAtiva = false;
-let trackDeVideo = null;
+let lanternaAtiva = false;
+let videoTrack = null;
 const el = id => document.getElementById(id);
 
 function formatarDataBR(dataISO) {
@@ -171,7 +178,7 @@ atualizarListaUI();
   el(id).addEventListener('input', e => localStorage.setItem('proativos_head_' + id, e.target.value));
 });
 
-// Opção foto
+// Leitura via Foto
 el('btnFoto').addEventListener('click', () => el('fileInput').click());
 el('fileInput').addEventListener('change', (e) => {
   const file = e.target.files[0];
@@ -183,7 +190,7 @@ el('fileInput').addEventListener('change', (e) => {
   Quagga.decodeSingle({
     src: url,
     numOfWorkers: 0,
-    inputStream: { size: 3840 }, // Alta resolução para fotos
+    inputStream: { size: 3840 },
     decoder: { readers: ["ean_reader", "ean_8_reader", "code_128_reader"] }
   }, function(result) {
     URL.revokeObjectURL(url);
@@ -193,23 +200,23 @@ el('fileInput').addEventListener('change', (e) => {
       mostrarStatus('Código lido com sucesso através da foto!', 'ok');
       buscarProduto();
     } else {
-      mostrarStatus('Não foi possível identificar o código na foto.', 'warn');
+      mostrarStatus('Não foi possível identificar o código na foto. Tente aproximação/foco.', 'warn');
     }
   });
 });
 
-// Câmera ao Vivo com Máxima Resolução e Zoom Automático
+// Câmera ao Vivo com Alta Definição e Zoom Híbrido
 el('start').addEventListener('click', () => {
   if (typeof Quagga === 'undefined') {
-    mostrarStatus('Carregando leitor... Aguarde um segundo.', 'warn');
+    mostrarStatus('Carregando leitor...', 'warn');
     return;
   }
 
   el('reader').classList.remove('hidden');
-  el('zoomBox').classList.remove('hidden');
+  el('cameraControls').classList.remove('hidden');
   el('start').classList.add('hidden');
   el('stop').classList.remove('hidden');
-  mostrarStatus('Iniciando câmera em 4K/Full HD com Zoom...', '');
+  mostrarStatus('Iniciando câmera na resolução máxima...', '');
 
   Quagga.init({
     inputStream: {
@@ -218,66 +225,73 @@ el('start').addEventListener('click', () => {
       target: document.querySelector('#reader'),
       constraints: {
         facingMode: "environment",
-        width: { min: 1280, ideal: 3840, max: 3840 },
-        height: { min: 720, ideal: 2160, max: 2160 },
-        focusMode: "continuous"
+        width: { ideal: 3840, min: 1920 },
+        height: { ideal: 2160, min: 1080 }
       }
     },
     locator: { patchSize: "medium", halfSample: false },
-    numOfWorkers: 4,
+    numOfWorkers: navigator.hardwareConcurrency || 4,
     decoder: { readers: ["ean_reader", "ean_8_reader", "code_128_reader"] },
     locate: true
   }, function(err) {
     if (err) {
-      mostrarStatus('Erro ao iniciar câmera: ' + err.message, 'err');
+      mostrarStatus('Erro ao abrir câmera: ' + err.message, 'err');
       pararCamera();
       return;
     }
     Quagga.start();
     cameraAtiva = true;
-    aplicarZoomEMaximaQualidade();
+
+    setTimeout(() => {
+      const track = Quagga.CameraAccess.getActiveTrack();
+      if (track) {
+        videoTrack = track;
+        aplicarZoom(2.0); // Zoom padrão 2x
+      }
+    }, 500);
+
+    mostrarStatus('Câmera aberta em HD. Use o controle de zoom se necessário.', 'ok');
   });
 });
 
-// Aplica o Zoom por hardware da câmera do celular
-function aplicarZoomEMaximaQualidade() {
-  const track = Quagga.CameraAccess.getActiveTrack();
-  if (track) {
-    trackDeVideo = track;
-    const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+// Aplicação de Zoom Óptico/Hardware + Fallback Visual CSS
+function aplicarZoom(valorVal) {
+  const val = parseFloat(valorVal);
+  el('zoomVal').innerText = val.toFixed(1);
 
-    if (capabilities.zoom) {
-      const minZoom = capabilities.zoom.min || 1;
-      const maxZoom = capabilities.zoom.max || 5;
-      
-      el('zoomRange').min = minZoom;
-      el('zoomRange').max = maxZoom;
-      
-      // Define o Zoom Inicial para 2x (ou o limite máximo se for menor que 2)
-      const zoomInicial = Math.min(2.0, maxZoom);
-      el('zoomRange').value = zoomInicial;
-      el('zoomVal').innerText = zoomInicial.toFixed(1);
-
-      track.applyConstraints({
-        advanced: [{ zoom: zoomInicial }]
-      }).catch(e => console.error("Erro ao aplicar zoom:", e));
-
-      mostrarStatus('Câmera em alta definição e Zoom ativado! Aproxime o código à distância.', 'ok');
-    } else {
-      mostrarStatus('Câmera iniciada em alta definição (Seu dispositivo não suporta zoom óptico via navegador).', 'ok');
+  // 1. Tenta Zoom Hardware (se o navegador/celular permitir)
+  if (videoTrack && videoTrack.getCapabilities) {
+    const caps = videoTrack.getCapabilities();
+    if (caps.zoom) {
+      videoTrack.applyConstraints({
+        advanced: [{ zoom: val }]
+      }).catch(e => console.log('Zoom por hardware não suportado:', e));
     }
+  }
+
+  // 2. Aplica Zoom Digital via CSS no elemento de vídeo (Garante visualmente o zoom em 100% dos celulares)
+  const videoElem = document.querySelector('#reader video');
+  if (videoElem) {
+    videoElem.style.transform = `scale(${val})`;
   }
 }
 
-// Controle manual de slider de Zoom
+// Slider de Zoom
 el('zoomRange').addEventListener('input', (e) => {
-  const val = parseFloat(e.target.value);
-  el('zoomVal').innerText = val.toFixed(1);
-  if (trackDeVideo) {
-    trackDeVideo.applyConstraints({
-      advanced: [{ zoom: val }]
-    }).catch(err => console.error(err));
-  }
+  aplicarZoom(e.target.value);
+});
+
+// Botão da Lanterna
+el('btnFlash').addEventListener('click', () => {
+  if (!videoTrack) return;
+  lanternaAtiva = !lanternaAtiva;
+  videoTrack.applyConstraints({
+    advanced: [{ torch: lanternaAtiva }]
+  }).then(() => {
+    el('btnFlash').innerText = lanternaAtiva ? '💡 Desligar Lanterna' : '💡 Ligar Lanterna';
+  }).catch(() => {
+    mostrarStatus('Lanterna não suportada neste dispositivo.', 'warn');
+  });
 });
 
 Quagga.onDetected((result) => {
@@ -314,10 +328,11 @@ function pararCamera() {
   if (cameraAtiva) {
     Quagga.stop();
     cameraAtiva = false;
-    trackDeVideo = null;
+    videoTrack = null;
+    lanternaAtiva = false;
   }
   el('reader').classList.add('hidden');
-  el('zoomBox').classList.add('hidden');
+  el('cameraControls').classList.add('hidden');
   el('start').classList.remove('hidden');
   el('stop').classList.add('hidden');
 }
@@ -530,7 +545,7 @@ el('exportar').addEventListener('click', async () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    mostrarStatus('Planilha Excel gerada com sucesso mantendo logo e layout!', 'ok');
+    mostrarStatus('Planilha Excel gerada com sucesso!', 'ok');
   } catch (err) {
     mostrarStatus('Erro ao gerar planilha: ' + err.message, 'err');
     console.error(err);
