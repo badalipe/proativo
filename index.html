@@ -229,7 +229,6 @@ el('start').addEventListener('click', async () => {
   };
 
   try {
-    // Tenta primeiro selecionar explicitamente a câmera traseira padrão
     const devices = await Html5Qrcode.getCameras();
     let backCameraId = null;
 
@@ -258,7 +257,6 @@ el('start').addEventListener('click', async () => {
 
     mostrarStatus('Câmera ativa! Posicione o código no retângulo verde.', 'ok');
 
-    // Mapeamento do Track de Vídeo para Zoom e Lanterna
     setTimeout(() => {
       const videoElement = document.querySelector("#reader video");
       if (videoElement && videoElement.srcObject) {
