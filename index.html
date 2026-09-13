@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b5cff">
 <title>Pró Ativos • Frios</title>
-<!-- Bibliotecas para suporte de leitura e geração de Excel com estilos -->
+<!-- Carregamento de bibliotecas externas com fallback -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
-<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js"></script>
+<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/index.min.js';"></script>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#18212f;background:#f4f6f8}
 *{box-sizing:border-box} body{margin:0}.top{background:#0b5cff;color:#fff;padding:18px 16px;position:sticky;top:0;z-index:10}
@@ -124,6 +124,11 @@ atualizarListaUI();
 });
 
 el('start').addEventListener('click', async () => {
+  if (typeof ZXing === 'undefined') {
+    mostrarStatus('Biblioteca do leitor de câmera ainda não carregou. Verifique sua conexão e recarregue a página.', 'err');
+    return;
+  }
+
   try {
     codeReader = new ZXing.BrowserMultiFormatReader();
     const videoInputDevices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
