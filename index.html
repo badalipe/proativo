@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b5cff">
 <title>Pró Ativos • Frios</title>
-<!-- Biblioteca Excel -->
+<!-- Bibliotecas externas -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#18212f;background:#f4f6f8}
 *{box-sizing:border-box} body{margin:0}.top{background:#0b5cff;color:#fff;padding:18px 16px;position:sticky;top:0;z-index:10}
@@ -17,8 +18,13 @@ input,button,select{font:inherit}input,select{width:100%;padding:13px;border:1px
 button{border:0;border-radius:11px;padding:12px 14px;font-weight:700;cursor:pointer}
 .primary{background:#0b5cff;color:#fff}.secondary{background:#eaf0ff;color:#0b5cff}.danger{background:#ffe9e9;color:#b42318}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-#reader{width:100%;border-radius:12px;overflow:hidden;background:#111;min-height:80px;position:relative}
-#reader video{width:100%;height:auto;display:block}
+
+/* Estilização da Câmera Quagga */
+#reader{width:100%;border-radius:12px;overflow:hidden;background:#111;min-height:220px;position:relative}
+#reader viewport{width:100%;height:100%}
+#reader video{width:100%;height:100%;object-fit:cover;display:block}
+#reader canvas.drawingBuffer{position:absolute;top:0;left:0;width:100%;height:100%}
+
 .notice{font-size:13px;color:#5a6575;line-height:1.4}.ok{color:#087443;font-weight:700}.warn{color:#a15c00}.err{color:#b42318;font-weight:700}
 .item{border:1px solid #e0e4ea;border-radius:12px;padding:11px;margin-top:9px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .item strong{display:block}.item small{color:#667085}.empty{text-align:center;padding:20px;color:#667085}
@@ -45,14 +51,12 @@ footer{font-size:11px;color:#7b8492;text-align:center;padding:10px 0 30px}
 
 <section class="card">
   <h3 style="margin:0 0 6px">1. Escanear produto</h3>
-  <div class="notice">A câmera funciona melhor em conexões HTTPS. Se necessário, digite o código de barras manualmente.</div>
+  <div class="notice">Centralize o código de barras na área de leitura para melhor precisão.</div>
   <div class="actions">
     <button class="primary" id="start">📷 Abrir câmera</button>
     <button class="secondary hidden" id="stop">Parar câmera</button>
   </div>
-  <div id="reader" class="hidden" style="margin-top:12px">
-    <video id="video-preview" autoplay playsinline muted></video>
-  </div>
+  <div id="reader" class="hidden" style="margin-top:12px"></div>
   <label>Código de barras</label>
   <input id="codigo" inputmode="numeric" placeholder="Ex.: 789...">
   <div class="actions"><button class="primary" id="buscar">🔎 Buscar produto</button></div>
@@ -91,8 +95,7 @@ footer{font-size:11px;color:#7b8492;text-align:center;padding:10px 0 30px}
 <script>
 let catalogoLocal = JSON.parse(localStorage.getItem('proativos_catalogo') || '{}');
 let itensLancados = JSON.parse(localStorage.getItem('proativos_itens') || '[]');
-let mediaStream = null;
-let animFrame = null;
+let cameraAtiva = false;
 const el = id => document.getElementById(id);
 
 function formatarDataBR(dataISO) {
@@ -123,65 +126,83 @@ atualizarListaUI();
   el(id).addEventListener('input', e => localStorage.setItem('proativos_head_' + id, e.target.value));
 });
 
-el('start').addEventListener('click', async () => {
-  if (!('BarcodeDetector' in window)) {
-    mostrarStatus('O leitor nativo não é suportado neste navegador. Digite o código de barras manualmente.', 'warn');
+el('start').addEventListener('click', () => {
+  if (typeof Quagga === 'undefined') {
+    mostrarStatus('Carregando leitor de alta precisão... Aguarde um segundo e tente novamente.', 'warn');
     return;
   }
 
-  try {
-    const video = el('video-preview');
-    mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { exact: "environment" } }
-    }).catch(async () => {
-      return await navigator.mediaDevices.getUserMedia({ video: true });
-    });
+  el('reader').classList.remove('hidden');
+  el('start').classList.add('hidden');
+  el('stop').classList.remove('hidden');
+  mostrarStatus('Iniciando câmera...', '');
 
-    video.srcObject = mediaStream;
-    await video.play();
-
-    el('reader').classList.remove('hidden');
-    el('start').classList.add('hidden');
-    el('stop').classList.remove('hidden');
-    mostrarStatus('Câmera iniciada. Aproxime o código de barras.', 'ok');
-
-    const barcodeDetector = new BarcodeDetector({
-      formats: ['ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e']
-    });
-
-    const detect = async () => {
-      if (!mediaStream) return;
-      try {
-        const barcodes = await barcodeDetector.detect(video);
-        if (barcodes.length > 0) {
-          el('codigo').value = barcodes[0].rawValue;
-          pararCamera();
-          buscarProduto();
-          return;
-        }
-      } catch (e) {
-        console.error(e);
+  Quagga.init({
+    inputStream: {
+      name: "Live",
+      type: "LiveStream",
+      target: document.querySelector('#reader'),
+      constraints: {
+        facingMode: "environment",
+        width: { min: 640, ideal: 1280 },
+        height: { min: 480, ideal: 720 }
       }
-      animFrame = requestAnimationFrame(detect);
-    };
+    },
+    locator: {
+      patchSize: "medium",
+      halfSample: true
+    },
+    numOfWorkers: 2,
+    decoder: {
+      readers: ["ean_reader", "ean_8_reader", "code_128_reader"]
+    },
+    locate: true
+  }, function(err) {
+    if (err) {
+      mostrarStatus('Erro ao iniciar câmera: ' + err.message, 'err');
+      pararCamera();
+      return;
+    }
+    Quagga.start();
+    cameraAtiva = true;
+    mostrarStatus('Câmera aberta. Centralize as barras na tela.', 'ok');
+  });
+});
 
-    detect();
-  } catch (err) {
-    mostrarStatus('Erro ao acessar a câmera: ' + err.message, 'err');
-    pararCamera();
+Quagga.onDetected((result) => {
+  if (result && result.codeResult && result.codeResult.code) {
+    const code = result.codeResult.code;
+    // Validação básica de tamanho para evitar leituras parciais
+    if (code.length === 13 || code.length === 8 || code.length === 12) {
+      el('codigo').value = code;
+      pararCamera();
+      buscarProduto();
+    }
+  }
+});
+
+Quagga.onProcessed((result) => {
+  const drawingCtx = Quagga.canvas.ctx.overlay;
+  const drawingCanvas = Quagga.canvas.dom.overlay;
+  if (result && drawingCtx && drawingCanvas) {
+    drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
+    if (result.boxes) {
+      result.boxes.filter(box => box !== result.box).forEach(box => {
+        Quagga.canvas.drawPath(box, { x: 0, y: 1 }, drawingCtx, { color: "green", lineWidth: 2 });
+      });
+    }
+    if (result.box) {
+      Quagga.canvas.drawPath(result.box, { x: 0, y: 1 }, drawingCtx, { color: "#0b5cff", lineWidth: 3 });
+    }
   }
 });
 
 el('stop').addEventListener('click', pararCamera);
 
 function pararCamera() {
-  if (animFrame) {
-    cancelAnimationFrame(animFrame);
-    animFrame = null;
-  }
-  if (mediaStream) {
-    mediaStream.getTracks().forEach(track => track.stop());
-    mediaStream = null;
+  if (cameraAtiva) {
+    Quagga.stop();
+    cameraAtiva = false;
   }
   el('reader').classList.add('hidden');
   el('start').classList.remove('hidden');
