@@ -215,31 +215,156 @@ button:active { transform: scale(0.98); }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 
-/* Container do Scanner */
-#reader-container {
-  width: 100%;
-  border-radius: 14px;
-  overflow: hidden;
+/* --- ESTILO TELA SCANNER "BEEP" --- */
+#beep-scanner-overlay {
+  position: fixed;
+  inset: 0;
   background: #000;
-  position: relative;
-  margin-top: 14px;
-  box-shadow: var(--shadow-md);
-}
-#reader { width: 100%; min-height: 300px; }
-#reader video { width: 100%!important; height: 100%!important; object-fit: cover!important; }
-
-.camera-controls {
-  background: #f1f5f9;
-  padding: 14px;
-  border-radius: 12px;
-  margin-top: 12px;
+  z-index: 99999;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  justify-content: space-between;
+  overflow: hidden;
 }
-.zoom-slider { display: flex; align-items: center; gap: 12px; }
-.zoom-slider label { margin: 0; white-space: nowrap; text-transform: none; }
-.zoom-slider input { flex: 1; }
+
+#beep-scanner-overlay.hidden {
+  display: none !important;
+}
+
+.beep-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  z-index: 10;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.beep-back-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.beep-manual-link {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.beep-viewport {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#beep-reader {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+}
+
+#beep-reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Moldura de mira central estilo Beep */
+.beep-target-box {
+  position: absolute;
+  width: 75%;
+  max-width: 320px;
+  height: 180px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 10px;
+}
+
+.beep-target-box::before, .beep-target-box::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: #fff;
+  border-style: solid;
+}
+.beep-target-box::before { top: -2px; left: -2px; border-width: 4px 0 0 4px; }
+.beep-target-box::after { top: -2px; right: -2px; border-width: 4px 4px 0 0; }
+
+.beep-logo-watermark {
+  font-weight: 900;
+  font-style: italic;
+  font-size: 16px;
+  color: #fff;
+  letter-spacing: 1px;
+}
+.beep-logo-watermark span {
+  color: var(--accent-red);
+}
+
+.beep-bottom-bar {
+  padding: 24px 20px 36px;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+}
+
+.beep-btn-bottom-action {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  color: #fff;
+  border-radius: 99px;
+  padding: 12px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.beep-btn-bottom-action:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.camera-controls-floating {
+  position: absolute;
+  bottom: 100px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  z-index: 10;
+  padding: 0 20px;
+}
+.camera-controls-floating button, .camera-controls-floating .zoom-pill {
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+}
 
 .notice { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
 .ok { color: var(--accent-green); font-weight: 700; }
@@ -333,7 +458,7 @@ footer {
   </div>
 </div>
 
-<!-- APLICAÇÃO PRINCIPAL (Oculta até logar) -->
+<!-- APLICAÇÃO PRINCIPAL -->
 <div id="app-container" class="hidden">
   <header class="top">
     <div class="header-title-container">
@@ -376,26 +501,11 @@ footer {
       <div class="card-header">
         <h3>1. Escanear produto</h3>
       </div>
-      <div class="notice">Abra a câmera e enquadre o código na mira central.</div>
+      <div class="notice">Toque no botão abaixo para abrir a câmera em tela cheia com leitura rápida.</div>
       <div class="actions">
-        <button class="primary" id="start" style="width:auto">📷 Abrir Câmera</button>
-        <button class="secondary" id="btnFoto">🖼️ Enviar foto / Tirar foto</button>
-        <input type="file" id="fileInput" accept="image/*" capture="environment" class="hidden">
-        <button class="secondary hidden" id="stop">Parar câmera</button>
-      </div>
-      
-      <div id="reader-container" class="hidden">
-        <div id="reader"></div>
-      </div>
-
-      <div id="cameraControls" class="camera-controls hidden">
-        <div class="zoom-slider">
-          <label>🔍 Zoom: <span id="zoomVal">1.0</span>x</label>
-          <input type="range" id="zoomRange" min="1" max="5" step="0.1" value="1">
-        </div>
-        <div class="actions" style="margin:0">
-          <button type="button" class="secondary" id="btnFlash">💡 Ligar Lanterna</button>
-        </div>
+        <button class="primary" id="start" style="width:auto">📷 Abrir Câmera para Escanear</button>
+        <button class="secondary" id="btnFoto">🖼️ Enviar foto da galeria</button>
+        <input type="file" id="fileInput" accept="image/*" class="hidden">
       </div>
 
       <label>Código de barras</label>
@@ -444,9 +554,33 @@ footer {
   </main>
 </div>
 
+<!-- TELA DE SCANNER ESTILO "BEEP" EM TELA CHEIA -->
+<div id="beep-scanner-overlay" class="hidden">
+  <div class="beep-top-bar">
+    <button type="button" class="beep-back-btn" id="beepBtnClose">←</button>
+    <span>Escanear...</span>
+    <button type="button" class="beep-manual-link" id="beepBtnManual">DIGITAR MANUALMENTE</button>
+  </div>
+
+  <div class="beep-viewport">
+    <div id="beep-reader"></div>
+    <div class="beep-target-box">
+      <div class="beep-logo-watermark">B<span>EE</span>P</div>
+    </div>
+  </div>
+
+  <div class="camera-controls-floating">
+    <button type="button" id="beepBtnFlash">💡 Lanterna</button>
+    <div class="zoom-pill">Zoom: <span id="beepZoomVal">1.0</span>x</div>
+    <input type="range" id="beepZoomRange" min="1" max="5" step="0.1" value="1" style="width: 80px; accent-color: #fff;">
+  </div>
+
+  <div class="beep-bottom-bar">
+    <button type="button" class="beep-btn-bottom-action" id="beepBtnNoBarcode">Adicionar sem código de barras</button>
+  </div>
+</div>
+
 <script>
-// --- CONFIGURAÇÃO DE USUÁRIOS E SENHAS ---
-// Você pode alterar ou adicionar novos usuários aqui:
 const usuariosPermitidos = {
   "felipe": "2026",
   "admin": "market123",
@@ -463,7 +597,6 @@ function realizarLogin(event) {
     sessionStorage.setItem('proativos_logado', 'true');
     sessionStorage.setItem('proativos_user', user);
     
-    // Preenche o campo "Quem digitou?" automaticamente com o nome do usuário logado
     const inputDigitou = document.getElementById('digitou');
     if(inputDigitou && !inputDigitou.value) {
       inputDigitou.value = user.toUpperCase();
@@ -483,7 +616,6 @@ function fazerLogout() {
   location.reload();
 }
 
-// Verifica se já estava logado na sessão atual
 window.addEventListener('DOMContentLoaded', () => {
   if (sessionStorage.getItem('proativos_logado') === 'true') {
     document.getElementById('login-screen').classList.add('hidden');
@@ -491,7 +623,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// --- RESTANTE DA LOGICA DO SISTEMA ---
 function tocarBipe() {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -507,9 +638,7 @@ function tocarBipe() {
     gain.connect(ctx.destination);
     osc.start();
     osc.stop(ctx.currentTime + 0.12);
-  } catch (e) {
-    console.error("Erro no áudio:", e);
-  }
+  } catch (e) {}
 }
 
 const produtosPreCadastrados = {
@@ -553,7 +682,7 @@ atualizarListaUI();
 function processarCodigoLido(decodedText) {
   const codigoLimpo = decodedText.trim();
   if (!/^\d{8,14}$/.test(codigoLimpo)) {
-    mostrarStatus('Código inválido detectado. Enquadre apenas o código de barras comercial.', 'warn');
+    mostrarStatus('Código inválido detectado.', 'warn');
     return false;
   }
   tocarBipe();
@@ -567,33 +696,30 @@ el('btnFoto').addEventListener('click', () => el('fileInput').click());
 el('fileInput').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
-  mostrarStatus('Lendo foto capturada...', '');
-  const qrScanner = new Html5Qrcode("reader");
+  mostrarStatus('Lendo foto...', '');
+  const qrScanner = new Html5Qrcode("beep-reader");
   qrScanner.scanFile(file, true)
     .then(decodedText => {
-      const OK = processarCodigoLido(decodedText);
-      if (OK) mostrarStatus('Código lido com sucesso da foto!', 'ok');
+      processarCodigoLido(decodedText);
       qrScanner.clear();
     })
     .catch(() => {
-      mostrarStatus('Não foi possível identificar um código claro nesta imagem.', 'warn');
+      mostrarStatus('Não foi possível identificar o código na imagem.', 'warn');
       qrScanner.clear();
     });
 });
 
+// ABRIR CÂMERAS NO ESTILO BEEP
 el('start').addEventListener('click', async () => {
-  el('reader-container').classList.remove('hidden');
-  el('cameraControls').classList.remove('hidden');
-  el('start').classList.add('hidden');
-  el('stop').classList.remove('hidden');
-  mostrarStatus('Abrindo câmera...', '');
+  el('beep-scanner-overlay').classList.remove('hidden');
+  mostrarStatus('Iniciando câmera...', '');
 
-  if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+  if (!html5QrCode) html5QrCode = new Html5Qrcode("beep-reader");
 
   const config = {
-    fps: 15,
-    qrbox: (w, h) => ({ width: Math.floor(Math.min(w, h) * 0.8), height: Math.floor(Math.min(w, h) * 0.45) }),
-    formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8]
+    fps: 20,
+    qrbox: (w, h) => ({ width: Math.floor(w * 0.75), height: Math.floor(h * 0.35) }),
+    formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.UPC_A]
   };
 
   try {
@@ -601,15 +727,15 @@ el('start').addEventListener('click', async () => {
     let backCameraId = devices && devices.length > 0 ? (devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('traseira'))?.id || devices[devices.length - 1].id) : null;
 
     await html5QrCode.start(backCameraId ? backCameraId : { facingMode: "environment" }, config, decodedText => processarCodigoLido(decodedText), () => {});
-    mostrarStatus('Câmera ativa! Posicione o código no retângulo verde.', 'ok');
+    mostrarStatus('Scanner pronto.', 'ok');
 
     setTimeout(() => {
-      const videoElement = document.querySelector("#reader video");
+      const videoElement = document.querySelector("#beep-reader video");
       if (videoElement && videoElement.srcObject) {
         videoTrack = videoElement.srcObject.getVideoTracks()[0];
         if (videoTrack && videoTrack.getCapabilities && videoTrack.getCapabilities().zoom) {
-          el('zoomRange').min = videoTrack.getCapabilities().zoom.min || 1;
-          el('zoomRange').max = videoTrack.getCapabilities().zoom.max || 5;
+          el('beepZoomRange').min = videoTrack.getCapabilities().zoom.min || 1;
+          el('beepZoomRange').max = videoTrack.getCapabilities().zoom.max || 5;
         }
       }
     }, 400);
@@ -619,39 +745,48 @@ el('start').addEventListener('click', async () => {
   }
 });
 
-el('zoomRange').addEventListener('input', (e) => {
+// BOTÕES DO OVERLAY DO BEEP
+el('beepBtnClose').addEventListener('click', pararCamera);
+el('beepBtnManual').addEventListener('click', () => {
+  pararCamera();
+  el('codigo').focus();
+});
+el('beepBtnNoBarcode').addEventListener('click', () => {
+  pararCamera();
+  el('codigo').value = "SEM_CODIGO";
+  el('descricao').focus();
+  mostrarStatus('Modo sem código ativado. Digite a descrição manualmente.', 'warn');
+});
+
+el('beepZoomRange').addEventListener('input', (e) => {
   const val = parseFloat(e.target.value);
-  el('zoomVal').innerText = val.toFixed(1);
+  el('beepZoomVal').innerText = val.toFixed(1);
   if (videoTrack && videoTrack.getCapabilities().zoom) {
     videoTrack.applyConstraints({ advanced: [{ zoom: val }] }).catch(() => {});
   }
 });
 
-el('btnFlash').addEventListener('click', () => {
+el('beepBtnFlash').addEventListener('click', () => {
   if (!videoTrack) return;
   lanternaAtiva = !lanternaAtiva;
   videoTrack.applyConstraints({ advanced: [{ torch: lanternaAtiva }] }).then(() => {
-    el('btnFlash').innerText = lanternaAtiva ? '💡 Desligar Lanterna' : '💡 Ligar Lanterna';
+    el('beepBtnFlash').innerText = lanternaAtiva ? '💡 Lanterna Ligada' : '💡 Lanterna';
   }).catch(() => mostrarStatus('Lanterna indisponível.', 'warn'));
 });
 
-el('stop').addEventListener('click', pararCamera);
-
 function pararCamera() {
   if (html5QrCode && html5QrCode.isScanning) {
-    html5QrCode.stop().then(() => { html5QrCode.clear(); resetarUI(); }).catch(() => resetarUI());
+    html5QrCode.stop().then(() => { 
+      html5QrCode.clear(); 
+      el('beep-scanner-overlay').classList.add('hidden');
+    }).catch(() => {
+      el('beep-scanner-overlay').classList.add('hidden');
+    });
   } else {
-    resetarUI();
+    el('beep-scanner-overlay').classList.add('hidden');
   }
-}
-
-function resetarUI() {
   videoTrack = null;
   lanternaAtiva = false;
-  el('reader-container').classList.add('hidden');
-  el('cameraControls').classList.add('hidden');
-  el('start').classList.remove('hidden');
-  el('stop').classList.add('hidden');
 }
 
 el('buscar').addEventListener('click', buscarProduto);
@@ -661,7 +796,7 @@ async function consultarOpenFoodFacts(codigoEan) {
     const response = await fetch(`https://br.openfoodfacts.org/api/v0/product/${codigoEan}.json`);
     const data = await response.json();
     if (data.status === 1 && data.product) {
-      return data.product.product_name_pt || data.product.product_name || data.product.abbreviated_product_name;
+      return data.product.product_name_pt || data.product.product_name;
     }
   } catch (e) {}
   return null;
@@ -670,6 +805,13 @@ async function consultarOpenFoodFacts(codigoEan) {
 async function buscarProduto() {
   const cod = el('codigo').value.trim();
   if (!cod) { mostrarStatus('Informe um código de barras.', 'warn'); return; }
+  
+  if (cod === "SEM_CODIGO") {
+    el('descricao').focus();
+    mostrarStatus('Preencha os dados do produto manualmente.', 'ok');
+    return;
+  }
+
   mostrarStatus('Buscando produto...', '');
 
   if (catalogoLocal[cod]) { el('descricao').value = catalogoLocal[cod]; mostrarStatus('Encontrado no catálogo local!', 'ok'); return; }
@@ -706,7 +848,7 @@ el('adicionar').addEventListener('click', () => {
   itensLancados.push({ id: Date.now(), codigo, descricao, quantidade, unidade, validade, valor });
   localStorage.setItem('proativos_itens', JSON.stringify(itensLancados));
 
-  if (!catalogoLocal[codigo]) {
+  if (codigo !== "SEM_CODIGO" && !catalogoLocal[codigo]) {
     catalogoLocal[codigo] = descricao;
     localStorage.setItem('proativos_catalogo', JSON.stringify(catalogoLocal));
   }
@@ -786,7 +928,7 @@ el('exportar').addEventListener('click', async () => {
     });
 
     const outBuffer = await workbook.outputAsync();
-    const blob = new Blob([outBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const blob = new Blob([outBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
