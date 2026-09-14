@@ -146,7 +146,7 @@ body {
 .wrap {
   max-width: 800px;
   margin: auto;
-  padding: 16px;
+  padding: 16px 16px 96px;
 }
 
 /* Cards Estilizados */
@@ -190,8 +190,6 @@ label {
   font-weight: 600;
   margin: 12px 0 6px;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 input, select {
@@ -216,6 +214,131 @@ input:focus, select:focus {
   letter-spacing: 2px;
   font-weight: 700;
 }
+
+/* --- FORMULARIO COMPACTO COM ICONES --- */
+.campo label { margin: 0 0 4px; }
+.campo .caixa {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+}
+.campo .caixa:focus-within {
+  border-color: var(--primary);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 178, 0.15);
+}
+.campo .caixa svg {
+  width: 18px;
+  height: 18px;
+  fill: var(--text-muted);
+  flex-shrink: 0;
+}
+.campo .caixa input,
+.campo .caixa select {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  height: 100%;
+  box-shadow: none !important;
+}
+
+/* --- INDICADOR DE ETAPAS --- */
+.etapas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 2px 16px;
+}
+.etapa {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
+.etapa .ponto {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+.etapa.ativa .ponto {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.etapa > span { font-size: 12px; font-weight: 600; }
+.etapa:not(.ativa) > span { color: var(--text-muted); font-weight: 500; }
+.etapas .linha { flex: 1; height: 1px; background: var(--border-color); }
+
+/* --- CHIP DA LOJA NO TOPO --- */
+.header-right { display: flex; align-items: center; gap: 10px; }
+.chip-loja {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.chip-loja:hover { background: rgba(255, 255, 255, 0.2); }
+.chip-loja svg { width: 14px; height: 14px; fill: currentColor; }
+
+/* --- ZONA DE SCAN TRACEJADA --- */
+.scan-zone {
+  border: 1.5px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* --- BARRA DE RESUMO FIXA --- */
+.resumo-fixo {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 90;
+  background: #fff;
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+}
+.resumo-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.resumo-inner .numero { font-size: 15px; font-weight: 700; }
+.resumo-inner .detalhe { font-size: 12px; color: var(--text-muted); }
 
 button {
   font: inherit;
@@ -592,33 +715,63 @@ footer {
           <div class="sub"><span>Controle de Validades e Estoque</span></div>
         </div>
       </div>
-      <div>
+      <div class="header-right">
+        <button type="button" class="chip-loja" id="chipLoja" title="Toque para trocar a loja">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
+          <span id="chipLojaTxt">PATITIBA</span>
+        </button>
         <button type="button" class="danger" onclick="fazerLogout()" style="padding: 8px 12px; font-size: 12px;">Sair</button>
       </div>
     </div>
   </header>
 
   <main class="wrap">
-    <section class="card">
+    <div class="etapas">
+      <button type="button" class="etapa ativa" onclick="document.getElementById('card-ident').scrollIntoView({behavior:'smooth', block:'start'})">
+        <div class="ponto">1</div><span>Identificação</span>
+      </button>
+      <div class="linha"></div>
+      <button type="button" class="etapa" onclick="document.getElementById('card-scan').scrollIntoView({behavior:'smooth', block:'start'})">
+        <div class="ponto">2</div><span>Produtos</span>
+      </button>
+      <div class="linha"></div>
+      <button type="button" class="etapa" onclick="document.getElementById('card-list').scrollIntoView({behavior:'smooth', block:'start'})">
+        <div class="ponto">3</div><span>Revisão</span>
+      </button>
+    </div>
+
+    <section class="card" id="card-ident">
       <div class="row">
-        <div><label>Loja</label><input id="loja" value="PATITIBA"></div>
-        <div><label>Quem digitou?</label><input id="digitou" placeholder="Seu nome"></div>
+        <div class="campo">
+          <label for="digitou">Quem digitou?</label>
+          <div class="caixa"><svg viewBox="0 0 24 24"><path d="M11.9997 12.8779C16.0197 12.878 19.4393 15.3848 20.7048 18.8828C21.0812 19.9234 20.2782 20.8962 19.2038 21.0137L18.9861 21.0264H5.0134L4.79562 21.0137C3.7213 20.8961 2.91743 19.9233 3.29367 18.8828C4.55905 15.3847 7.9797 12.8781 11.9997 12.8779ZM11.9997 14.6777C8.84467 14.6779 6.17462 16.5794 5.09152 19.2256H18.9079C17.8248 16.5793 15.1549 14.6778 11.9997 14.6777ZM12.2312 3.00586C14.6088 3.1264 16.4997 5.09239 16.4997 7.5L16.4939 7.73145C16.3734 10.1091 14.4073 11.9999 11.9997 12C9.59225 11.9998 7.62604 10.109 7.50558 7.73145L7.49973 7.5C7.49973 5.01485 9.51462 3.00021 11.9997 3L12.2312 3.00586ZM11.9997 4.7998C10.5087 4.80001 9.29953 6.00896 9.29953 7.5C9.29953 8.99104 10.5087 10.2 11.9997 10.2002C13.4908 10.2001 14.6999 8.99112 14.6999 7.5C14.6999 6.00888 13.4908 4.79989 11.9997 4.7998Z"/></svg><input id="digitou" placeholder="Seu nome"></div>
+        </div>
+        <div class="campo">
+          <label for="gerente">Gerente / avaliação</label>
+          <div class="caixa"><svg viewBox="0 0 24 24"><path d="M19.1964 9.37793C20.7432 9.7925 21.6615 11.3828 21.2472 12.9297L19.6945 18.7256C19.28 20.2726 17.6888 21.1908 16.1418 20.7764L11.2316 19.46L14.3244 18.6318C14.4413 18.6005 14.5538 18.5599 14.6632 18.5156L16.6086 19.0371C17.1952 19.194 17.798 18.8464 17.9552 18.2598L19.508 12.4639C19.665 11.8773 19.3171 11.2746 18.7306 11.1172L15.05 10.1309L14.5119 8.12207L19.1964 9.37793Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M10.1789 6.60059C11.7256 6.18648 13.3159 7.1048 13.7306 8.65137L15.2834 14.4473C15.6979 15.9943 14.7795 17.5844 13.2326 17.999L7.43668 19.5527C5.8898 19.9669 4.29941 19.0478 3.88492 17.501L2.33219 11.7061C1.91782 10.1591 2.836 8.56783 4.38297 8.15332L10.1789 6.60059ZM11.9914 9.11816C11.8341 8.53162 11.2313 8.18287 10.6447 8.33984L4.84879 9.89355C4.26222 10.0509 3.9144 10.6536 4.07145 11.2402L5.62418 17.0352C5.78141 17.6219 6.38408 17.9697 6.97086 17.8125L12.7668 16.2598C13.3534 16.1024 13.7013 15.4998 13.5441 14.9131L11.9914 9.11816Z"/><path d="M15.0002 3.5293C16.6017 3.52938 17.9005 4.82909 17.9005 6.43066V8.0918L16.0998 7.60938V6.43066C16.0998 5.8232 15.6076 5.33114 15.0002 5.33105H9.00016C8.44441 5.33105 7.98648 5.74306 7.91227 6.27832L6.09977 6.76367V6.43066C6.09977 4.82904 7.39853 3.5293 9.00016 3.5293H15.0002Z"/></svg><input id="gerente"></div>
+        </div>
       </div>
-      <div class="row">
-        <div><label>Gerente / Avaliação</label><input id="gerente"></div>
-        <div><label>Comprador</label><input id="comprador"></div>
+      <div class="row" style="margin-top:12px">
+        <div class="campo">
+          <label for="comprador">Comprador</label>
+          <div class="caixa"><svg viewBox="0 0 24 24"><path d="M11.9997 12.8779C16.0197 12.878 19.4393 15.3848 20.7048 18.8828C21.0812 19.9234 20.2782 20.8962 19.2038 21.0137L18.9861 21.0264H5.0134L4.79562 21.0137C3.7213 20.8961 2.91743 19.9233 3.29367 18.8828C4.55905 15.3847 7.9797 12.8781 11.9997 12.8779ZM11.9997 14.6777C8.84467 14.6779 6.17462 16.5794 5.09152 19.2256H18.9079C17.8248 16.5793 15.1549 14.6778 11.9997 14.6777ZM12.2312 3.00586C14.6088 3.1264 16.4997 5.09239 16.4997 7.5L16.4939 7.73145C16.3734 10.1091 14.4073 11.9999 11.9997 12C9.59225 11.9998 7.62604 10.109 7.50558 7.73145L7.49973 7.5C7.49973 5.01485 9.51462 3.00021 11.9997 3L12.2312 3.00586ZM11.9997 4.7998C10.5087 4.80001 9.29953 6.00896 9.29953 7.5C9.29953 8.99104 10.5087 10.2 11.9997 10.2002C13.4908 10.2001 14.6999 8.99112 14.6999 7.5C14.6999 6.00888 13.4908 4.79989 11.9997 4.7998Z"/></svg><input id="comprador"></div>
+        </div>
+        <div class="campo">
+          <label for="data">Data do levantamento</label>
+          <div class="caixa"><svg viewBox="0 0 24 24"><path d="M11.8999 6.79965C12.397 6.79965 12.7997 7.20235 12.7997 7.69941V11.7266L14.7359 13.6629C15.0873 14.0143 15.0879 14.584 14.7366 14.9355C14.3852 15.287 13.8148 15.287 13.4633 14.9355L11.2632 12.7355C11.0947 12.5668 11.0002 12.338 11.0001 12.0995V7.69941C11.0001 7.20238 11.4029 6.7997 11.8999 6.79965Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M12 1.89893C17.4677 1.89893 21.9001 6.33147 21.9002 11.7991C21.9002 17.2669 17.4678 21.6993 12 21.6993C6.53228 21.6993 2.09985 17.2669 2.09985 11.7991C2.09998 6.33147 6.53236 1.89893 12 1.89893ZM20.1 11.7998C20.1 7.32616 16.4737 3.69984 12 3.69984C7.5264 3.69984 3.90008 7.32616 3.90008 11.7998C3.90032 16.2732 7.52655 19.8998 12 19.8998C16.4735 19.8998 20.0998 16.2732 20.1 11.7998Z"/></svg><input id="data" type="date"></div>
+        </div>
       </div>
-      <label>Data do levantamento</label><input id="data" type="date">
+      <input id="loja" type="hidden" value="PATITIBA">
     </section>
 
-    <section class="card">
+    <section class="card" id="card-scan">
       <div class="card-header">
         <span class="card-icon icon-scan">📷</span>
         <h3>1. Escanear produto</h3>
       </div>
       <div class="notice">Toque no botão abaixo para abrir a câmera em tela cheia com leitura rápida.</div>
-      <div class="actions">
-        <button class="primary" id="start" style="width:auto">📷 Abrir Câmera para Escanear</button>
+      <div class="scan-zone">
+        <button class="primary" id="start">📷 Abrir câmera para escanear</button>
         <button class="secondary" id="btnFoto">🖼️ Enviar foto da galeria</button>
         <input type="file" id="fileInput" accept="image/*" class="hidden">
       </div>
@@ -629,7 +782,7 @@ footer {
       <div id="status" class="notice" style="margin-top:10px"></div>
     </section>
 
-    <section class="card">
+    <section class="card" id="card-conf">
       <div class="card-header">
         <span class="card-icon icon-conf">✏️</span>
         <h3>2. Conferência</h3>
@@ -649,7 +802,7 @@ footer {
       </div>
     </section>
 
-    <section class="card">
+    <section class="card" id="card-list">
       <div class="card-header" style="justify-content: space-between;">
         <div style="display:flex;align-items:center;gap:10px;">
           <span class="card-icon icon-list">📋</span>
@@ -664,6 +817,16 @@ footer {
       </div>
     </section>
 
+    <div class="resumo-fixo hidden" id="resumoFixo">
+      <div class="resumo-inner">
+        <div>
+          <div class="numero" id="resumoTotal">0 produtos</div>
+          <div class="detalhe" id="resumoValor">R$ 0,00 em estoque</div>
+        </div>
+        <button type="button" class="primary" id="exportarFixo" style="width:auto; height:40px; padding:0 20px;">📊 Gerar Excel</button>
+      </div>
+    </div>
+
     <footer>
       <div>Catálogo local e consulta externa via Open Food Facts.</div>
       <div class="signature-badge">
@@ -672,7 +835,6 @@ footer {
     </footer>
   </main>
 </div>
-
 <!-- TELA DE SCANNER ESTILO "BEEP" EM TELA CHEIA ABSOLUTA -->
 <div id="beep-scanner-overlay" class="hidden">
   <div class="beep-top-bar">
@@ -827,6 +989,21 @@ if (!el('data').value) {
   el('data').value = `${ano}-${mes}-${dia}`;
 }
 atualizarListaUI();
+
+/* --- CHIP DA LOJA NO TOPO --- */
+function atualizarChipLoja() {
+  const chip = document.getElementById('chipLojaTxt');
+  if (chip) chip.innerText = el('loja').value || 'Loja';
+}
+atualizarChipLoja();
+document.getElementById('chipLoja').addEventListener('click', () => {
+  const nova = prompt('Nome da loja:', el('loja').value);
+  if (nova && nova.trim()) {
+    el('loja').value = nova.trim().toUpperCase();
+    localStorage.setItem('proativos_head_loja', el('loja').value);
+    atualizarChipLoja();
+  }
+});
 
 ['loja', 'digitou', 'gerente', 'comprador'].forEach(id => {
   const savedVal = localStorage.getItem('proativos_head_' + id);
@@ -1033,6 +1210,14 @@ function atualizarListaUI() {
   const listaDiv = el('lista');
   el('contador').innerText = itensLancados.length;
 
+  const totalGeral = itensLancados.reduce((soma, i) => soma + i.quantidade * i.valor, 0);
+  const resumoFixo = el('resumoFixo');
+  if (resumoFixo) {
+    resumoFixo.classList.toggle('hidden', itensLancados.length === 0);
+    el('resumoTotal').innerText = `${itensLancados.length} ${itensLancados.length === 1 ? 'produto' : 'produtos'}`;
+    el('resumoValor').innerText = `R$ ${moedaBR(totalGeral)} em estoque`;
+  }
+
   if (itensLancados.length === 0) {
     listaDiv.className = 'empty';
     listaDiv.innerHTML = `
@@ -1117,6 +1302,8 @@ el('exportar').addEventListener('click', async () => {
   }
 });
 
+el('exportarFixo').addEventListener('click', () => el('exportar').click());
+
 function mostrarStatus(msg, tipo) {
   const st = el('status');
   st.innerText = msg;
@@ -1125,4 +1312,3 @@ function mostrarStatus(msg, tipo) {
 </script>
 </body>
 </html>
-
