@@ -249,17 +249,6 @@
     .campo .caixa svg { width: 18px; height: 18px; fill: var(--text-muted); flex-shrink: 0; }
     .campo .caixa input, .campo .caixa select { border: 0; background: transparent; padding: 0; height: 100%; box-shadow: none !important; }
 
-    .etapas { display: flex; align-items: center; gap: 8px; margin: 4px 2px 16px; }
-    .etapa { display: flex; align-items: center; gap: 6px; cursor: pointer; background: none; border: 0; padding: 0; font: inherit; color: inherit; }
-    .etapa .ponto {
-      width: 20px; height: 20px; border-radius: 999px; border: 1px solid var(--border-color);
-      background: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-muted); flex-shrink: 0;
-    }
-    .etapa.ativa .ponto { background: var(--primary); border-color: var(--primary); color: #fff; }
-    .etapa > span { font-size: 12px; font-weight: 600; }
-    .etapa:not(.ativa) > span { color: var(--text-muted); font-weight: 500; }
-    .etapas .linha { flex: 1; height: 1px; background: var(--border-color); }
-
     .header-right { display: flex; align-items: center; gap: 10px; }
     .chip-loja {
       display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.12);
@@ -270,15 +259,6 @@
     .chip-loja svg { width: 14px; height: 14px; fill: currentColor; }
 
     .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
-
-    .resumo-fixo {
-      position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; background: #fff;
-      border-top: 1px solid var(--border-color); box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
-      padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
-    }
-    .resumo-inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .resumo-inner .numero { font-size: 15px; font-weight: 700; }
-    .resumo-inner .detalhe { font-size: 12px; color: var(--text-muted); }
 
     button {
       font: inherit; border: 0; border-radius: 10px; padding: 12px 16px; font-weight: 600;
@@ -373,13 +353,6 @@
     .empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 14px; }
     .pill { display: inline-block; padding: 2px 10px; border-radius: 99px; background: #e2e8f0; font-size: 12px; font-weight: 700; color: var(--text-main); }
 
-    footer { text-align: center; padding: 24px 16px 40px; color: var(--text-muted); font-size: 12px; line-height: 1.6; }
-    .signature-badge {
-      display: inline-flex; align-items: center; gap: 6px; background: #ffffff;
-      border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 99px;
-      margin-top: 10px; font-weight: 600; color: var(--text-main); box-shadow: var(--shadow-sm);
-    }
-
     @media(max-width: 600px) {
       .btn-row { flex-direction: column; gap: 16px; padding: 0 16px; }
       .glass-btn { width: 100%; min-height: 100px; padding: 20px 16px; }
@@ -395,7 +368,6 @@
       .header-text h1 { font-size: 18px; }
       .header-text .sub { display: none; }
       .chip-loja { padding: 6px 10px; font-size: 12px; }
-      .etapa > span { font-size: 11px; }
       .card { padding: 16px; border-radius: 14px; }
     }
 
@@ -407,9 +379,7 @@
       .header-text .sub { font-size: 13px; }
       .card { padding: 24px; }
       .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
-      .wrap > .etapas { grid-column: 1 / -1; margin: 4px 2px 0; }
       .wrap > .card { margin-bottom: 0; }
-      .wrap > footer { grid-column: 1 / -1; }
       .card-full { grid-column: 1 / -1; }
       .row { grid-template-columns: 1fr 1fr; }
       .row-ident { grid-template-columns: repeat(4, 1fr); }
@@ -441,7 +411,7 @@
       </div>
     </button>
 
-    <a href="https://exemplo.com/perdas" class="glass-btn glass-3">
+    <a href="#" class="glass-btn glass-3">
       <div class="glass-shine"></div>
       <div class="glass-content">
         <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -527,11 +497,11 @@
         <section class="card">
           <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
           <div class="scan-zone">
-            <button class="primary" onclick="abrirScanner('proative')">📷 Abrir câmera para escanear</button>
+            <button class="primary" onclick="abrirScanner('proativo')">📷 Abrir câmera para escanear</button>
           </div>
           <label>Código de barras</label>
           <input id="pro_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
-          <div class="actions"><button class="primary" onclick="buscarProduto('proative')" style="width:auto">🔎 Buscar produto</button></div>
+          <div class="actions"><button class="primary" onclick="buscarProduto('proativo')" style="width:auto">🔎 Buscar produto</button></div>
           <div id="pro_status" class="notice" style="margin-top:10px"></div>
         </section>
 
@@ -547,7 +517,7 @@
             <div><label>Valor unitário (R$)</label><input id="pro_valor" inputmode="decimal" value="0.00"></div>
           </div>
           <div class="actions">
-            <button class="primary" onclick="adicionarItem('proative')" style="width:auto">➕ Adicionar à lista</button>
+            <button class="primary" onclick="adicionarItem('proativo')" style="width:auto">➕ Adicionar à lista</button>
           </div>
         </section>
 
@@ -558,8 +528,8 @@
           </div>
           <div id="pro_lista" class="empty"></div>
           <div class="actions" style="margin-top: 16px;">
-            <button class="primary" onclick="gerarExcel('proative')" style="width:auto">📊 Gerar Excel Pró Ativo</button>
-            <button class="danger" onclick="limparLista('proative')">Limpar lista</button>
+            <button class="primary" onclick="gerarExcel('proativo')" style="width:auto">📊 Gerar Excel Pró Ativo</button>
+            <button class="danger" onclick="limparLista('proativo')">Limpar lista</button>
           </div>
         </section>
       </main>
@@ -681,7 +651,7 @@
   </div>
 
   <script>
-    let moduloAtual = null; // 'proative' ou 'trocas'
+    let moduloAtual = null; // 'proativo' ou 'trocas'
     let html5QrCode = null;
     let lanternaAtiva = false;
 
@@ -718,10 +688,10 @@
 
     function exibirTelaModulo(modulo) {
       el('login-screen').classList.add('hidden');
-      if (modulo === 'proative') {
+      if (modulo === 'proativo') {
         el('proativo-modal').classList.remove('hidden');
         el('app-proativo').classList.remove('hidden');
-        renderizarLista('proative');
+        renderizarLista('proativo');
       } else if (modulo === 'trocas') {
         el('trocas-modal').classList.remove('hidden');
         el('app-trocas').classList.remove('hidden');
@@ -798,7 +768,7 @@
           (decodedText) => {
             tocarBipe();
             dispararFlashScan();
-            const prefix = modulo === 'proative' ? 'pro_' : 'trc_';
+            const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
             el(prefix + 'codigo').value = decodedText;
             pararScanner();
             buscarProduto(modulo);
@@ -806,7 +776,6 @@
           () => {}
         );
 
-        // Zoom Controles
         try {
           const capabilities = html5QrCode.getRunningTrackCapabilities();
           if (capabilities.zoom) {
@@ -849,7 +818,7 @@
     }
 
     function fecharScannerSemCodigo() {
-      const prefix = moduloAtual === 'proative' ? 'pro_' : 'trc_';
+      const prefix = moduloAtual === 'proativo' ? 'pro_' : 'trc_';
       pararScanner();
       el(prefix + 'codigo').value = "";
       el(prefix + 'descricao').focus();
@@ -857,7 +826,7 @@
 
     // OPERAÇÕES DOS PRODUTOS
     async function buscarProduto(modulo) {
-      const prefix = modulo === 'proative' ? 'pro_' : 'trc_';
+      const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
       const code = el(prefix + 'codigo').value.trim();
       const statusEl = el(prefix + 'status');
 
@@ -896,7 +865,7 @@
     }
 
     function adicionarItem(modulo) {
-      const prefix = modulo === 'proative' ? 'pro_' : 'trc_';
+      const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
       const desc = el(prefix + 'descricao').value.trim();
       const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
       const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
@@ -918,7 +887,7 @@
         total: qtd * val
       };
 
-      if (modulo === 'proative') {
+      if (modulo === 'proativo') {
         itensProAtivo.unshift(item);
         localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
       } else {
@@ -928,7 +897,6 @@
 
       renderizarLista(modulo);
 
-      // Limpeza dos campos
       el(prefix + 'codigo').value = '';
       el(prefix + 'descricao').value = '';
       el(prefix + 'quantidade').value = '';
@@ -938,9 +906,9 @@
     }
 
     function renderizarLista(modulo) {
-      const prefix = modulo === 'proative' ? 'pro_' : 'trc_';
+      const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
       const listContainer = el(prefix + 'lista');
-      const listaData = modulo === 'proative' ? itensProAtivo : itensTrocas;
+      const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
 
       el(prefix + 'contador').innerText = listaData.length;
 
@@ -973,7 +941,7 @@
     }
 
     function removerItem(modulo, id) {
-      if (modulo === 'proative') {
+      if (modulo === 'proativo') {
         itensProAtivo = itensProAtivo.filter(i => i.id !== id);
         localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
       } else {
@@ -985,7 +953,7 @@
 
     function limparLista(modulo) {
       if (confirm("Deseja apagar todos os lançamentos deste módulo?")) {
-        if (modulo === 'proative') {
+        if (modulo === 'proativo') {
           itensProAtivo = [];
           localStorage.removeItem('sys_proative_itens');
         } else {
@@ -998,7 +966,7 @@
 
     // EXPORTAR PLANILHA EXCEL
     async function gerarExcel(modulo) {
-      const listaData = modulo === 'proative' ? itensProAtivo : itensTrocas;
+      const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
       if (listaData.length === 0) {
         alert("Adicione itens para exportar.");
         return;
@@ -1007,7 +975,7 @@
       try {
         const workbook = await XlsxPopulate.fromBlankAsync();
         const sheet = workbook.sheet(0);
-        const nomeModulo = modulo === 'proative' ? "Pró Ativo Frios" : "Relatório de Trocas";
+        const nomeModulo = modulo === 'proativo' ? "Pró Ativo Frios" : "Relatório de Trocas";
 
         sheet.name(nomeModulo);
         sheet.cell("A1").value(`REDE MARKET - ${nomeModulo.toUpperCase()}`);
