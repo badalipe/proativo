@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0f172a">
   <title>Sistema de Gestão & Botões 3D</title>
   
-  <!-- Bibliotecas externas do módulo Pró-Ativo -->
+  <!-- Bibliotecas externas -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
@@ -149,8 +149,8 @@
     .glass-3:hover .glass-shine { transform: translate(25%, 25%); }
     .glass-3:active { transform: translateY(-2px) rotateX(2deg) scale(1.01); }
 
-    /* --- MODAL DO MÓDULO PRÓ ATIVO --- */
-    #proativo-modal {
+    /* --- MODAL DE SISTEMA --- */
+    .system-modal {
       position: fixed;
       inset: 0;
       z-index: 99999;
@@ -160,7 +160,7 @@
 
     .hidden { display: none !important; }
 
-    /* Estilos Internos do Pró-Ativo */
+    /* Estilos Internos dos Módulos */
     #login-screen {
       position: fixed;
       inset: 0;
@@ -238,7 +238,7 @@
       outline: none; border-color: var(--primary); background: #fff;
       box-shadow: 0 0 0 3px rgba(0, 102, 178, 0.15);
     }
-    #codigo { font-family: 'Courier New', monospace; font-size: 17px; letter-spacing: 2px; font-weight: 700; }
+    .input-codigo { font-family: 'Courier New', monospace; font-size: 17px; letter-spacing: 2px; font-weight: 700; }
 
     .campo label { margin: 0 0 4px; }
     .campo .caixa {
@@ -296,6 +296,7 @@
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 
+    /* SCANNER BEEP */
     #beep-scanner-overlay {
       position: fixed; inset: 0; background: #000; z-index: 999999;
       display: flex; flex-direction: column; justify-content: space-between; animation: overlayFadeIn 0.25s ease;
@@ -409,8 +410,7 @@
       .wrap > .etapas { grid-column: 1 / -1; margin: 4px 2px 0; }
       .wrap > .card { margin-bottom: 0; }
       .wrap > footer { grid-column: 1 / -1; }
-      #card-ident { grid-column: 1 / -1; }
-      #card-list { grid-column: 1 / -1; }
+      .card-full { grid-column: 1 / -1; }
       .row { grid-template-columns: 1fr 1fr; }
       .row-ident { grid-template-columns: repeat(4, 1fr); }
       .scan-zone { padding: 20px; }
@@ -421,7 +421,7 @@
 
   <!-- NAVEGAÇÃO PRINCIPAL (BOTÕES 3D) -->
   <div class="btn-row">
-    <button type="button" onclick="abrirProAtivo()" class="glass-btn glass-1">
+    <button type="button" onclick="abrirModulo('proativo')" class="glass-btn glass-1">
       <div class="glass-shine"></div>
       <div class="glass-content">
         <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -431,7 +431,7 @@
       </div>
     </button>
 
-    <a href="https://exemplo.com/trocas" class="glass-btn glass-2">
+    <button type="button" onclick="abrirModulo('trocas')" class="glass-btn glass-2">
       <div class="glass-shine"></div>
       <div class="glass-content">
         <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -439,7 +439,7 @@
         </svg>
         <span class="btn-text">TROCAS</span>
       </div>
-    </a>
+    </button>
 
     <a href="https://exemplo.com/perdas" class="glass-btn glass-3">
       <div class="glass-shine"></div>
@@ -452,42 +452,40 @@
     </a>
   </div>
 
-  <!-- MODAL / PAINEL SOBREPOSTO DO PRÓ ATIVO -->
-  <div id="proativo-modal" class="hidden">
-    
-    <!-- TELA DE LOGIN -->
-    <div id="login-screen">
-      <div class="login-card">
-        <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
-          <path d="M 30,120 L 30,55 C 30,35 45,20 65,20 L 115,20 C 145,20 165,40 165,70 C 165,95 145,115 120,120 L 155,160 L 125,160 L 95,120 L 65,120 L 65,160 L 30,160 Z M 65,50 L 65,95 L 110,95 C 125,95 135,85 135,72 C 135,60 125,50 110,50 Z" fill="#0066b2"/>
-          <circle cx="30" cy="35" r="14" fill="#0066b2"/>
-          <circle cx="30" cy="145" r="14" fill="#0066b2"/>
-          <text x="175" y="68" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#0066b2" letter-spacing="-1">rede</text>
-          <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
-        </svg>
-        <h2>Controle de Frios</h2>
-        <p>Insira suas credenciais para acessar o sistema</p>
+  <!-- CONTAINER DE LOGIN COMPARTILHADO -->
+  <div id="login-screen" class="hidden">
+    <div class="login-card">
+      <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 30,120 L 30,55 C 30,35 45,20 65,20 L 115,20 C 145,20 165,40 165,70 C 165,95 145,115 120,120 L 155,160 L 125,160 L 95,120 L 65,120 L 65,160 L 30,160 Z M 65,50 L 65,95 L 110,95 C 125,95 135,85 135,72 C 135,60 125,50 110,50 Z" fill="#0066b2"/>
+        <circle cx="30" cy="35" r="14" fill="#0066b2"/>
+        <circle cx="30" cy="145" r="14" fill="#0066b2"/>
+        <text x="175" y="68" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#0066b2" letter-spacing="-1">rede</text>
+        <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
+      </svg>
+      <h2>Acesso ao Sistema</h2>
+      <p>Insira suas credenciais para continuar</p>
 
-        <div id="loginError" class="login-error hidden">Usuário ou senha incorretos!</div>
+      <div id="loginError" class="login-error hidden">Usuário ou senha incorretos!</div>
 
-        <form id="loginForm" onsubmit="realizarLogin(event)">
-          <div style="text-align: left;">
-            <label>Usuário</label>
-            <input id="usuarioInput" type="text" placeholder="Digite seu usuário" required autocomplete="username">
+      <form id="loginForm" onsubmit="realizarLogin(event)">
+        <div style="text-align: left;">
+          <label>Usuário</label>
+          <input id="usuarioInput" type="text" placeholder="Digite seu usuário" required autocomplete="username">
 
-            <label>Senha</label>
-            <input id="senhaInput" type="password" placeholder="••••••••" required autocomplete="current-password">
-          </div>
-          <div style="margin-top: 20px;">
-            <button type="submit" class="primary">Entrar no Sistema</button>
-            <button type="button" class="secondary" onclick="fecharProAtivo()" style="margin-top:8px">Voltar ao Menu</button>
-          </div>
-        </form>
-      </div>
+          <label>Senha</label>
+          <input id="senhaInput" type="password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <div style="margin-top: 20px;">
+          <button type="submit" class="primary">Entrar no Sistema</button>
+          <button type="button" class="secondary" onclick="fecharModais()" style="margin-top:8px">Voltar ao Menu</button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <!-- APLICAÇÃO PRINCIPAL -->
-    <div id="app-container" class="hidden">
+  <!-- MODAL DO MÓDULO PRÓ ATIVO -->
+  <div id="proativo-modal" class="system-modal hidden">
+    <div id="app-proativo" class="hidden">
       <header class="top">
         <div class="header-title-container">
           <div class="header-left">
@@ -498,7 +496,6 @@
                 <circle cx="30" cy="145" r="14" fill="#0066b2"/>
                 <text x="175" y="68" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#0066b2" letter-spacing="-1">rede</text>
                 <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
-                <text x="492" y="72" font-family="Arial, sans-serif" font-weight="bold" font-size="18" fill="#e30613">®</text>
               </svg>
             </div>
             <div class="header-text">
@@ -507,211 +504,263 @@
             </div>
           </div>
           <div class="header-right">
-            <button type="button" class="chip-loja" id="chipLoja" title="Toque para trocar a loja">
+            <button type="button" class="chip-loja">
               <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
-              <span id="chipLojaTxt">PATITIBA</span>
+              <span>PATITIBA</span>
             </button>
-            <button type="button" class="secondary" onclick="fecharProAtivo()" style="padding: 8px 12px; font-size: 12px;">Menu</button>
+            <button type="button" class="secondary" onclick="fecharModais()" style="padding: 8px 12px; font-size: 12px;">Menu</button>
             <button type="button" class="danger" onclick="fazerLogout()" style="padding: 8px 12px; font-size: 12px;">Sair</button>
           </div>
         </div>
       </header>
 
       <main class="wrap">
-        <div class="etapas">
-          <button type="button" class="etapa ativa" onclick="document.getElementById('card-ident').scrollIntoView({behavior:'smooth', block:'start'})">
-            <div class="ponto">1</div><span>Identificação</span>
-          </button>
-          <div class="linha"></div>
-          <button type="button" class="etapa" onclick="document.getElementById('card-scan').scrollIntoView({behavior:'smooth', block:'start'})">
-            <div class="ponto">2</div><span>Produtos</span>
-          </button>
-          <div class="linha"></div>
-          <button type="button" class="etapa" onclick="document.getElementById('card-list').scrollIntoView({behavior:'smooth', block:'start'})">
-            <div class="ponto">3</div><span>Revisão</span>
-          </button>
-        </div>
-
-        <section class="card" id="card-ident">
+        <section class="card card-full" id="card-ident-pro">
           <div class="row row-ident">
-            <div class="campo">
-              <label for="digitou">Quem digitou?</label>
-              <div class="caixa"><svg viewBox="0 0 24 24"><path d="M11.9997 12.8779C16.0197 12.878 19.4393 15.3848 20.7048 18.8828C21.0812 19.9234 20.2782 20.8962 19.2038 21.0137L18.9861 21.0264H5.0134L4.79562 21.0137C3.7213 20.8961 2.91743 19.9233 3.29367 18.8828C4.55905 15.3847 7.9797 12.8781 11.9997 12.8779ZM11.9997 14.6777C8.84467 14.6779 6.17462 16.5794 5.09152 19.2256H18.9079C17.8248 16.5793 15.1549 14.6778 11.9997 14.6777ZM12.2312 3.00586C14.6088 3.1264 16.4997 5.09239 16.4997 7.5L16.4939 7.73145C16.3734 10.1091 14.4073 11.9999 11.9997 12C9.59225 11.9998 7.62604 10.109 7.50558 7.73145L7.49973 7.5C7.49973 5.01485 9.51462 3.00021 11.9997 3L12.2312 3.00586ZM11.9997 4.7998C10.5087 4.80001 9.29953 6.00896 9.29953 7.5C9.29953 8.99104 10.5087 10.2 11.9997 10.2002C13.4908 10.2001 14.6999 8.99112 14.6999 7.5C14.6999 6.00888 13.4908 4.79989 11.9997 4.7998Z"/></svg><input id="digitou" placeholder="Seu nome"></div>
-            </div>
-            <div class="campo">
-              <label for="gerente">Gerente / avaliação</label>
-              <div class="caixa"><svg viewBox="0 0 24 24"><path d="M19.1964 9.37793C20.7432 9.7925 21.6615 11.3828 21.2472 12.9297L19.6945 18.7256C19.28 20.2726 17.6888 21.1908 16.1418 20.7764L11.2316 19.46L14.3244 18.6318C14.4413 18.6005 14.5538 18.5599 14.6632 18.5156L16.6086 19.0371C17.1952 19.194 17.798 18.8464 17.9552 18.2598L19.508 12.4639C19.665 11.8773 19.3171 11.2746 18.7306 11.1172L15.05 10.1309L14.5119 8.12207L19.1964 9.37793Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M10.1789 6.60059C11.7256 6.18648 13.3159 7.1048 13.7306 8.65137L15.2834 14.4473C15.6979 15.9943 14.7795 17.5844 13.2326 17.999L7.43668 19.5527C5.8898 19.9669 4.29941 19.0478 3.88492 17.501L2.33219 11.7061C1.91782 10.1591 2.836 8.56783 4.38297 8.15332L10.1789 6.60059ZM11.9914 9.11816C11.8341 8.53162 11.2313 8.18287 10.6447 8.33984L4.84879 9.89355C4.26222 10.0509 3.9144 10.6536 4.07145 11.2402L5.62418 17.0352C5.78141 17.6219 6.38408 17.9697 6.97086 17.8125L12.7668 16.2598C13.3534 16.1024 13.7013 15.4998 13.5441 14.9131L11.9914 9.11816Z"/><path d="M15.0002 3.5293C16.6017 3.52938 17.9005 4.82909 17.9005 6.43066V8.0918L16.0998 7.60938V6.43066C16.0998 5.8232 15.6076 5.33114 15.0002 5.33105H9.00016C8.44441 5.33105 7.98648 5.74306 7.91227 6.27832L6.09977 6.76367V6.43066C6.09977 4.82904 7.39853 3.5293 9.00016 3.5293H15.0002Z"/></svg><input id="gerente"></div>
-            </div>
-            <div class="campo">
-              <label for="comprador">Comprador</label>
-              <div class="caixa"><svg viewBox="0 0 24 24"><path d="M11.9997 12.8779C16.0197 12.878 19.4393 15.3848 20.7048 18.8828C21.0812 19.9234 20.2782 20.8962 19.2038 21.0137L18.9861 21.0264H5.0134L4.79562 21.0137C3.7213 20.8961 2.91743 19.9233 3.29367 18.8828C4.55905 15.3847 7.9797 12.8781 11.9997 12.8779ZM11.9997 14.6777C8.84467 14.6779 6.17462 16.5794 5.09152 19.2256H18.9079C17.8248 16.5793 15.1549 14.6778 11.9997 14.6777ZM12.2312 3.00586C14.6088 3.1264 16.4997 5.09239 16.4997 7.5L16.4939 7.73145C16.3734 10.1091 14.4073 11.9999 11.9997 12C9.59225 11.9998 7.62604 10.109 7.50558 7.73145L7.49973 7.5C7.49973 5.01485 9.51462 3.00021 11.9997 3L12.2312 3.00586ZM11.9997 4.7998C10.5087 4.80001 9.29953 6.00896 9.29953 7.5C9.29953 8.99104 10.5087 10.2 11.9997 10.2002C13.4908 10.2001 14.6999 8.99112 14.6999 7.5C14.6999 6.00888 13.4908 4.79989 11.9997 4.7998Z"/></svg><input id="comprador"></div>
-            </div>
-            <div class="campo">
-              <label for="data">Data do levantamento</label>
-              <div class="caixa"><svg viewBox="0 0 24 24"><path d="M11.8999 6.79965C12.397 6.79965 12.7997 7.20235 12.7997 7.69941V11.7266L14.7359 13.6629C15.0873 14.0143 15.0879 14.584 14.7366 14.9355C14.3852 15.287 13.8148 15.287 13.4633 14.9355L11.2632 12.7355C11.0947 12.5668 11.0002 12.338 11.0001 12.0995V7.69941C11.0001 7.20238 11.4029 6.7997 11.8999 6.79965Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M12 1.89893C17.4677 1.89893 21.9001 6.33147 21.9002 11.7991C21.9002 17.2669 17.4678 21.6993 12 21.6993C6.53228 21.6993 2.09985 17.2669 2.09985 11.7991C2.09998 6.33147 6.53236 1.89893 12 1.89893ZM20.1 11.7998C20.1 7.32616 16.4737 3.69984 12 3.69984C7.5264 3.69984 3.90008 7.32616 3.90008 11.7998C3.90032 16.2732 7.52655 19.8998 12 19.8998C16.4735 19.8998 20.0998 16.2732 20.1 11.7998Z"/></svg><input id="data" type="date"></div>
-            </div>
+            <div class="campo"><label>Quem digitou?</label><div class="caixa"><input id="pro_digitou" placeholder="Seu nome"></div></div>
+            <div class="campo"><label>Gerente / avaliação</label><div class="caixa"><input id="pro_gerente"></div></div>
+            <div class="campo"><label>Comprador</label><div class="caixa"><input id="pro_comprador"></div></div>
+            <div class="campo"><label>Data do levantamento</label><div class="caixa"><input id="pro_data" type="date"></div></div>
           </div>
-          <input id="loja" type="hidden" value="PATITIBA">
         </section>
 
-        <section class="card" id="card-scan">
-          <div class="card-header">
-            <span class="card-icon icon-scan">📷</span>
-            <h3>1. Escanear produto</h3>
-          </div>
-          <div class="notice">Toque no botão abaixo para abrir a câmera em tela cheia com leitura rápida.</div>
+        <section class="card">
+          <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
           <div class="scan-zone">
-            <button class="primary" id="start">📷 Abrir câmera para escanear</button>
-            <button class="secondary" id="btnFoto">🖼️ Enviar foto da galeria</button>
-            <input type="file" id="fileInput" accept="image/*" class="hidden">
+            <button class="primary" onclick="abrirScanner('proative')">📷 Abrir câmera para escanear</button>
           </div>
-
           <label>Código de barras</label>
-          <input id="codigo" inputmode="numeric" placeholder="Ex.: 789...">
-          <div class="actions"><button class="primary" id="buscar" style="width:auto">🔎 Buscar produto</button></div>
-          <div id="status" class="notice" style="margin-top:10px"></div>
+          <input id="pro_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
+          <div class="actions"><button class="primary" onclick="buscarProduto('proative')" style="width:auto">🔎 Buscar produto</button></div>
+          <div id="pro_status" class="notice" style="margin-top:10px"></div>
         </section>
 
-        <section class="card" id="card-conf">
-          <div class="card-header">
-            <span class="card-icon icon-conf">✏️</span>
-            <h3>2. Conferência</h3>
-          </div>
-          <label>Descrição do produto</label><input id="descricao" placeholder="Preenchida automaticamente ou digite aqui">
+        <section class="card">
+          <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
+          <label>Descrição do produto</label><input id="pro_descricao" placeholder="Descrição do produto">
           <div class="row">
-            <div><label>Quantidade no estoque *</label><input id="quantidade" inputmode="decimal" placeholder="Ex.: 12"></div>
-            <div><label>Unidade / Caixa / Fardo</label><input id="unidade" value="und"></div>
+            <div><label>Quantidade *</label><input id="pro_quantidade" inputmode="decimal" placeholder="Ex.: 12"></div>
+            <div><label>Unidade</label><input id="pro_unidade" value="und"></div>
           </div>
           <div class="row">
-            <div><label>Data de validade *</label><input id="validade" type="date"></div>
-            <div><label>Valor unitário (R$)</label><input id="valor" inputmode="decimal" value="0.00"></div>
+            <div><label>Data de validade *</label><input id="pro_validade" type="date"></div>
+            <div><label>Valor unitário (R$)</label><input id="pro_valor" inputmode="decimal" value="0.00"></div>
           </div>
           <div class="actions">
-            <button class="primary" id="adicionar" style="width:auto">➕ Adicionar à lista</button>
-            <button class="secondary" id="salvarCatalogo">💾 Salvar descrição no catálogo</button>
+            <button class="primary" onclick="adicionarItem('proative')" style="width:auto">➕ Adicionar à lista</button>
           </div>
         </section>
 
-        <section class="card" id="card-list">
+        <section class="card card-full">
           <div class="card-header" style="justify-content: space-between;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span class="card-icon icon-list">📋</span>
-              <h3>3. Produtos lançados</h3>
-            </div>
-            <span id="contador" class="pill">0</span>
+            <div style="display:flex;align-items:center;gap:10px;"><span class="card-icon icon-list">📋</span><h3>3. Produtos lançados</h3></div>
+            <span id="pro_contador" class="pill">0</span>
           </div>
-          <div id="lista" class="empty"></div>
+          <div id="pro_lista" class="empty"></div>
           <div class="actions" style="margin-top: 16px;">
-            <button class="primary" id="exportar" style="width:auto">📊 Gerar Excel padrão com Logo e Cores</button>
-            <button class="danger" id="limpar">Limpar lista</button>
+            <button class="primary" onclick="gerarExcel('proative')" style="width:auto">📊 Gerar Excel Pró Ativo</button>
+            <button class="danger" onclick="limparLista('proative')">Limpar lista</button>
           </div>
         </section>
-
-        <div class="resumo-fixo hidden" id="resumoFixo">
-          <div class="resumo-inner">
-            <div>
-              <div class="numero" id="resumoTotal">0 produtos</div>
-              <div class="detalhe" id="resumoValor">R$ 0,00 em estoque</div>
-            </div>
-            <button type="button" class="primary" id="exportarFixo" style="width:auto; height:40px; padding:0 20px;">📊 Gerar Excel</button>
-          </div>
-        </div>
-
-        <footer>
-          <div>Catálogo local e consulta externa via Open Food Facts.</div>
-          <div class="signature-badge">
-            ✍️ Encarregado Felipe Farizeli desde 2026
-          </div>
-        </footer>
       </main>
     </div>
+  </div>
 
-    <!-- TELA DE SCANNER LEITOR -->
-    <div id="beep-scanner-overlay" class="hidden">
-      <div class="beep-top-bar">
-        <button type="button" class="beep-back-btn" id="beepBtnClose">←</button>
-        <span>Escanear...</span>
-        <button type="button" class="beep-manual-link" id="beepBtnManual">DIGITAR MANUALMENTE</button>
-      </div>
-
-      <div class="beep-viewport">
-        <div id="beep-reader"></div>
-      </div>
-
-      <div class="beep-target-container">
-        <div class="scan-flash" id="scanFlash"></div>
-        <div class="beep-target-box">
-          <div class="scan-line"></div>
-          <div class="beep-logo-watermark">B<span>EE</span>P</div>
+  <!-- MODAL DO MÓDULO TROCAS -->
+  <div id="trocas-modal" class="system-modal hidden">
+    <div id="app-trocas" class="hidden">
+      <header class="top">
+        <div class="header-title-container">
+          <div class="header-left">
+            <div class="logo-container">
+              <svg class="header-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 30,120 L 30,55 C 30,35 45,20 65,20 L 115,20 C 145,20 165,40 165,70 C 165,95 145,115 120,120 L 155,160 L 125,160 L 95,120 L 65,120 L 65,160 L 30,160 Z M 65,50 L 65,95 L 110,95 C 125,95 135,85 135,72 C 135,60 125,50 110,50 Z" fill="#0066b2"/>
+                <circle cx="30" cy="35" r="14" fill="#0066b2"/>
+                <circle cx="30" cy="145" r="14" fill="#0066b2"/>
+                <text x="175" y="68" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#0066b2" letter-spacing="-1">rede</text>
+                <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
+              </svg>
+            </div>
+            <div class="header-text">
+              <h1>Gestão de Trocas</h1>
+              <div class="sub"><span>Registro e Devoluções de Mercadorias</span></div>
+            </div>
+          </div>
+          <div class="header-right">
+            <button type="button" class="chip-loja">
+              <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
+              <span>PATITIBA</span>
+            </button>
+            <button type="button" class="secondary" onclick="fecharModais()" style="padding: 8px 12px; font-size: 12px;">Menu</button>
+            <button type="button" class="danger" onclick="fazerLogout()" style="padding: 8px 12px; font-size: 12px;">Sair</button>
+          </div>
         </div>
-      </div>
+      </header>
 
-      <div class="camera-controls-floating">
-        <button type="button" id="beepBtnFlash">💡 Lanterna</button>
-        <div class="zoom-pill">Zoom: <span id="beepZoomVal">1.0</span>x</div>
-        <input type="range" id="beepZoomRange" min="1" max="5" step="0.1" value="1" style="width: 75px; accent-color: #fff;">
-      </div>
+      <main class="wrap">
+        <section class="card card-full">
+          <div class="row row-ident">
+            <div class="campo"><label>Conferente / Responsável</label><div class="caixa"><input id="trc_digitou" placeholder="Seu nome"></div></div>
+            <div class="campo"><label>Fornecedor</label><div class="caixa"><input id="trc_fornecedor" placeholder="Ex: Ambev, Nestlé"></div></div>
+            <div class="campo"><label>Motivo da Troca</label><div class="caixa"><input id="trc_motivo" placeholder="Ex: Vencido, Avariado"></div></div>
+            <div class="campo"><label>Data da Troca</label><div class="caixa"><input id="trc_data" type="date"></div></div>
+          </div>
+        </section>
 
-      <div class="beep-bottom-bar">
-        <button type="button" class="beep-btn-bottom-action" id="beepBtnNoBarcode">Adicionar sem código de barras</button>
+        <section class="card">
+          <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
+          <div class="scan-zone">
+            <button class="primary" onclick="abrirScanner('trocas')">📷 Abrir câmera para escanear</button>
+          </div>
+          <label>Código de barras</label>
+          <input id="trc_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
+          <div class="actions"><button class="primary" onclick="buscarProduto('trocas')" style="width:auto">🔎 Buscar produto</button></div>
+          <div id="trc_status" class="notice" style="margin-top:10px"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Dados da Troca</h3></div>
+          <label>Descrição do produto</label><input id="trc_descricao" placeholder="Descrição do produto">
+          <div class="row">
+            <div><label>Quantidade a trocar *</label><input id="trc_quantidade" inputmode="decimal" placeholder="Ex.: 5"></div>
+            <div><label>Unidade</label><input id="trc_unidade" value="und"></div>
+          </div>
+          <div class="row">
+            <div><label>Data de Validade *</label><input id="trc_validade" type="date"></div>
+            <div><label>Custo Unitário (R$)</label><input id="trc_valor" inputmode="decimal" value="0.00"></div>
+          </div>
+          <div class="actions">
+            <button class="primary" onclick="adicionarItem('trocas')" style="width:auto">➕ Registrar para Troca</button>
+          </div>
+        </section>
+
+        <section class="card card-full">
+          <div class="card-header" style="justify-content: space-between;">
+            <div style="display:flex;align-items:center;gap:10px;"><span class="card-icon icon-list">📋</span><h3>3. Itens na Lista de Trocas</h3></div>
+            <span id="trc_contador" class="pill">0</span>
+          </div>
+          <div id="trc_lista" class="empty"></div>
+          <div class="actions" style="margin-top: 16px;">
+            <button class="primary" onclick="gerarExcel('trocas')" style="width:auto">📊 Exportar Planilha de Trocas</button>
+            <button class="danger" onclick="limparLista('trocas')">Limpar trocas</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- LEITOR BEEP COMPARTILHADO -->
+  <div id="beep-scanner-overlay" class="hidden">
+    <div class="beep-top-bar">
+      <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
+      <span>Escanear Código</span>
+      <button type="button" class="beep-manual-link" onclick="pararScanner()">MANUAL</button>
+    </div>
+
+    <div class="beep-viewport">
+      <div id="beep-reader"></div>
+    </div>
+
+    <div class="beep-target-container">
+      <div class="scan-flash" id="scanFlash"></div>
+      <div class="beep-target-box">
+        <div class="scan-line"></div>
+        <div class="beep-logo-watermark">B<span>EE</span>P</div>
       </div>
+    </div>
+
+    <div class="camera-controls-floating">
+      <button type="button" onclick="alternarLanterna()">💡 Lanterna</button>
+      <div class="zoom-pill">Zoom: <span id="beepZoomVal">1.0</span>x</div>
+      <input type="range" id="beepZoomRange" min="1" max="5" step="0.1" value="1" style="width: 75px; accent-color: #fff;">
+    </div>
+
+    <div class="beep-bottom-bar">
+      <button type="button" class="beep-btn-bottom-action" onclick="fecharScannerSemCodigo()">Inserir sem código</button>
     </div>
   </div>
 
   <script>
-    /* NAVEGAÇÃO DO MODAL PRÓ ATIVO */
-    function abrirProAtivo() {
-      document.getElementById('proativo-modal').classList.remove('hidden');
-    }
-    function fecharProAtivo() {
-      if(html5QrCode && html5QrCode.isScanning) {
-        pararScanner();
-      }
-      document.getElementById('proativo-modal').classList.add('hidden');
-    }
+    let moduloAtual = null; // 'proative' ou 'trocas'
+    let html5QrCode = null;
+    let lanternaAtiva = false;
 
-    /* SISTEMA DE LOGIN & PRÓ ATIVO */
+    // CREDENCIAIS
     const usuariosPermitidos = {
       "felipe": "2026",
       "admin": "market123",
       "patitiba": "frios2026"
     };
 
-    function realizarLogin(event) {
-      event.preventDefault();
-      const user = document.getElementById('usuarioInput').value.trim().toLowerCase();
-      const pass = document.getElementById('senhaInput').value;
-      const errorBox = document.getElementById('loginError');
+    const produtosPreCadastrados = {
+      "7896045112098": "Refresco em Pó Frisco Abacaxi 18g",
+      "7896183210120": "Leite Glória",
+      "7908077452537": "Caderno Universitário 80 Fls Foroni"
+    };
+
+    let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
+    let itensProAtivo = JSON.parse(localStorage.getItem('sys_proative_itens') || '[]');
+    let itensTrocas = JSON.parse(localStorage.getItem('sys_trocas_itens') || '[]');
+
+    const el = id => document.getElementById(id);
+
+    // CONTROLADORES DE INTERFACE
+    function abrirModulo(modulo) {
+      moduloAtual = modulo;
+      const estaLogado = sessionStorage.getItem('sys_logado') === 'true';
+
+      if (!estaLogado) {
+        el('login-screen').classList.remove('hidden');
+      } else {
+        exibirTelaModulo(modulo);
+      }
+    }
+
+    function exibirTelaModulo(modulo) {
+      el('login-screen').classList.add('hidden');
+      if (modulo === 'proative') {
+        el('proativo-modal').classList.remove('hidden');
+        el('app-proativo').classList.remove('hidden');
+        renderizarLista('proative');
+      } else if (modulo === 'trocas') {
+        el('trocas-modal').classList.remove('hidden');
+        el('app-trocas').classList.remove('hidden');
+        renderizarLista('trocas');
+      }
+    }
+
+    function fecharModais() {
+      pararScanner();
+      el('proativo-modal').classList.add('hidden');
+      el('trocas-modal').classList.add('hidden');
+      el('login-screen').classList.add('hidden');
+    }
+
+    function realizarLogin(e) {
+      e.preventDefault();
+      const user = el('usuarioInput').value.trim().toLowerCase();
+      const pass = el('senhaInput').value;
 
       if (usuariosPermitidos[user] && usuariosPermitidos[user] === pass) {
-        sessionStorage.setItem('proativos_logado', 'true');
-        sessionStorage.setItem('proativos_user', user);
-
-        const inputDigitou = document.getElementById('digitou');
-        if(inputDigitou && !inputDigitou.value) {
-          inputDigitou.value = user.toUpperCase();
-          localStorage.setItem('proativos_head_digitou', user.toUpperCase());
-        }
-
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('app-container').classList.remove('hidden');
+        sessionStorage.setItem('sys_logado', 'true');
+        sessionStorage.setItem('sys_user', user);
+        
+        el('loginError').classList.add('hidden');
+        if (moduloAtual) exibirTelaModulo(moduloAtual);
       } else {
-        errorBox.classList.remove('hidden');
+        el('loginError').classList.remove('hidden');
       }
     }
 
     function fazerLogout() {
-      sessionStorage.removeItem('proativos_logado');
-      sessionStorage.removeItem('proativos_user');
-      document.getElementById('app-container').classList.add('hidden');
-      document.getElementById('login-screen').classList.remove('hidden');
+      sessionStorage.removeItem('sys_logado');
+      fecharModais();
     }
 
+    // SCANNER E ÁUDIO
     function tocarBipe() {
       try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return;
-        const ctx = new AudioContext();
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = "square";
@@ -726,57 +775,22 @@
     }
 
     function dispararFlashScan() {
-      const flash = document.getElementById('scanFlash');
+      const flash = el('scanFlash');
       if (!flash) return;
       flash.classList.add('active');
       setTimeout(() => flash.classList.remove('active'), 350);
     }
 
-    const produtosPreCadastrados = {
-      "7896045112098": "Refresco em Pó Frisco Abacaxi 18g",
-      "7896183210120": "Leite Glória",
-      "7908077452537": "Caderno Universitário 80 Fls 1 Matéria Capa Dura Unicórnio Foroni"
-    };
-
-    let catalogoLocal = JSON.parse(localStorage.getItem('proativos_catalogo') || '{}');
-    let itensLancados = JSON.parse(localStorage.getItem('proativos_itens') || '[]');
-    let html5QrCode = null;
-    let videoTrack = null;
-    let lanternaAtiva = false;
-
-    const el = id => document.getElementById(id);
-
-    window.addEventListener('DOMContentLoaded', () => {
-      if (sessionStorage.getItem('proativos_logado') === 'true') {
-        el('login-screen').classList.add('hidden');
-        el('app-container').classList.remove('hidden');
-      }
-
-      // Inicializa Data do Levantamento como Hoje se vazia
-      if(!el('data').value) {
-        el('data').value = new Date().toISOString().split('T')[0];
-      }
-
-      // Restaura dados salvos do formulário
-      ['digitou', 'gerente', 'comprador'].forEach(id => {
-        const val = localStorage.getItem('proativos_head_' + id);
-        if(val) el(id).value = val;
-        el(id).addEventListener('input', () => {
-          localStorage.setItem('proativos_head_' + id, el(id).value);
-        });
-      });
-
-      renderizarLista();
-    });
-
-    // Scanner
-    async function iniciarScanner() {
+    async function abrirScanner(modulo) {
+      moduloAtual = modulo;
       el('beep-scanner-overlay').classList.remove('hidden');
-      if(!html5QrCode) {
+      
+      if (!html5QrCode) {
         html5QrCode = new Html5Qrcode("beep-reader");
       }
-      
+
       const config = { fps: 15, qrbox: { width: 280, height: 160 } };
+      
       try {
         await html5QrCode.start(
           { facingMode: "environment" },
@@ -784,37 +798,37 @@
           (decodedText) => {
             tocarBipe();
             dispararFlashScan();
-            el('codigo').value = decodedText;
+            const prefix = modulo === 'proative' ? 'pro_' : 'trc_';
+            el(prefix + 'codigo').value = decodedText;
             pararScanner();
-            buscarProduto();
+            buscarProduto(modulo);
           },
           () => {}
         );
-        
-        // Ativar controles de zoom/lanterna se suportado
+
+        // Zoom Controles
         try {
           const capabilities = html5QrCode.getRunningTrackCapabilities();
-          if(capabilities.zoom) {
+          if (capabilities.zoom) {
             const zoomInput = el('beepZoomRange');
             zoomInput.min = capabilities.zoom.min || 1;
             zoomInput.max = capabilities.zoom.max || 5;
             zoomInput.step = capabilities.zoom.step || 0.1;
             zoomInput.oninput = (e) => {
-              const val = e.target.value;
-              el('beepZoomVal').innerText = val;
-              html5QrCode.applyVideoConstraints({ advanced: [{ zoom: val }] });
+              el('beepZoomVal').innerText = e.target.value;
+              html5QrCode.applyVideoConstraints({ advanced: [{ zoom: e.target.value }] });
             };
           }
         } catch(e){}
 
-      } catch(e) {
-        alert("Não foi possível acessar a câmera: " + e);
+      } catch (e) {
+        alert("Erro ao abrir a câmera: " + e);
         pararScanner();
       }
     }
 
     function pararScanner() {
-      if(html5QrCode && html5QrCode.isScanning) {
+      if (html5QrCode && html5QrCode.isScanning) {
         html5QrCode.stop().then(() => {
           el('beep-scanner-overlay').classList.add('hidden');
         }).catch(() => {
@@ -825,149 +839,123 @@
       }
     }
 
-    el('start').onclick = iniciarScanner;
-    el('beepBtnClose').onclick = pararScanner;
-    el('beepBtnManual').onclick = () => { pararScanner(); el('codigo').focus(); };
-    el('beepBtnNoBarcode').onclick = () => {
-      pararScanner();
-      el('codigo').value = "";
-      el('descricao').focus();
-    };
-
-    // Alternar Lanterna
-    el('beepBtnFlash').onclick = async () => {
+    async function alternarLanterna() {
       try {
         lanternaAtiva = !lanternaAtiva;
         await html5QrCode.applyVideoConstraints({ advanced: [{ torch: lanternaAtiva }] });
-      } catch(e) {
-        alert("Lanterna não suportada neste dispositivo.");
+      } catch (e) {
+        alert("Lanterna não disponível nesta câmera.");
       }
-    };
+    }
 
-    // Buscar Produto
-    async function buscarProduto() {
-      const code = el('codigo').value.trim();
-      if(!code) {
-        el('status').innerHTML = '<span class="warn">Digite um código para buscar.</span>';
+    function fecharScannerSemCodigo() {
+      const prefix = moduloAtual === 'proative' ? 'pro_' : 'trc_';
+      pararScanner();
+      el(prefix + 'codigo').value = "";
+      el(prefix + 'descricao').focus();
+    }
+
+    // OPERAÇÕES DOS PRODUTOS
+    async function buscarProduto(modulo) {
+      const prefix = modulo === 'proative' ? 'pro_' : 'trc_';
+      const code = el(prefix + 'codigo').value.trim();
+      const statusEl = el(prefix + 'status');
+
+      if (!code) {
+        statusEl.innerHTML = '<span class="warn">Informe um código.</span>';
         return;
       }
 
-      el('status').innerHTML = '🔎 Buscando...';
+      statusEl.innerHTML = '🔎 Buscando...';
 
-      if(catalogoLocal[code]) {
-        el('descricao').value = catalogoLocal[code];
-        el('status').innerHTML = '<span class="ok">Encontrado no catálogo local!</span>';
+      if (catalogoLocal[code]) {
+        el(prefix + 'descricao').value = catalogoLocal[code];
+        statusEl.innerHTML = '<span class="ok">Localizado no catálogo local!</span>';
         return;
       }
 
-      if(produtosPreCadastrados[code]) {
-        el('descricao').value = produtosPreCadastrados[code];
-        el('status').innerHTML = '<span class="ok">Encontrado na base base!</span>';
+      if (produtosPreCadastrados[code]) {
+        el(prefix + 'descricao').value = produtosPreCadastrados[code];
+        statusEl.innerHTML = '<span class="ok">Localizado na base do sistema!</span>';
         return;
       }
 
       try {
         const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
         const data = await res.json();
-        if(data.status === 1 && data.product.product_name) {
-          el('descricao').value = data.product.product_name;
-          el('status').innerHTML = '<span class="ok">Encontrado via Open Food Facts!</span>';
+        if (data.status === 1 && data.product.product_name) {
+          el(prefix + 'descricao').value = data.product.product_name;
+          statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
         } else {
-          el('status').innerHTML = '<span class="warn">Produto não encontrado. Digite a descrição manualmente.</span>';
-          el('descricao').focus();
+          statusEl.innerHTML = '<span class="warn">Não encontrado. Digite a descrição.</span>';
+          el(prefix + 'descricao').focus();
         }
-      } catch(e) {
-        el('status').innerHTML = '<span class="warn">Falha na consulta externa. Digite a descrição.</span>';
+      } catch (e) {
+        statusEl.innerHTML = '<span class="warn">Erro de consulta. Digite manualmente.</span>';
       }
     }
 
-    el('buscar').onclick = buscarProduto;
+    function adicionarItem(modulo) {
+      const prefix = modulo === 'proative' ? 'pro_' : 'trc_';
+      const desc = el(prefix + 'descricao').value.trim();
+      const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
+      const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
+      const validade = el(prefix + 'validade').value;
 
-    // Salvar no Catálogo
-    el('salvarCatalogo').onclick = () => {
-      const code = el('codigo').value.trim();
-      const desc = el('descricao').value.trim();
-      if(!code || !desc) {
-        alert("Informe o código e a descrição para salvar no catálogo.");
-        return;
-      }
-      catalogoLocal[code] = desc;
-      localStorage.setItem('proativos_catalogo', JSON.stringify(catalogoLocal));
-      alert("Produto salvo no catálogo local!");
-    };
-
-    // Adicionar Item
-    el('adicionar').onclick = () => {
-      const desc = el('descricao').value.trim();
-      const qtd = parseFloat(el('quantidade').value.replace(',', '.'));
-      const val = parseFloat(el('valor').value.replace(',', '.')) || 0;
-      const validade = el('validade').value;
-
-      if(!desc || isNaN(qtd) || !validade) {
-        alert("Preencha a descrição, quantidade e validade obrigatoriamente.");
+      if (!desc || isNaN(qtd) || !validade) {
+        alert("Preencha descrição, quantidade e validade.");
         return;
       }
 
       const item = {
         id: Date.now(),
-        codigo: el('codigo').value.trim() || 'S/C',
+        codigo: el(prefix + 'codigo').value.trim() || 'S/C',
         descricao: desc,
         quantidade: qtd,
-        unidade: el('unidade').value || 'und',
+        unidade: el(prefix + 'unidade').value || 'und',
         validade: validade,
         valor: val,
         total: qtd * val
       };
 
-      itensLancados.unshift(item);
-      localStorage.setItem('proativos_itens', JSON.stringify(itensLancados));
-      renderizarLista();
+      if (modulo === 'proative') {
+        itensProAtivo.unshift(item);
+        localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
+      } else {
+        itensTrocas.unshift(item);
+        localStorage.setItem('sys_trocas_itens', JSON.stringify(itensTrocas));
+      }
 
-      // Limpar campos de entrada do produto
-      el('codigo').value = '';
-      el('descricao').value = '';
-      el('quantidade').value = '';
-      el('validade').value = '';
-      el('valor').value = '0.00';
-      el('status').innerHTML = '';
-    };
+      renderizarLista(modulo);
 
-    // Renderizar Lista de Produtos
-    function renderizarLista() {
-      const container = el('lista');
-      el('contador').innerText = itensLancados.length;
+      // Limpeza dos campos
+      el(prefix + 'codigo').value = '';
+      el(prefix + 'descricao').value = '';
+      el(prefix + 'quantidade').value = '';
+      el(prefix + 'validade').value = '';
+      el(prefix + 'valor').value = '0.00';
+      el(prefix + 'status').innerHTML = '';
+    }
 
-      if(itensLancados.length === 0) {
-        container.className = 'empty';
-        container.innerHTML = 'Nenhum produto adicionado à lista ainda.';
-        el('resumoFixo').classList.add('hidden');
+    function renderizarLista(modulo) {
+      const prefix = modulo === 'proative' ? 'pro_' : 'trc_';
+      const listContainer = el(prefix + 'lista');
+      const listaData = modulo === 'proative' ? itensProAtivo : itensTrocas;
+
+      el(prefix + 'contador').innerText = listaData.length;
+
+      if (listaData.length === 0) {
+        listContainer.className = 'empty';
+        listContainer.innerHTML = 'Nenhum item registrado.';
         return;
       }
 
-      container.className = '';
-      container.innerHTML = '';
+      listContainer.className = '';
+      listContainer.innerHTML = '';
 
-      let valTotalGeral = 0;
-      let qtdTotalItens = 0;
-
-      const hoje = new Date();
-      hoje.setHours(0,0,0,0);
-
-      itensLancados.forEach(item => {
-        valTotalGeral += item.total;
-        qtdTotalItens += item.quantidade;
-
-        const dataVal = new Date(item.validade + 'T00:00:00');
-        const diffDias = Math.ceil((dataVal - hoje) / (1000 * 60 * 60 * 24));
-
-        let corBorda = '#10b981'; // Verde
-        if(diffDias < 0) corBorda = '#e30613'; // Vencido
-        else if(diffDias <= 30) corBorda = '#d97706'; // Amarelo/Laranja
-
+      listaData.forEach(item => {
         const itemEl = document.createElement('div');
         itemEl.className = 'item';
-        itemEl.style.setProperty('--item-cor', corBorda);
-
         const dataFmt = item.validade.split('-').reverse().join('/');
 
         itemEl.innerHTML = `
@@ -977,64 +965,64 @@
           </div>
           <div class="item-right">
             <span class="item-total">R$ ${item.total.toFixed(2)}</span>
-            <button type="button" class="danger" style="padding: 6px 10px; font-size: 12px;" onclick="removerItem(${item.id})">🗑️</button>
+            <button type="button" class="danger" style="padding: 6px 10px; font-size: 12px;" onclick="removerItem('${modulo}', ${item.id})">🗑️</button>
           </div>
         `;
-        container.appendChild(itemEl);
+        listContainer.appendChild(itemEl);
       });
-
-      el('resumoTotal').innerText = `${itensLancados.length} itens (${qtdTotalItens} un.)`;
-      el('resumoValor').innerText = `R$ ${valTotalGeral.toFixed(2)} em estoque`;
-      el('resumoFixo').classList.remove('hidden');
     }
 
-    function removerItem(id) {
-      itensLancados = itensLancados.filter(i => i.id !== id);
-      localStorage.setItem('proativos_itens', JSON.stringify(itensLancados));
-      renderizarLista();
-    }
-
-    el('limpar').onclick = () => {
-      if(confirm("Tem certeza que deseja limpar toda a lista?")) {
-        itensLancados = [];
-        localStorage.removeItem('proativos_itens');
-        renderizarLista();
+    function removerItem(modulo, id) {
+      if (modulo === 'proative') {
+        itensProAtivo = itensProAtivo.filter(i => i.id !== id);
+        localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
+      } else {
+        itensTrocas = itensTrocas.filter(i => i.id !== id);
+        localStorage.setItem('sys_trocas_itens', JSON.stringify(itensTrocas));
       }
-    };
+      renderizarLista(modulo);
+    }
 
-    // Gerar Planilha Excel Completa com XLSX Populate
-    async function gerarExcel() {
-      if(itensLancados.length === 0) {
-        alert("Adicione itens à lista antes de exportar.");
+    function limparLista(modulo) {
+      if (confirm("Deseja apagar todos os lançamentos deste módulo?")) {
+        if (modulo === 'proative') {
+          itensProAtivo = [];
+          localStorage.removeItem('sys_proative_itens');
+        } else {
+          itensTrocas = [];
+          localStorage.removeItem('sys_trocas_itens');
+        }
+        renderizarLista(modulo);
+      }
+    }
+
+    // EXPORTAR PLANILHA EXCEL
+    async function gerarExcel(modulo) {
+      const listaData = modulo === 'proative' ? itensProAtivo : itensTrocas;
+      if (listaData.length === 0) {
+        alert("Adicione itens para exportar.");
         return;
       }
 
       try {
         const workbook = await XlsxPopulate.fromBlankAsync();
         const sheet = workbook.sheet(0);
-        sheet.name("Pró Ativos Frios");
+        const nomeModulo = modulo === 'proative' ? "Pró Ativo Frios" : "Relatório de Trocas";
 
-        // Título e Cabeçalho
-        sheet.cell("A1").value("REDE MARKET - CONTROLE DE VALIDADES E ESTOQUE (FRIOS)");
+        sheet.name(nomeModulo);
+        sheet.cell("A1").value(`REDE MARKET - ${nomeModulo.toUpperCase()}`);
         sheet.cell("A1").style({ bold: true, fontSize: 14, fontColor: "0066b2" });
 
-        sheet.cell("A3").value("Quem Digitou: " + (el('digitou').value || '-'));
-        sheet.cell("A4").value("Gerente/Avaliação: " + (el('gerente').value || '-'));
-        sheet.cell("D3").value("Comprador: " + (el('comprador').value || '-'));
-        sheet.cell("D4").value("Data Levantamento: " + (el('data').value || '-'));
-
-        // Cabeçalho da Tabela
-        const headers = ["Código", "Descrição do Produto", "Qtd", "Unidade", "Validade", "Valor Unit. (R$)", "Total (R$)"];
+        const headers = ["Código", "Descrição", "Qtd", "Unidade", "Validade", "Valor Unit.", "Total"];
         headers.forEach((h, idx) => {
           const col = String.fromCharCode(65 + idx);
-          const cell = sheet.cell(`${col}6`);
+          const cell = sheet.cell(`${col}3`);
           cell.value(h);
           cell.style({ bold: true, fill: "0066b2", fontColor: "ffffff" });
         });
 
-        // Linhas de Dados
-        itensLancados.forEach((item, index) => {
-          const row = 7 + index;
+        listaData.forEach((item, index) => {
+          const row = 4 + index;
           const dataFmt = item.validade.split('-').reverse().join('/');
 
           sheet.cell(`A${row}`).value(item.codigo);
@@ -1046,22 +1034,24 @@
           sheet.cell(`G${row}`).value(item.total);
         });
 
-        // Download
         const blob = await workbook.outputAsync();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `ProAtivo_Frios_${el('loja').value}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
         a.click();
         window.URL.revokeObjectURL(url);
-
-      } catch(e) {
-        alert("Erro ao gerar arquivo Excel: " + e.message);
+      } catch (e) {
+        alert("Erro ao exportar Excel: " + e.message);
       }
     }
 
-    el('exportar').onclick = gerarExcel;
-    el('exportarFixo').onclick = gerarExcel;
+    // DATA DEFAULT
+    window.addEventListener('DOMContentLoaded', () => {
+      const hoje = new Date().toISOString().split('T')[0];
+      if (el('pro_data')) el('pro_data').value = hoje;
+      if (el('trc_data')) el('trc_data').value = hoje;
+    });
   </script>
 </body>
 </html>
