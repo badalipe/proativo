@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Gestão - Pró Ativo & Trocas</title>
+  <title>Sistema de Gestão - Pró Ativo, Trocas e Perdas</title>
   
   <!-- Biblioteca SheetJS para exportação de planilhas Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -39,11 +39,12 @@
     button.secondary { background: var(--secondary); color: white; }
     button.danger { background: var(--danger); color: white; }
     
-    /* Grid do Menu */
-    .menu-container { text-align: center; max-width: 500px; margin: 50px auto; }
-    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
-    .btn-modulo { display: flex; flex-direction: column; align-items: center; padding: 30px; border-radius: 12px; border: none; cursor: pointer; font-size: 16px; }
-    .btn-modulo .icon { font-size: 32px; margin-bottom: 8px; }
+    /* Grid do Menu de 3 Ícones */
+    .menu-container { text-align: center; max-width: 700px; margin: 40px auto; }
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-top: 25px; }
+    .btn-modulo { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 25px 15px; border-radius: 12px; border: 1px solid var(--border); cursor: pointer; font-size: 16px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s; }
+    .btn-modulo:hover { transform: translateY(-3px); }
+    .btn-modulo .icon { font-size: 40px; margin-bottom: 10px; }
 
     /* Tabela de Produtos */
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -74,26 +75,35 @@
       </form>
     </div>
 
-    <!-- 2. TELA DE SELEÇÃO DE MÓDULO (MENU PRINCIPAL) -->
+    <!-- 2. TELA DE SELEÇÃO DE MÓDULO (MENU DOS 3 ÍCONES) -->
     <div id="menu-screen" class="card menu-container hidden">
-      <h2>Selecione o Módulo</h2>
-      <p style="color: var(--secondary);">Escolha a operação desejada para continuar:</p>
+      <h2>Painel Principal</h2>
+      <p style="color: var(--secondary);">Selecione um dos módulos para iniciar:</p>
       
       <div class="menu-grid">
-        <button type="button" class="btn-modulo primary" onclick="navegarPara('proativo')">
+        <!-- Ícone 1: Pró Ativo -->
+        <button type="button" class="btn-modulo" onclick="navegarPara('proativo')">
           <span class="icon">🚀</span>
-          <span class="label">Pró Ativo</span>
+          <span class="label"><strong>Pró Ativo</strong></span>
         </button>
 
-        <button type="button" class="btn-modulo secondary" onclick="navegarPara('troca')">
+        <!-- Ícone 2: Troca -->
+        <button type="button" class="btn-modulo" onclick="navegarPara('troca')">
           <span class="icon">🔄</span>
-          <span class="label">Troca</span>
+          <span class="label"><strong>Troca</strong></span>
+        </button>
+
+        <!-- Ícone 3: Perdas -->
+        <button type="button" class="btn-modulo" onclick="navegarPara('perdas')">
+          <span class="icon">🗑️</span>
+          <span class="label"><strong>Perdas</strong></span>
         </button>
       </div>
-      <button type="button" class="danger" style="margin-top: 25px;" onclick="fazerLogout()">Sair do Sistema</button>
+
+      <button type="button" class="danger" style="margin-top: 30px;" onclick="fazerLogout()">Sair do Sistema</button>
     </div>
 
-    <!-- 3. MÓDULO PRÓ ATIVO (FASE 1) -->
+    <!-- 3. MÓDULO PRÓ ATIVO -->
     <div id="app-container" class="hidden">
       <div class="card">
         <div class="card-header" style="justify-content: space-between;">
@@ -118,7 +128,7 @@
       </div>
     </div>
 
-    <!-- 4. MÓDULO DE TROCA (FASE 2) -->
+    <!-- 4. MÓDULO DE TROCA -->
     <div id="troca-container" class="hidden">
       <header class="card-header" style="justify-content: space-between;">
         <h2>🔄 Registro de Troca de Produtos</h2>
@@ -195,20 +205,31 @@
       </section>
     </div>
 
+    <!-- 5. MÓDULO DE PERDAS (EM BREVE) -->
+    <div id="perdas-container" class="hidden">
+      <div class="card">
+        <div class="card-header" style="justify-content: space-between;">
+          <h2>🗑️ Módulo de Perdas</h2>
+          <button type="button" class="secondary" onclick="voltarAoMenu()">⬅️ Voltar ao Menu</button>
+        </div>
+        <p style="color: var(--secondary); margin-bottom: 15px;">Módulo em desenvolvimento. Em breve novos comandos e funcionalidades estarão disponíveis aqui.</p>
+      </div>
+    </div>
+
   </div>
 
   <script>
-    // Usuários de teste
+    // Credenciais de Usuários
     const usuariosPermitidos = {
       'admin': '1234',
       'operador': '1234'
     };
 
-    // Estado da Aplicação
+    // Leitura dos dados salvos no LocalStorage
     let itensProativo = JSON.parse(localStorage.getItem('proativos_itens') || '[]');
     let itensTroca = JSON.parse(localStorage.getItem('proativos_trocas') || '[]');
 
-    // --- AUTENTICAÇÃO E NAVEGAÇÃO ---
+    // --- AUTENTICAÇÃO E LOGIN ---
     function realizarLogin(event) {
       event.preventDefault();
       const user = document.getElementById('usuarioInput').value.trim().toLowerCase();
@@ -229,28 +250,38 @@
 
     function fazerLogout() {
       sessionStorage.clear();
-      document.getElementById('menu-screen').classList.add('hidden');
+      esconderTodasAsTelas();
       document.getElementById('login-screen').classList.remove('hidden');
     }
 
-    function navegarPara(modulo) {
+    // --- GERENCIAMENTO DE NAVEGAÇÃO ---
+    function esconderTodasAsTelas() {
+      document.getElementById('login-screen').classList.add('hidden');
       document.getElementById('menu-screen').classList.add('hidden');
+      document.getElementById('app-container').classList.add('hidden');
+      document.getElementById('troca-container').classList.add('hidden');
+      document.getElementById('perdas-container').classList.add('hidden');
+    }
+
+    function navegarPara(modulo) {
+      esconderTodasAsTelas();
       
       if (modulo === 'proativo') {
         document.getElementById('app-container').classList.remove('hidden');
       } else if (modulo === 'troca') {
         document.getElementById('troca-container').classList.remove('hidden');
         atualizarListaTrocas();
+      } else if (modulo === 'perdas') {
+        document.getElementById('perdas-container').classList.remove('hidden');
       }
     }
 
     function voltarAoMenu() {
-      document.getElementById('app-container').classList.add('hidden');
-      document.getElementById('troca-container').classList.add('hidden');
+      esconderTodasAsTelas();
       document.getElementById('menu-screen').classList.remove('hidden');
     }
 
-    // --- MÓDULO PRÓ ATIVO (FASE 1) ---
+    // --- MÓDULO PRÓ ATIVO ---
     function salvarItemProativo() {
       const codigo = document.getElementById('proativo-codigo').value;
       const descricao = document.getElementById('proativo-descricao').value;
@@ -268,15 +299,14 @@
       document.getElementById('proativo-descricao').value = '';
       document.getElementById('proativo-qtd').value = '1';
 
-      alert('Item cadastrado no Pró Ativo!');
+      alert('Item cadastrado no Pró Ativo com sucesso!');
     }
 
-    // --- MÓDULO DE TROCA (FASE 2) ---
+    // --- MÓDULO DE TROCA ---
     function buscarDescricaoAutomatica() {
       const codigo = document.getElementById('troca-codigo').value.trim();
       if (!codigo) return;
 
-      // Procura se o produto já existe no histórico do Pró Ativo
       const encontrado = itensProativo.find(item => item.codigo === codigo);
       if (encontrado) {
         document.getElementById('troca-descricao').value = encontrado.descricao;
@@ -387,7 +417,6 @@
 
       const usuarioLogado = sessionStorage.getItem('proativos_user') || 'Não identificado';
 
-      // Mapeamento idêntico à sua estrutura .ods
       const dadosExcel = itensTroca.map(item => ({
         'Data': item.dataRegistro,
         'Código de Barras': item.codigo,
