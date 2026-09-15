@@ -103,7 +103,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 800px;
+  max-width: 960px;
   margin: 0 auto;
 }
 .header-left {
@@ -144,7 +144,7 @@ body {
 }
 
 .wrap {
-  max-width: 800px;
+  max-width: 960px;
   margin: auto;
   padding: 16px 16px 96px;
 }
@@ -330,7 +330,7 @@ input:focus, select:focus {
   padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
 }
 .resumo-inner {
-  max-width: 800px;
+  max-width: 960px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -653,13 +653,43 @@ footer {
   box-shadow: var(--shadow-sm);
 }
 
+/* --- CELULAR: layout enxuto --- */
 @media(max-width: 520px) {
   .row { grid-template-columns: 1fr; }
-  .top { padding: 18px 16px; }
-  .header-left { gap: 14px; }
-  .header-logo { height: 32px; }
-  .logo-container { padding: 6px 10px; }
-  .header-text h1 { font-size: 18px; }
+  .top { padding: 14px 12px; }
+  .header-left { gap: 12px; }
+  .header-logo { height: 30px; }
+  .logo-container { padding: 6px 10px; border-radius: 10px; }
+  .header-text h1 { font-size: 17px; }
+  .header-text .sub { display: none; }
+  .chip-loja { padding: 6px 10px; font-size: 12px; }
+  .etapa > span { font-size: 11px; }
+  .card { padding: 16px; border-radius: 14px; }
+}
+
+/* --- PC: seções lado a lado, formulário em 4 colunas --- */
+@media(min-width: 960px) {
+  .top { padding: 20px 24px; }
+  .header-logo { height: 44px; }
+  .logo-container { padding: 10px 16px; }
+  .header-text h1 { font-size: 22px; }
+  .header-text .sub { font-size: 13px; }
+  .card { padding: 24px; }
+  .wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  .wrap > .etapas { grid-column: 1 / -1; margin: 4px 2px 0; }
+  .wrap > .card { margin-bottom: 0; }
+  .wrap > footer { grid-column: 1 / -1; }
+  #card-ident { grid-column: 1 / -1; }
+  #card-list { grid-column: 1 / -1; }
+  .row { grid-template-columns: 1fr 1fr; }
+  .row-ident { grid-template-columns: repeat(4, 1fr); }
+  .scan-zone { padding: 20px; }
+  .empty-state { padding: 48px 20px; }
 }
 </style>
 </head>
@@ -741,7 +771,7 @@ footer {
     </div>
 
     <section class="card" id="card-ident">
-      <div class="row">
+      <div class="row row-ident">
         <div class="campo">
           <label for="digitou">Quem digitou?</label>
           <div class="caixa"><svg viewBox="0 0 24 24"><path d="M11.9997 12.8779C16.0197 12.878 19.4393 15.3848 20.7048 18.8828C21.0812 19.9234 20.2782 20.8962 19.2038 21.0137L18.9861 21.0264H5.0134L4.79562 21.0137C3.7213 20.8961 2.91743 19.9233 3.29367 18.8828C4.55905 15.3847 7.9797 12.8781 11.9997 12.8779ZM11.9997 14.6777C8.84467 14.6779 6.17462 16.5794 5.09152 19.2256H18.9079C17.8248 16.5793 15.1549 14.6778 11.9997 14.6777ZM12.2312 3.00586C14.6088 3.1264 16.4997 5.09239 16.4997 7.5L16.4939 7.73145C16.3734 10.1091 14.4073 11.9999 11.9997 12C9.59225 11.9998 7.62604 10.109 7.50558 7.73145L7.49973 7.5C7.49973 5.01485 9.51462 3.00021 11.9997 3L12.2312 3.00586ZM11.9997 4.7998C10.5087 4.80001 9.29953 6.00896 9.29953 7.5C9.29953 8.99104 10.5087 10.2 11.9997 10.2002C13.4908 10.2001 14.6999 8.99112 14.6999 7.5C14.6999 6.00888 13.4908 4.79989 11.9997 4.7998Z"/></svg><input id="digitou" placeholder="Seu nome"></div>
@@ -750,8 +780,6 @@ footer {
           <label for="gerente">Gerente / avaliação</label>
           <div class="caixa"><svg viewBox="0 0 24 24"><path d="M19.1964 9.37793C20.7432 9.7925 21.6615 11.3828 21.2472 12.9297L19.6945 18.7256C19.28 20.2726 17.6888 21.1908 16.1418 20.7764L11.2316 19.46L14.3244 18.6318C14.4413 18.6005 14.5538 18.5599 14.6632 18.5156L16.6086 19.0371C17.1952 19.194 17.798 18.8464 17.9552 18.2598L19.508 12.4639C19.665 11.8773 19.3171 11.2746 18.7306 11.1172L15.05 10.1309L14.5119 8.12207L19.1964 9.37793Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M10.1789 6.60059C11.7256 6.18648 13.3159 7.1048 13.7306 8.65137L15.2834 14.4473C15.6979 15.9943 14.7795 17.5844 13.2326 17.999L7.43668 19.5527C5.8898 19.9669 4.29941 19.0478 3.88492 17.501L2.33219 11.7061C1.91782 10.1591 2.836 8.56783 4.38297 8.15332L10.1789 6.60059ZM11.9914 9.11816C11.8341 8.53162 11.2313 8.18287 10.6447 8.33984L4.84879 9.89355C4.26222 10.0509 3.9144 10.6536 4.07145 11.2402L5.62418 17.0352C5.78141 17.6219 6.38408 17.9697 6.97086 17.8125L12.7668 16.2598C13.3534 16.1024 13.7013 15.4998 13.5441 14.9131L11.9914 9.11816Z"/><path d="M15.0002 3.5293C16.6017 3.52938 17.9005 4.82909 17.9005 6.43066V8.0918L16.0998 7.60938V6.43066C16.0998 5.8232 15.6076 5.33114 15.0002 5.33105H9.00016C8.44441 5.33105 7.98648 5.74306 7.91227 6.27832L6.09977 6.76367V6.43066C6.09977 4.82904 7.39853 3.5293 9.00016 3.5293H15.0002Z"/></svg><input id="gerente"></div>
         </div>
-      </div>
-      <div class="row" style="margin-top:12px">
         <div class="campo">
           <label for="comprador">Comprador</label>
           <div class="caixa"><svg viewBox="0 0 24 24"><path d="M11.9997 12.8779C16.0197 12.878 19.4393 15.3848 20.7048 18.8828C21.0812 19.9234 20.2782 20.8962 19.2038 21.0137L18.9861 21.0264H5.0134L4.79562 21.0137C3.7213 20.8961 2.91743 19.9233 3.29367 18.8828C4.55905 15.3847 7.9797 12.8781 11.9997 12.8779ZM11.9997 14.6777C8.84467 14.6779 6.17462 16.5794 5.09152 19.2256H18.9079C17.8248 16.5793 15.1549 14.6778 11.9997 14.6777ZM12.2312 3.00586C14.6088 3.1264 16.4997 5.09239 16.4997 7.5L16.4939 7.73145C16.3734 10.1091 14.4073 11.9999 11.9997 12C9.59225 11.9998 7.62604 10.109 7.50558 7.73145L7.49973 7.5C7.49973 5.01485 9.51462 3.00021 11.9997 3L12.2312 3.00586ZM11.9997 4.7998C10.5087 4.80001 9.29953 6.00896 9.29953 7.5C9.29953 8.99104 10.5087 10.2 11.9997 10.2002C13.4908 10.2001 14.6999 8.99112 14.6999 7.5C14.6999 6.00888 13.4908 4.79989 11.9997 4.7998Z"/></svg><input id="comprador"></div>
@@ -760,7 +788,6 @@ footer {
           <label for="data">Data do levantamento</label>
           <div class="caixa"><svg viewBox="0 0 24 24"><path d="M11.8999 6.79965C12.397 6.79965 12.7997 7.20235 12.7997 7.69941V11.7266L14.7359 13.6629C15.0873 14.0143 15.0879 14.584 14.7366 14.9355C14.3852 15.287 13.8148 15.287 13.4633 14.9355L11.2632 12.7355C11.0947 12.5668 11.0002 12.338 11.0001 12.0995V7.69941C11.0001 7.20238 11.4029 6.7997 11.8999 6.79965Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M12 1.89893C17.4677 1.89893 21.9001 6.33147 21.9002 11.7991C21.9002 17.2669 17.4678 21.6993 12 21.6993C6.53228 21.6993 2.09985 17.2669 2.09985 11.7991C2.09998 6.33147 6.53236 1.89893 12 1.89893ZM20.1 11.7998C20.1 7.32616 16.4737 3.69984 12 3.69984C7.5264 3.69984 3.90008 7.32616 3.90008 11.7998C3.90032 16.2732 7.52655 19.8998 12 19.8998C16.4735 19.8998 20.0998 16.2732 20.1 11.7998Z"/></svg><input id="data" type="date"></div>
         </div>
-      </div>
       <input id="loja" type="hidden" value="PATITIBA">
     </section>
 
