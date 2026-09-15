@@ -653,14 +653,16 @@ footer {
   box-shadow: var(--shadow-sm);
 }
 
-/* --- CELULAR: layout enxuto --- */
+/* --- CELULAR: topo em duas linhas, logo em destaque --- */
 @media(max-width: 520px) {
   .row { grid-template-columns: 1fr; }
-  .top { padding: 14px 12px; }
-  .header-left { gap: 12px; }
-  .header-logo { height: 30px; }
-  .logo-container { padding: 6px 10px; border-radius: 10px; }
-  .header-text h1 { font-size: 17px; }
+  .top { padding: 12px; }
+  .header-title-container { flex-wrap: wrap; gap: 8px 10px; }
+  .header-left { flex: 1; min-width: 0; flex-wrap: wrap; row-gap: 8px; gap: 8px 12px; }
+  .logo-container { padding: 8px 14px; border-radius: 12px; }
+  .header-logo { height: 42px; }
+  .header-text { width: 100%; }
+  .header-text h1 { font-size: 18px; }
   .header-text .sub { display: none; }
   .chip-loja { padding: 6px 10px; font-size: 12px; }
   .etapa > span { font-size: 11px; }
@@ -670,8 +672,8 @@ footer {
 /* --- PC: seções lado a lado, formulário em 4 colunas --- */
 @media(min-width: 960px) {
   .top { padding: 20px 24px; }
-  .header-logo { height: 44px; }
-  .logo-container { padding: 10px 16px; }
+  .header-logo { height: 48px; }
+  .logo-container { padding: 10px 18px; }
   .header-text h1 { font-size: 22px; }
   .header-text .sub { font-size: 13px; }
   .card { padding: 24px; }
