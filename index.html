@@ -61,18 +61,22 @@
     <!-- 1. TELA DE LOGIN -->
     <div id="login-screen" class="card wrap" style="max-width: 400px; margin-top: 80px;">
       <h2 style="margin-bottom: 15px; text-align: center;">Acesso ao Sistema</h2>
-      <form onsubmit="realizarLogin(event)">
+      <div>
         <div style="margin-bottom: 15px;">
           <label for="usuarioInput">Usuário</label>
-          <input type="text" id="usuarioInput" required placeholder="Digite seu usuário">
+          <input type="text" id="usuarioInput" placeholder="Digite seu usuário">
         </div>
         <div style="margin-bottom: 15px;">
           <label for="senhaInput">Senha</label>
-          <input type="password" id="senhaInput" required placeholder="Digite sua senha">
+          <input type="password" id="senhaInput" placeholder="Digite sua senha">
         </div>
         <p id="loginError" style="color: var(--danger); font-size: 13px; margin-bottom: 10px;" class="hidden">Usuário ou senha inválidos.</p>
-        <button type="submit" class="primary" style="width: 100%;">Entrar</button>
-      </form>
+        <button type="button" class="primary" style="width: 100%;" onclick="realizarLogin()">Entrar</button>
+      </div>
+      <div style="margin-top: 15px; padding: 10px; background: var(--bg); border-radius: 6px; font-size: 12px; color: var(--secondary); text-align: center;">
+        <strong>Acesso liberado para:</strong><br>
+        Usuário: <code>FELIPE</code> | Senha: <code>2026</code>
+      </div>
     </div>
 
     <!-- 2. TELA DE SELEÇÃO DE MÓDULO (MENU DOS 3 ÍCONES) -->
@@ -219,8 +223,9 @@
   </div>
 
   <script>
-    // Credenciais de Usuários
+    // Credenciais de Usuários Permitidos
     const usuariosPermitidos = {
+      'felipe': '2026',
       'admin': '1234',
       'operador': '1234'
     };
@@ -230,11 +235,13 @@
     let itensTroca = JSON.parse(localStorage.getItem('proativos_trocas') || '[]');
 
     // --- AUTENTICAÇÃO E LOGIN ---
-    function realizarLogin(event) {
-      event.preventDefault();
-      const user = document.getElementById('usuarioInput').value.trim().toLowerCase();
-      const pass = document.getElementById('senhaInput').value;
+    function realizarLogin() {
+      const userField = document.getElementById('usuarioInput');
+      const passField = document.getElementById('senhaInput');
       const errorBox = document.getElementById('loginError');
+
+      const user = userField.value.trim().toLowerCase();
+      const pass = passField.value.trim();
 
       if (usuariosPermitidos[user] && usuariosPermitidos[user] === pass) {
         sessionStorage.setItem('proativos_logado', 'true');
@@ -243,10 +250,21 @@
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('menu-screen').classList.remove('hidden');
         errorBox.classList.add('hidden');
+
+        // Limpa os campos de login
+        userField.value = '';
+        passField.value = '';
       } else {
         errorBox.classList.remove('hidden');
       }
     }
+
+    // Permitir pressionar a tecla ENTER no campo de senha para logar
+    document.getElementById('senhaInput').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        realizarLogin();
+      }
+    });
 
     function fazerLogout() {
       sessionStorage.clear();
