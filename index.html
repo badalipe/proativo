@@ -160,7 +160,6 @@
 
     .hidden { display: none !important; }
 
-    /* Estilos Internos dos Módulos */
     #login-screen {
       position: fixed;
       inset: 0;
@@ -246,7 +245,6 @@
       border: 1px solid var(--border-color); border-radius: 10px; background: #f8fafc; transition: all 0.2s ease;
     }
     .campo .caixa:focus-within { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(0, 102, 178, 0.15); }
-    .campo .caixa svg { width: 18px; height: 18px; fill: var(--text-muted); flex-shrink: 0; }
     .campo .caixa input, .campo .caixa select { border: 0; background: transparent; padding: 0; height: 100%; box-shadow: none !important; }
 
     .header-right { display: flex; align-items: center; gap: 10px; }
@@ -573,7 +571,6 @@
             <div class="campo"><label>Conferente / Responsável</label><div class="caixa"><input id="trc_digitou" placeholder="Seu nome"></div></div>
             <div class="campo"><label>Fornecedor</label><div class="caixa"><input id="trc_fornecedor" placeholder="Ex: Ambev, Nestlé"></div></div>
             
-            <!-- CAMPO DE MOTIVO FIXADO EM 1 OU 2 -->
             <div class="campo">
               <label>Motivo da Troca *</label>
               <div class="caixa">
@@ -1007,44 +1004,32 @@
         sheet.name(nomeModulo);
 
         if (modulo === 'proativo') {
-          // CAPTURA DOS DADOS DO CABEÇALHO (MENU PROATIVO)
-          const digitou = el('pro_digitou').value.trim();
-          const gerente = el('pro_gerente').value.trim();
-          const comprador = el('pro_comprador').value.trim();
+          // CAPTURA DOS DADOS DO CABEÇALHO
           const dataLev = el('pro_data').value;
           const dataFmt = dataLev ? dataLev.split('-').reverse().join('/') : '';
 
-          // ESCREVE OS DADOS DO CABEÇALHO NAS LINHAS 1 E 2
-          sheet.cell("A1").value("Quem Digitou: " + digitou).style({ bold: true });
-          sheet.cell("C1").value("Gerente: " + gerente).style({ bold: true });
-          sheet.cell("A2").value("Comprador: " + comprador).style({ bold: true });
-          sheet.cell("C2").value("Data Levantamento: " + dataFmt).style({ bold: true });
+          // PREENCHE EXATAMENTE O CABEÇALHO DO MODELO DA IMAGEM
+          if (listaData.length > 0) {
+            const primeiroItem = listaData[0];
+            sheet.cell("B5").value(primeiroItem.descricao);
+            sheet.cell("C5").value(primeiroItem.quantidade);
+            sheet.cell("D5").value(primeiroItem.unidade);
+            sheet.cell("E6").value(dataFmt);
+          }
+          sheet.cell("C7").value("PATITIBA");
 
-          // CABEÇALHO DA TABELA
-          const headers = ["Código", "Descrição", "Qtd", "Unidade", "Validade", "Valor Unit.", "Total"];
-          headers.forEach((h, idx) => {
-            const col = String.fromCharCode(65 + idx);
-            const cell = sheet.cell(`${col}4`);
-            cell.value(h);
-            cell.style({ bold: true, fill: "0066b2", fontColor: "ffffff" });
-          });
-
-          // INSERÇÃO DOS ITENS A PARTIR DA LINHA 5
+          // LANÇAMENTO DA LISTA A PARTIR DA LINHA 7
           listaData.forEach((item, index) => {
-            const row = 5 + index;
-            const valFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
-
-            sheet.cell(`A${row}`).value(item.codigo);
-            sheet.cell(`B${row}`).value(item.descricao);
-            sheet.cell(`C${row}`).value(item.quantidade);
-            sheet.cell(`D${row}`).value(item.unidade);
-            sheet.cell(`E${row}`).value(valFmt);
-            sheet.cell(`F${row}`).value(item.valor);
-            sheet.cell(`G${row}`).value(item.total);
+            const row = 7 + index;
+            sheet.cell(`A${row}`).value(index + 1);
+            sheet.cell(`B${row}`).value(item.codigo);
+            sheet.cell(`C${row}`).value(item.descricao);
+            sheet.cell(`D${row}`).value(item.quantidade);
+            sheet.cell(`E${row}`).value(item.validade ? item.validade.split('-').reverse().join('/') : '');
           });
 
         } else {
-          // TRATAMENTO PARA O MÓDULO TROCAS
+          // MÓDULO TROCAS
           const headers = ["Código", "Descrição", "Qtd", "Unidade", "Validade", "Motivo", "Valor Unit.", "Total"];
           headers.forEach((h, idx) => {
             const col = String.fromCharCode(65 + idx);
