@@ -7,7 +7,7 @@
  <style>
  body {
  font-family: Arial, sans-serif;
- margin: 15px;
+ margin: 20px;
  background-color: #f4f4f9;
  }
  .container {
@@ -23,17 +23,16 @@
  color: #333;
  }
  .form-group {
- margin-bottom: 12px;
+ margin-bottom: 15px;
  }
  label {
  display: block;
- margin-bottom: 4px;
+ margin-bottom: 5px;
  font-weight: bold;
- font-size: 14px;
  }
  input, select {
  width: 100%;
- padding: 9px;
+ padding: 10px;
  box-sizing: border-box;
  border: 1px solid #ccc;
  border-radius: 4px;
@@ -45,60 +44,43 @@
  color: white;
  border: none;
  border-radius: 4px;
- font-size: 15px;
- font-weight: bold;
+ font-size: 16px;
  cursor: pointer;
- margin-top: 5px;
  }
  button:hover {
  background-color: #0056b3;
  }
- .file-box {
- background: #e9ecef;
- border: 2px dashed #6c757d;
- padding: 12px;
- border-radius: 6px;
- text-align: center;
- margin-bottom: 15px;
- }
  .table-preview {
- margin-top: 15px;
+ margin-top: 20px;
  width: 100%;
  border-collapse: collapse;
- font-size: 13px;
  }
  .table-preview th, .table-preview td {
  border: 1px solid #ddd;
- padding: 6px;
+ padding: 8px;
  text-align: left;
  }
  .table-preview th {
  background-color: #f2f2f2;
  }
  </style>
- <!-- Biblioteca para ler e exportar arquivos Excel (.xlsx) -->
+ <!-- Biblioteca para exportar diretamente para Excel (XLSX) -->
  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
 <div class="container">
- <h2>Lançamento de Estoque - Patitiba</h2>
+ <h2>Lançamento de Estoque</h2>
   
- <!-- PASSO 1: Carregar o modelo oficial da planilha -->
- <div class="file-box">
- <label for="excelFile" style="cursor: pointer; color: #0056b3;">📁 <strong>1º Clique aqui para carregar sua planilha modelo (.xlsx)</strong></label>
- <input type="file" id="excelFile" accept=".xlsx, .xls" style="margin-top: 8px;">
- </div>
-
 <form id="stockForm">
  <div class="form-group">
  <label for="loja">Loja</label>
- <input type="text" id="loja" value="PATITIBA" readonly style="background-color: #e9ecef;">
+ <input type="text" id="loja" value="Patitiba" required>
  </div>
  
  <div class="form-group">
- <label for="codigo">Código do Produto (Código de Barras)</label>
- <input type="text" id="codigo" placeholder="Bip ou digite o código" autofocus required>
+ <label for="codigo">Código do Produto</label>
+ <input type="text" id="codigo" placeholder="7896336006778" required>
  </div>
  
  <div class="form-group">
@@ -135,7 +117,7 @@
  </form>
  
  <br>
- <button type="button" onclick="salvarNaPlanilhaModelo()" style="background-color: #28a745;">💾 2º Salvar na Planilha Oficial</button>
+ <button type="button" onclick="exportarExcel()" style="background-color: #28a745;">Exportar para Excel (.xlsx)</button>
  
  <h3>Itens Digitados</h3>
  <table class="table-preview" id="itensTable">
@@ -146,57 +128,48 @@
  <th>Código</th>
  <th>Descrição</th>
  <th>Qtd</th>
+ <th>Emb.</th>
+ <th>Validade</th>
+ <th>Valor</th>
  </tr>
  </thead>
  <tbody>
- <!-- Os itens digitados aparecem aqui -->
+ <!-- Os itens serão inseridos aqui -->
  </tbody>
  </table>
 </div>
 
 <script>
- let templateWorkbook = null;
  const itens = [];
 
- // Leitura da planilha modelo enviada pelo usuário ao abrir o app
- document.getElementById('excelFile').addEventListener('change', function(e) {
- const file = e.target.files[0];
- if (!file) return;
-
- const reader = new FileReader();
- reader.onload = function(evt) {
- const data = new Uint8Array(evt.target.result);
- templateWorkbook = XLSX.read(data, { type: 'array' });
- alert('Planilha modelo carregada com sucesso! Agora pode lançar os produtos.');
- };
- reader.readAsArrayBuffer(file);
- });
-
  function adicionarItem() {
- const codigo = document.getElementById('codigo').value.trim();
- const descricao = document.getElementById('descricao').value.trim();
+ const lojaInput = document.getElementById('loja').value.trim();
+ const loja = lojaInput !== "" ? lojaInput : "Patitiba"; // Garante Patitiba se alterado ou vazio
+ const codigo = document.getElementById('codigo').value;
+ const descricao = document.getElementById('descricao').value;
  const qtd = document.getElementById('qtd').value;
  const unidade = document.getElementById('unidade').value;
- const validade = document.getElementById('validade').value.trim();
- const valor = parseFloat(document.getElementById('valor').value || 0);
+ const validade = document.getElementById('validade').value;
+ const valor = parseFloat(document.getElementById('valor').value || 0).toFixed(2);
  
  if (!codigo || !descricao || !qtd) {
- alert('Preencha o Código, a Descrição e a Quantidade!');
+ alert('Preencha os campos obrigatórios!');
  return;
  }
  
- itens.push({
+ const itemObj = {
  itemNum: itens.length + 1,
- comprador: '', // Em branco conforme solicitado
- loja: 'PATITIBA', // Sempre Patitiba
- codigo: codigo,
- descricao: descricao,
- qtd: Number(qtd),
- unidade: unidade,
- validade: validade,
- valor: valor
- });
+ comprador: '', // Mantido em branco na Coluna B
+ loja: loja,          // Na Coluna C (Patitiba)
+ codigo: codigo,      // Na Coluna D (Código do Produto)
+ descricao: descricao,// Na Coluna E (Descrição)
+ qtd: Number(qtd),    // Na Coluna F (Qtd)
+ unidade: unidade,    // Na Coluna G (Unidade)
+ validade: validade,  // Na Coluna H (Validade/Data)
+ valor: Number(valor) // Na Coluna I (Valor)
+ };
  
+ itens.push(itemObj);
  atualizarTabela();
  limparCampos();
  }
@@ -213,6 +186,9 @@
  <td>${item.codigo}</td>
  <td>${item.descricao}</td>
  <td>${item.qtd}</td>
+ <td>${item.unidade}</td>
+ <td>${item.validade}</td>
+ <td>R$ ${item.valor.toFixed(2)}</td>
  `;
  tbody.appendChild(tr);
  });
@@ -226,57 +202,54 @@
  document.getElementById('codigo').focus();
  }
 
- function salvarNaPlanilhaModelo() {
+ function exportarExcel() {
  if (itens.length === 0) {
- alert('Adicione pelo menos um item antes de salvar!');
+ alert('Nenhum item para exportar!');
  return;
  }
-
- if (!templateWorkbook) {
- alert('Por favor, selecione a planilha modelo (.xlsx) no botão superior antes de salvar!');
- return;
- }
-
- // Pega a primeira aba da planilha modelo
- const firstSheetName = templateWorkbook.SheetNames[0];
- const worksheet = templateWorkbook.Sheets[firstSheetName];
-
- // A tabela começa na linha 7 (índice 6 em JavaScript, pois começa do 0)
- // Mapeamento correto das colunas baseado na sua estrutura:
- // Coluna A (0) = Número do item (1, 2, 3...)
- // Coluna B (1) = Comprador (fica em branco)
- // Coluna C (2) = Loja ("PATITIBA")
- // Coluna D (3) = Código do Produto (Código de Barras)
- // Coluna E (4) = Descrição do produto
- // Coluna F (5) = Quantidade no Estoque
- // Coluna G (6) = Unidade / Caixa / Fardo
- // Coluna H (7) = Data de Validade
- // Coluna I (8) = Valor Unitário
-
+ 
+ const ws_data = [];
+ 
+ // Estrutura exata do cabeçalho original nas primeiras linhas
+ ws_data[0] = []; 
+ ws_data[1] = ['', '', '', '', '', '', '666', 'und', '0']; 
+ ws_data[2] = ['', '', '', '', '', '', 'Gerente / Avaliação', ''];
+ ws_data[3] = ['', '', '', '', '', '', 'Data', new Date().toLocaleDateString('pt-BR')];
+ ws_data[4] = ['', '', '', '', '', '', 'Quem Digitou?', ''];
+  
+ // Linha 6 (índice 5): Cabeçalhos da tabela principal
+ ws_data[5] = [
+ '', 
+ 'Comprador', 
+ 'Loja', 
+ 'Código do Produto', 
+ 'Descrição do produto', 
+ 'Quantidade no Estoque', 
+ 'Unidade / Caixa / Fardo', 
+ 'Data de Validade', 
+ 'Valor Unitário'
+ ];
+ 
+ // Inserção correta dos dados a partir da linha 7 em diante (índice 6+)
  itens.forEach((item, index) => {
- const rowIndex = 6 + index; // Linha 7 do Excel é o índice 6
-
- worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 0})] = { t: 'n', v: item.itemNum };
- worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 1})] = { t: 's', v: item.comprador }; // Branco
- worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 2})] = { t: 's', v: item.loja };     // PATITIBA
- worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 3})] = { t: 's', v: item.codigo };   // Código de barras
- worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 4})] = { t: 's', v: item.descricao };// Descrição
- worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 5})] = { t: 'n', v: item.qtd };      // Qtd
- worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 6})] = { t: 's', v: item.unidade };  // Unidade
- worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 7})] = { t: 's', v: item.validade }; // Data
- worksheet[XLSX.utils.encode_cell({r: rowIndex, c: 8})] = { t: 'n', v: item.valor };    // Valor
+ ws_data[6 + index] = [
+ item.itemNum,       // Coluna A (0): Número do item
+ item.comprador,     // Coluna B (1): Em branco
+ item.loja,          // Coluna C (2): Patitiba
+ item.codigo,        // Coluna D (3): Código do Produto
+ item.descricao,     // Coluna E (4): Descrição do Produto
+ item.qtd,           // Coluna F (5): Quantidade
+ item.unidade,       // Coluna G (6): Unidade
+ item.validade,      // Coluna H (7): Validade
+ item.valor          // Coluna I (8): Valor Unitário
+ ];
  });
-
- // Atualiza o intervalo total da planilha para garantir que todas as linhas apareçam
- const range = XLSX.utils.decode_range(worksheet['!ref']);
- if (range.e.r < 6 + itens.length - 1) {
- range.e.r = 6 + itens.length - 1;
- worksheet['!ref'] = XLSX.utils.encode_range(range);
- }
-
- // Baixa o arquivo preenchido mantendo a formatação original da rede
- XLSX.writeFile(templateWorkbook, "Pro_Ativo_Patitiba_Preenchido.xlsx");
- alert('Planilha salva e baixada com sucesso nas linhas e colunas corretas!');
+ 
+ const ws = XLSX.utils.aoa_to_sheet(ws_data);
+ const wb = XLSX.utils.book_new();
+ XLSX.utils.book_append_sheet(wb, ws, "Pró Ativo Frios");
+ 
+ XLSX.writeFile(wb, "Pro_Ativo_Patitiba.xlsx");
  }
 </script>
 
