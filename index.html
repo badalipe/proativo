@@ -3,107 +3,144 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coletor Pró Ativo - Rede Market</title>
+  <title>Coletor de Dados - Rede Market</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 15px; background: #f4f4f9; }
-    .card { background: #fff; padding: 15px; border-radius: 8px; max-width: 500px; margin: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .form-group { margin-bottom: 10px; }
-    label { font-weight: bold; display: block; margin-bottom: 3px; font-size: 14px; }
-    input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-    button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 5px; }
-    button.export { background: #28a745; margin-top: 10px; }
-    .file-input-wrapper { background: #e9ecef; border: 1px dashed #6c757d; padding: 10px; border-radius: 4px; text-align: center; margin-bottom: 15px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
-    th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
-    th { background: #eee; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f9;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .table-preview {
+      margin-top: 20px;
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .table-preview th, .table-preview td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    .table-preview th {
+      background-color: #f2f2f2;
+    }
   </style>
+  <!-- Biblioteca para exportar diretamente para Excel (XLSX) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
-<div class="card">
-  <h3>Coletor de Dados - Pró Ativo</h3>
+<div class="container">
+  <h2>Lançamento de Estoque</h2>
+  
+  <form id="stockForm">
+    <div class="form-group">
+      <label for="loja">Loja</label>
+      <input type="text" id="loja" value="PATITIBA" required>
+    </div>
 
-  <!-- PASSO 1: Selecionar a Planilha Modelo -->
-  <div class="file-input-wrapper">
-    <label for="excelFile">1º Selecione o modelo (.xlsx):</label>
-    <input type="file" id="excelFile" accept=".xlsx, .xls">
-  </div>
+    <div class="form-group">
+      <label for="codigo">Código do Produto</label>
+      <input type="text" id="codigo" placeholder="7896336006778" required>
+    </div>
 
-  <!-- PASSO 2: Formulário de Entrada -->
-  <div class="form-group">
-    <label>Loja</label>
-    <input type="text" id="loja" value="PATITIBA">
-  </div>
+    <div class="form-group">
+      <label for="descricao">Descrição do Produto</label>
+      <input type="text" id="descricao" placeholder="Nome do produto" required>
+    </div>
 
-  <div class="form-group">
-    <label>Código do Produto</label>
-    <input type="text" id="codigo" placeholder="Bip/Digite o código" autofocus>
-  </div>
+    <div class="form-group">
+      <label for="qtd">Quantidade no Estoque</label>
+      <input type="number" id="qtd" step="any" required>
+    </div>
 
-  <div class="form-group">
-    <label>Descrição do Produto</label>
-    <input type="text" id="descricao" placeholder="Nome do produto">
-  </div>
+    <div class="form-group">
+      <label for="unidade">Unidade / Caixa / Fardo</label>
+      <select id="unidade">
+        <option value="und">und</option>
+        <option value="cx">cx</option>
+        <option value="fd">fd</option>
+        <option value="kg">kg</option>
+      </select>
+    </div>
 
-  <div class="form-group">
-    <label>Qtd no Estoque</label>
-    <input type="number" id="qtd" step="any">
-  </div>
+    <div class="form-group">
+      <label for="validade">Data de Validade</label>
+      <input type="text" id="validade" placeholder="DD/MM/AAAA">
+    </div>
 
-  <div class="form-group">
-    <label>Unidade / Caixa / Fardo</label>
-    <select id="unidade">
-      <option value="und">und</option>
-      <option value="cx">cx</option>
-      <option value="fd">fd</option>
-      <option value="kg">kg</option>
-    </select>
-  </div>
+    <div class="form-group">
+      <label for="valor">Valor Unitário (R$)</label>
+      <input type="number" id="valor" step="0.01" value="0.00">
+    </div>
 
-  <div class="form-group">
-    <label>Data de Validade</label>
-    <input type="text" id="validade" placeholder="DD/MM/AAAA">
-  </div>
+    <button type="button" onclick="adicionarItem()">Adicionar à Lista</button>
+  </form>
 
-  <div class="form-group">
-    <label>Valor Unitário (R$)</label>
-    <input type="number" id="valor" step="0.01" value="0.00">
-  </div>
+  <br>
+  <button type="button" onclick="exportarExcel()" style="background-color: #28a745;">Exportar para Excel (.xlsx)</button>
 
-  <button type="button" onclick="adicionarItem()">Adicionar Item</button>
-  <button type="button" class="export" onclick="salvarNaPlanilha()">2º Salvar na Planilha</button>
-
-  <table>
+  <h3>Itens Digitados</h3>
+  <table class="table-preview" id="itensTable">
     <thead>
       <tr>
-        <th>Nº</th>
+        <th>Item</th>
+        <th>Loja</th>
         <th>Código</th>
         <th>Descrição</th>
         <th>Qtd</th>
+        <th>Emb.</th>
+        <th>Validade</th>
+        <th>Valor</th>
       </tr>
     </thead>
-    <tbody id="listaCorpo"></tbody>
+    <tbody>
+      <!-- Os itens serão inseridos aqui -->
+    </tbody>
   </table>
 </div>
 
 <script>
-  let templateWorkbook = null;
-  const listaItens = [];
-
-  // Leitura da planilha modelo enviada pelo usuário
-  document.getElementById('excelFile').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-      const data = new Uint8Array(evt.target.result);
-      templateWorkbook = XLSX.read(data, { type: 'array' });
-      alert('Planilha modelo carregada com sucesso!');
-    };
-    reader.readAsArrayBuffer(file);
-  });
+  const itens = [];
 
   function adicionarItem() {
     const loja = document.getElementById('loja').value;
@@ -112,15 +149,15 @@
     const qtd = document.getElementById('qtd').value;
     const unidade = document.getElementById('unidade').value;
     const validade = document.getElementById('validade').value;
-    const valor = parseFloat(document.getElementById('valor').value || 0);
+    const valor = parseFloat(document.getElementById('valor').value || 0).toFixed(2);
 
-    if (!codigo || !qtd) {
-      alert('Preencha pelo menos o Código e a Quantidade!');
+    if (!codigo || !descricao || !qtd) {
+      alert('Preencha os campos obrigatórios!');
       return;
     }
 
-    listaItens.push({
-      itemNum: listaItens.length + 1,
+    const itemObj = {
+      itemNum: itens.length + 1,
       comprador: '',
       loja: loja,
       codigo: codigo,
@@ -128,23 +165,31 @@
       qtd: Number(qtd),
       unidade: unidade,
       validade: validade,
-      valor: valor
-    });
+      valor: Number(valor)
+    };
 
-    renderTabela();
+    itens.push(itemObj);
+    atualizarTabela();
     limparCampos();
   }
 
-  function renderTabela() {
-    const tbody = document.getElementById('listaCorpo');
+  function atualizarTabela() {
+    const tbody = document.querySelector('#itensTable tbody');
     tbody.innerHTML = '';
-    listaItens.forEach(item => {
-      tbody.innerHTML += `<tr>
+
+    itens.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
         <td>${item.itemNum}</td>
+        <td>${item.loja}</td>
         <td>${item.codigo}</td>
         <td>${item.descricao}</td>
         <td>${item.qtd}</td>
-      </tr>`;
+        <td>${item.unidade}</td>
+        <td>${item.validade}</td>
+        <td>R$ ${item.valor.toFixed(2)}</td>
+      `;
+      tbody.appendChild(tr);
     });
   }
 
@@ -155,40 +200,57 @@
     document.getElementById('codigo').focus();
   }
 
-  function salvarNaPlanilha() {
-    if (listaItens.length === 0) {
-      alert('Adicione itens antes de salvar!');
+  function exportarExcel() {
+    if (itens.length === 0) {
+      alert('Nenhum item para exportar!');
       return;
     }
 
-    if (!templateWorkbook) {
-      alert('Selecione o arquivo modelo (.xlsx) no topo da tela antes de salvar!');
-      return;
-    }
+    // Criar uma nova planilha zerada
+    const ws_data = [];
 
-    // Pega a primeira aba da planilha modelo
-    const sheetName = templateWorkbook.SheetNames[0];
-    const worksheet = templateWorkbook.Sheets[sheetName];
+    // Linhas de cabeçalho (Linhas 1 a 5 da planilha padrão)
+    ws_data[0] = []; 
+    ws_data[1] = ['', '', '', '', '', '', '666', 'und', '0']; // Cabeçalho fixo topo
+    ws_data[2] = ['', '', '', '', '', '', 'Gerente / Avaliação', ''];
+    ws_data[3] = ['', '', '', '', '', '', 'Data', '16/09/2026'];
+    ws_data[4] = ['', '', '', '', '', '', 'Quem Digitou?', ''];
+    
+    // Cabeçalho da tabela principal na Linha 6 (Índice 5 do array)
+    ws_data[5] = [
+      '', 
+      'Comprador', 
+      'Loja', 
+      'Código de Produto', 
+      'Descrição do produto', 
+      'Quantidade no Estoque', 
+      'Unidade / Caixa / Fardo', 
+      'Data de Validade', 
+      'Valor Unitário'
+    ];
 
-    // Mapeamento correto a partir da Linha 7 da imagem
-    listaItens.forEach((item, index) => {
-      const rowIndex = 7 + index; // Linha 7 em diante (7, 8, 9...)
-
-      XLSX.utils.sheet_add_aoa(worksheet, [[
-        item.itemNum,   // Coluna A (Índice / Item)
-        item.comprador, // Coluna B (Comprador)
-        item.loja,      // Coluna C (Loja - PATITIBA)
-        item.codigo,    // Coluna D (Código de Produto)
-        item.descricao, // Coluna E (Descrição)
-        item.qtd,       // Coluna F (Quantidade no Estoque)
-        item.unidade,   // Coluna G (Unidade / Caixa / Fardo)
-        item.validade,  // Coluna H (Data de Validade)
-        item.valor      // Coluna I (Valor Unitário)
-      ]], { origin: `A${rowIndex}` });
+    // Popula a partir da Linha 7 (Índice 6 do array)
+    itens.forEach((item, index) => {
+      ws_data[6 + index] = [
+        item.itemNum,    // Coluna A
+        item.comprador,  // Coluna B
+        item.loja,       // Coluna C (PATITIBA)
+        item.codigo,     // Coluna D (Código do Produto)
+        item.descricao,  // Coluna E (Descrição)
+        item.qtd,        // Coluna F (Quantidade no Estoque)
+        item.unidade,    // Coluna G (Unidade/Caixa/Fardo)
+        item.validade,   // Coluna H (Data de Validade)
+        item.valor       // Coluna I (Valor Unitário)
+      ];
     });
 
-    // Gera o download do arquivo preenchido
-    XLSX.writeFile(templateWorkbook, "Pro_Ativo_Frios_Preenchido.xlsx");
+    // Cria a folha de trabalho e o arquivo Excel
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Pró Ativo Frios");
+
+    // Baixa o arquivo formatado corretamente
+    XLSX.writeFile(wb, "Pro_Ativo_Frios_Atualizado.xlsx");
   }
 </script>
 
