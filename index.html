@@ -80,6 +80,197 @@
 <div class="container">
  <h2>Lançamento de Estoque</h2>
   
+ <!-- Seleção obrigatória da planilha modelo oficial da rede -->
+ <div class="file-box">
+ <label for="excelFile" style="cursor: pointer; color: #0056b3;">📁 <strong>1º Selecione sua planilha modelo (.xlsx)</strong></label>
+ <input type="file" id="excelFile" accept=".xlsx, .xls" style="margin-top: 8px;">
+ </div>
+
+<form id="stockForm">
+ <div class="form-group">
+ <label for="loja">Loja</label>
+ <input type="text" id="loja" value="Patitiba" required>
+ </div>
+ 
+ <div class="form-group">
+ <label for="codigo">Código do Produto</label>
+ <input type="text" id="codigo" placeholder="7896336006778" required>
+ </div>
+ 
+ <div class="form-group">
+ <label for="descricao">Descrição do Produto</label>
+ <input type="text" id="descricao" placeholder="Nome do produto" required>
+ </div>
+ 
+ <div class="form-group">
+ <label for="qtd">Quantidade no Estoque</label>
+ <input type="number" id="qtd" step="any" required>
+ </div>
+ 
+ <div class="form-group">
+ <label for="unidade">Unidade / Caixa / Fardo</label>
+ <select id="unidade">
+ <option value="und">und</option>
+ <option value="cx">cx</option>
+ <option value="fd">fd</option>
+ <option value="kg">kg</option>
+ </select>
+ </div>
+ 
+ <div class="form-group">
+ <label for="validade">Data de Validade</label>
+ <input type="text" id="validade" placeholder="DD/MM/AAAA">
+ </div>
+ 
+ <div class="form-group">
+ <label for="valor">Valor Unitário (R$)</label>
+ <input type="number" id="valor" step="0.01" value="0.00">
+ </div>
+ 
+ <button type="button" onclick="adicionarItem()">Adicionar à Lista</button>
+ </form>
+ 
+ <br>
+ <button type="button" onclick="exportarExcel()" style="background-color: #28a745;">💾 2º Salvar na Planilha (.xlsx)</button>
+ 
+ <h3>Itens Digitados</h3>
+ <table class="table-preview" id="itensTable">
+ <thead>
+ <tr>
+ <th>Item</th>
+ <th>Loja</th>
+ <th>Código</th>
+ <th>Descrição</th>
+ <th>Qtd</th>
+ <th>Emb.</th>
+ <th>Validade</th>
+ <th>Valor</th>
+ </tr>
+ </thead>
+ <tbody>
+ <!-- Os itens serão inseridos aqui -->
+ </tbody>
+ </table>
+</div>
+
+<script>
+ let templateWorkbook = null;
+ const itens = [];
+
+ // Carrega a planilha modelo selecionada pelo usuário
+ document.getElementById('excelFile').addEventListener('change', function(e) {
+ const file = e.target.files[0];
+ if (!file) return;
+
+ const reader = new FileReader();
+ reader.onload = function(evt) {
+ const data = new Uint8Array(evt.target.result);
+ templateWorkbook = XLSX.read(data, { type: 'array' });
+ alert('Planilha modelo carregada com sucesso!');
+ };
+ reader.readAsArrayBuffer(file);
+ });
+
+ function adicionarItem() {
+ const lojaInput = document.getElementById('loja').value.trim();
+ const loja = lojaInput !== "" ? lojaInput : "Patitiba";
+ const codigo = document.getElementById('codigo').value;
+ const descricao = document.getElementById('descricao').value;
+ const qtd = document.getElementById('qtd').value;
+ const unidade = document.getElementById('unidade').value;
+ const validade = document.getElementById('validade').value;
+ const valor = parseFloat(document.getElementById('valor').value || 0).toFixed(2);
+ 
+ if (!codigo || !descricao || !qtd) {
+ alert('Preencha os campos obrigatórios!');
+ return;
+ }
+ 
+ const itemObj = {
+ itemNum: itens.length + 1,
+ comprador: '', // Coluna B: em branco
+ loja: loja,          // Coluna C: Patitiba
+ codigo: codigo,      // Coluna D: Código do Produto
+ descricao: descricao,// Coluna E: Descrição do produto
+ qtd: Number(qtd),    // Coluna F: Quantidade no Estoque
+ unidade: unidade,    // Coluna G: Unidade / Caixa / Fardo
+ validade: validade,  // Coluna H: Data de Validade
+ valor: Number(valor) // Coluna I: Valor Unitário
+ };
+ 
+ itens.push(itemObj);
+ atualizarTabela();
+ limparCampos();
+ }
+
+ function atualizarTabela() {
+ const tbody = document.querySelector('#itensTable tbody');
+ tbody.innerHTML = '';
+ 
+ itens.forEach(item => {
+ const tr = document.createElement('tr');
+ tr.innerHTML = `
+ <td>${item.itemNum}</td>
+ <td>${item.loja}</td>
+ <td>${item.codigo}</td>
+ <td>${item.descricao}</td>
+ <td>${item.qtd}</td>
+ <td>${item.unidade}</td>
+ <td>${item.validade}</td>
+ <td>R$ ${item.valor.toFixed(2)}</td>
+ `;
+ tbody.appendChild(tr);
+ });
+ }
+
+ function limparCampos() {
+ document.getElementById('codigo').value = '';
+ document.getElementById('descricao').value = '';
+ document.getElementById('qtd').value = '';
+ document.getElementById('validade').value = '';
+ document.getElementById('codigo').focus();
+ }
+
+ function exportarExcel() {
+ if (itens.length === 0) {
+ alert('Nenhum item para exportar!');
+ return;
+ }
+
+ if (!templateWorkbook) {
+ alert('Por favor, selecione primeiro a sua planilha modelo (.xlsx) no botão cinza acima!');
+ return;
+ }
+
+ const firstSheetName = templateWorkbook.SheetNames[0];
+ const ws = templateWorkbook.Sheets[firstSheetName];
+
+ // Inserção cirúrgica respeitando a estrutura exata da rede:
+ // A Coluna A (índice 0) já tem os números 1 a 30 da planilha modelo, então não mexemos nela.
+ // Começamos a preencher a partir da Coluna B (índice 1) até a Coluna I (índice 8).
+ itens.forEach((item, index) => {
+ const rowIndex = 6 + index; // Linha 7 do Excel (índice 6)
+
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 1})] = { t: 's', v: item.comprador }; // Coluna B: Comprador (Vazio)
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 2})] = { t: 's', v: item.loja };     // Coluna C: Loja (Patitiba)
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 3})] = { t: 's', v: item.codigo };   // Coluna D: Código do Produto
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 4})] = { t: 's', v: item.descricao };// Coluna E: Descrição do produto
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 5})] = { t: 'n', v: item.qtd };      // Coluna F: Quantidade no Estoque
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 6})] = { t: 's', v: item.unidade };  // Coluna G: Unidade / Caixa / Fardo
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 7})] = { t: 's', v: item.validade }; // Coluna H: Data de Validade
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 8})] = { t: 'n', v: item.valor };    // Coluna I: Valor Unitário
+ });
+
+ XLSX.writeFile(templateWorkbook, "Pro_Ativo_Patitiba_Preenchido.xlsx");
+ alert('Planilha preenchida e salva com sucesso nas colunas corretas!');
+ }
+</script>
+
+</body>
+</html>
+<div class="container">
+ <h2>Lançamento de Estoque</h2>
+  
  <!-- Seleção da planilha modelo oficial -->
  <div class="file-box">
  <label for="excelFile" style="cursor: pointer; color: #0056b3;">📁 <strong>1º Selecione sua planilha modelo (.xlsx)</strong></label>
