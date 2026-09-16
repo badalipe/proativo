@@ -1006,36 +1006,67 @@
 
         sheet.name(nomeModulo);
 
-        const headers = modulo === 'trocas' 
-          ? ["Código", "Descrição", "Qtd", "Unidade", "Validade", "Motivo", "Valor Unit.", "Total"]
-          : ["Código", "Descrição", "Qtd", "Unidade", "Validade", "Valor Unit.", "Total"];
+        if (modulo === 'proativo') {
+          // CAPTURA DOS DADOS DO CABEÇALHO (MENU PROATIVO)
+          const digitou = el('pro_digitou').value.trim();
+          const gerente = el('pro_gerente').value.trim();
+          const comprador = el('pro_comprador').value.trim();
+          const dataLev = el('pro_data').value;
+          const dataFmt = dataLev ? dataLev.split('-').reverse().join('/') : '';
 
-        headers.forEach((h, idx) => {
-          const col = String.fromCharCode(65 + idx);
-          const cell = sheet.cell(`${col}3`);
-          cell.value(h);
-          cell.style({ bold: true, fill: "0066b2", fontColor: "ffffff" });
-        });
+          // ESCREVE OS DADOS DO CABEÇALHO NAS LINHAS 1 E 2
+          sheet.cell("A1").value("Quem Digitou: " + digitou).style({ bold: true });
+          sheet.cell("C1").value("Gerente: " + gerente).style({ bold: true });
+          sheet.cell("A2").value("Comprador: " + comprador).style({ bold: true });
+          sheet.cell("C2").value("Data Levantamento: " + dataFmt).style({ bold: true });
 
-        listaData.forEach((item, index) => {
-          const row = 4 + index;
-          const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
+          // CABEÇALHO DA TABELA
+          const headers = ["Código", "Descrição", "Qtd", "Unidade", "Validade", "Valor Unit.", "Total"];
+          headers.forEach((h, idx) => {
+            const col = String.fromCharCode(65 + idx);
+            const cell = sheet.cell(`${col}4`);
+            cell.value(h);
+            cell.style({ bold: true, fill: "0066b2", fontColor: "ffffff" });
+          });
 
-          sheet.cell(`A${row}`).value(item.codigo);
-          sheet.cell(`B${row}`).value(item.descricao);
-          sheet.cell(`C${row}`).value(item.quantidade);
-          sheet.cell(`D${row}`).value(item.unidade);
-          sheet.cell(`E${row}`).value(dataFmt);
+          // INSERÇÃO DOS ITENS A PARTIR DA LINHA 5
+          listaData.forEach((item, index) => {
+            const row = 5 + index;
+            const valFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
 
-          if (modulo === 'trocas') {
-            sheet.cell(`F${row}`).value(item.motivo); // Salva obrigatoriamente 1 ou 2
-            sheet.cell(`G${row}`).value(item.valor);
-            sheet.cell(`H${row}`).value(item.total);
-          } else {
+            sheet.cell(`A${row}`).value(item.codigo);
+            sheet.cell(`B${row}`).value(item.descricao);
+            sheet.cell(`C${row}`).value(item.quantidade);
+            sheet.cell(`D${row}`).value(item.unidade);
+            sheet.cell(`E${row}`).value(valFmt);
             sheet.cell(`F${row}`).value(item.valor);
             sheet.cell(`G${row}`).value(item.total);
-          }
-        });
+          });
+
+        } else {
+          // TRATAMENTO PARA O MÓDULO TROCAS
+          const headers = ["Código", "Descrição", "Qtd", "Unidade", "Validade", "Motivo", "Valor Unit.", "Total"];
+          headers.forEach((h, idx) => {
+            const col = String.fromCharCode(65 + idx);
+            const cell = sheet.cell(`${col}3`);
+            cell.value(h);
+            cell.style({ bold: true, fill: "0066b2", fontColor: "ffffff" });
+          });
+
+          listaData.forEach((item, index) => {
+            const row = 4 + index;
+            const valFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
+
+            sheet.cell(`A${row}`).value(item.codigo);
+            sheet.cell(`B${row}`).value(item.descricao);
+            sheet.cell(`C${row}`).value(item.quantidade);
+            sheet.cell(`D${row}`).value(item.unidade);
+            sheet.cell(`E${row}`).value(valFmt);
+            sheet.cell(`F${row}`).value(item.motivo);
+            sheet.cell(`G${row}`).value(item.valor);
+            sheet.cell(`H${row}`).value(item.total);
+          });
+        }
 
         const blob = await workbook.outputAsync();
         const url = window.URL.createObjectURL(blob);
