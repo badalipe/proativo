@@ -1018,12 +1018,13 @@
             const valFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
 
             sheet.cell(`A${row}`).value(index + 1);       // Nº
-            sheet.cell(`B${row}`).value(item.codigo);      // Código
+            sheet.cell(`B${row}`).value(item.codigo);      // Código de Barras
             sheet.cell(`C${row}`).value(item.descricao);   // Descrição
-            sheet.cell(`D${row}`).value(item.quantidade);  // Qtd
-            sheet.cell(`E${row}`).value(item.unidade);     // Unidade
-            sheet.cell(`H${row}`).value(valFmt);           // Data de Validade
-            sheet.cell(`I${row}`).value(item.valor);       // Valor Unitário
+            sheet.cell(`D${row}`).value(item.codigo);      // Código / SKU
+            sheet.cell(`E${row}`).value(valFmt);           // Data de Validade
+            sheet.cell(`F${row}`).value(item.quantidade);  // Quantidade
+            sheet.cell(`G${row}`).value(item.unidade);     // Unidade
+            sheet.cell(`H${row}`).value(item.valor);       // Valor Unitário
           });
 
         } else {
