@@ -573,7 +573,6 @@
             <div class="campo"><label>Conferente / Responsável</label><div class="caixa"><input id="trc_digitou" placeholder="Seu nome"></div></div>
             <div class="campo"><label>Fornecedor</label><div class="caixa"><input id="trc_fornecedor" placeholder="Ex: Ambev, Nestlé"></div></div>
             
-            <!-- CAMPO DE MOTIVO FIXADO EM 1 OU 2 -->
             <div class="campo">
               <label>Motivo da Troca *</label>
               <div class="caixa">
@@ -977,10 +976,6 @@
       }
     }
 
-    function getModeloPlanilha(modulo) {
-      return modulo === 'trocas' ? './PERDAS E TROCA.ods' : './planilha_padrao_original.xlsx';
-    }
-
     // EXPORTAR PLANILHA EXCEL
     async function gerarExcel(modulo) {
       const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
@@ -989,36 +984,39 @@
         return;
       }
 
-      const urlModelo = getModeloPlanilha(modulo);
-
       try {
         let workbook;
+        // Utiliza o modelo .xlsx oficial fornecido no repositório
+        const urlModelo = './planilha_padrao_original.xlsx';
+
         try {
           const response = await fetch(urlModelo);
           const arrayBuffer = await response.arrayBuffer();
           workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
         } catch (e) {
+          // Fallback seguro caso a planilha modelo não seja encontrada
           workbook = await XlsxPopulate.fromBlankAsync();
         }
 
         const sheet = workbook.sheet(0);
         const nomeModulo = modulo === 'proativo' ? "Pró Ativo Frios" : "Relatório de Trocas";
-
         sheet.name(nomeModulo);
 
+        // Preenche o cabeçalho dos dados
         const headers = modulo === 'trocas' 
           ? ["Código", "Descrição", "Qtd", "Unidade", "Validade", "Motivo", "Valor Unit.", "Total"]
           : ["Código", "Descrição", "Qtd", "Unidade", "Validade", "Valor Unit.", "Total"];
 
         headers.forEach((h, idx) => {
           const col = String.fromCharCode(65 + idx);
-          const cell = sheet.cell(`${col}3`);
+          const cell = sheet.cell(`${col}1`);
           cell.value(h);
           cell.style({ bold: true, fill: "0066b2", fontColor: "ffffff" });
         });
 
+        // Insere as linhas coletadas no aplicativo
         listaData.forEach((item, index) => {
-          const row = 4 + index;
+          const row = 2 + index;
           const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
 
           sheet.cell(`A${row}`).value(item.codigo);
@@ -1028,7 +1026,7 @@
           sheet.cell(`E${row}`).value(dataFmt);
 
           if (modulo === 'trocas') {
-            sheet.cell(`F${row}`).value(item.motivo); // Salva obrigatoriamente 1 ou 2
+            sheet.cell(`F${row}`).value(item.motivo); // Motivo 1 (Avaria) ou 2 (Descarte)
             sheet.cell(`G${row}`).value(item.valor);
             sheet.cell(`H${row}`).value(item.total);
           } else {
