@@ -2,387 +2,170 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Gestão - Pró Ativo, Trocas e Perdas</title>
-  
-  <!-- Biblioteca para leitura de Código de Barras via Câmera -->
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <!-- Biblioteca para manipulação do modelo Excel (.xlsx) -->
+  <title>Gerador de Planilha - Pró Ativo Frios</title>
+  <!-- Biblioteca xlsx-populate via CDN -->
   <script src="https://unpkg.com/xlsx-populate/browser/xlsx-populate.min.js"></script>
-
   <style>
-    :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --secondary: #64748b;
-      --danger: #ef4444;
-      --success: #10b981;
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --text: #f8fafc;
-      --border: #334155;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-    body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); color: var(--text); min-height: 100vh; padding: 20px; }
-    .wrap { max-width: 900px; margin: 0 auto; }
-    .hidden { display: none !important; }
-    
-    .card { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); backdrop-filter: blur(10px); }
-    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    
-    .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
-    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #94a3b8; }
-    input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #0f172a; color: white; }
-    input:focus, select:focus { outline: none; border-color: var(--primary); }
-    
-    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
-    button { padding: 12px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-    button.primary { background: var(--primary); color: white; }
-    button.primary:hover { background: var(--primary-hover); }
-    button.secondary { background: var(--secondary); color: white; }
-    button.danger { background: var(--danger); color: white; }
-    button.success { background: var(--success); color: white; }
-    
-    /* Menu dos 3 Botões 3D / Glass */
-    .menu-container { text-align: center; max-width: 750px; margin: 40px auto; }
-    .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px; }
-    .glass-btn {
-      padding: 30px 20px; border: 2px solid rgba(255,255,255,0.2); border-radius: 20px; color: #ffffff; cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s; background: linear-gradient(145deg, rgba(37,99,235,0.8), rgba(30,58,138,0.9));
-      box-shadow: 0 10px 30px rgba(37,99,235,0.4); display: flex; flex-direction: column; align-items: center; gap: 12px; text-decoration: none;
-    }
-    .glass-btn:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 35px rgba(37,99,235,0.6); }
-    .glass-btn .icon { font-size: 36px; }
-    .glass-btn .title { font-size: 20px; font-weight: 800; letter-spacing: 2px; }
-
-    /* Tabela */
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { border: 1px solid var(--border); padding: 12px; text-align: left; font-size: 14px; }
-    th { background-color: #0f172a; color: #94a3b8; }
-    
-    /* Scanner de Câmera */
-    #reader { width: 100%; border-radius: 12px; overflow: hidden; background: #000; margin-bottom: 15px; }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: inline-block; width: 120px; font-weight: bold; }
+    input, select { padding: 5px; width: 200px; }
+    button { padding: 8px 15px; background-color: #007bff; color: white; border: none; cursor: pointer; margin-right: 10px; }
+    button:hover { background-color: #0056b3; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f4f4f4; }
   </style>
 </head>
 <body>
 
-  <div class="wrap">
-    
-    <!-- 1. TELA DE LOGIN -->
-    <div id="login-screen" class="card wrap" style="max-width: 400px; margin-top: 80px;">
-      <h2 style="margin-bottom: 20px; text-align: center;">Acesso ao Sistema</h2>
-      <div>
-        <div style="margin-bottom: 15px;">
-          <label for="usuarioInput">Usuário</label>
-          <input type="text" id="usuarioInput" placeholder="admin ou operador">
-        </div>
-        <div style="margin-bottom: 15px;">
-          <label for="senhaInput">Senha</label>
-          <input type="password" id="senhaInput" placeholder="1234">
-        </div>
-        <p id="loginError" style="color: var(--danger); font-size: 13px; margin-bottom: 10px;" class="hidden">Usuário ou senha inválidos.</p>
-        <button type="button" class="primary" style="width: 100%;" onclick="realizarLogin()">Entrar</button>
-      </div>
-      <div style="margin-top: 20px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; font-size: 12px; color: #94a3b8; text-align: center;">
-        <strong>Credenciais de Teste:</strong><br>
-        Usuário: <code>admin</code> | Senha: <code>1234</code>
-      </div>
-    </div>
+  <h2>Lançamento - Pró Ativo Frios</h2>
 
-    <!-- 2. SEGUNDA TELA: MENU PRINCIPAL COM OS 3 BOTÕES -->
-    <div id="menu-screen" class="card menu-container hidden">
-      <h2>Painel Principal</h2>
-      <p style="color: #94a3b8; margin-top: 5px;">Selecione o módulo desejado:</p>
-      
-      <div class="menu-grid">
-        <button type="button" class="glass-btn" onclick="navegarPara('proativo')">
-          <span class="icon">🚀</span>
-          <span class="title">PRÓATIVO</span>
-        </button>
-
-        <button type="button" class="glass-btn" style="background: linear-gradient(145deg, rgba(79,70,229,0.8), rgba(49,46,129,0.9));" onclick="navegarPara('trocas')">
-          <span class="icon">🔄</span>
-          <span class="title">TROCAS</span>
-        </button>
-
-        <button type="button" class="glass-btn" style="background: linear-gradient(145deg, rgba(225,29,72,0.8), rgba(136,19,55,0.9));" onclick="navegarPara('perdas')">
-          <span class="icon">🗑️</span>
-          <span class="title">PERDAS</span>
-        </button>
-      </div>
-
-      <button type="button" class="danger" style="margin-top: 35px;" onclick="fazerLogout()">Sair do Sistema</button>
-    </div>
-
-    <!-- 3. MÓDULO PRÓ ATIVO COMPLETO COM CÂMERA -->
-    <div id="proativo-container" class="hidden">
-      <div class="card">
-        <div class="card-header">
-          <h2>🚀 Módulo Pró Ativo</h2>
-          <button type="button" class="secondary" onclick="voltarAoMenu()">⬅️ Voltar ao Menu</button>
-        </div>
-
-        <!-- Dados Gerais -->
-        <div class="row">
-          <div>
-            <label for="pro_comprador">Comprador</label>
-            <input type="text" id="pro_comprador" placeholder="Nome do comprador">
-          </div>
-          <div>
-            <label for="pro_digitou">Quem Digitou</label>
-            <input type="text" id="pro_digitou" placeholder="Nome do operador">
-          </div>
-        </div>
-
-        <hr style="border-color: var(--border); margin: 20px 0;">
-
-        <!-- Leitor de Câmera -->
-        <div id="scanner-wrapper" class="hidden">
-          <div id="reader"></div>
-          <button type="button" class="danger" style="width: 100%; margin-bottom: 15px;" onclick="pararCamera()">Fechar Câmera</button>
-        </div>
-
-        <!-- Formulário de Produto -->
-        <div class="row">
-          <div>
-            <label for="pro_codigo">Código de Barras</label>
-            <div style="display: flex; gap: 8px;">
-              <input type="text" id="pro_codigo" placeholder="Bipe ou digite">
-              <button type="button" class="success" onclick="iniciarCamera()" title="Ligar Câmera">📷</button>
-            </div>
-          </div>
-          <div>
-            <label for="pro_descricao">Descrição do Produto</label>
-            <input type="text" id="pro_descricao" placeholder="Nome do produto">
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label for="pro_qtd">Quantidade Estoque</label>
-            <input type="number" id="pro_qtd" value="1" min="1">
-          </div>
-          <div>
-            <label for="pro_unidade">Unidade / Caixa</label>
-            <input type="text" id="pro_unidade" placeholder="Ex: CX, UND, KG">
-          </div>
-          <div>
-            <label for="pro_validade">Data de Validade</label>
-            <input type="date" id="pro_validade">
-          </div>
-          <div>
-            <label for="pro_valor">Valor Unitário (R$)</label>
-            <input type="number" step="0.01" id="pro_valor" placeholder="0.00">
-          </div>
-        </div>
-
-        <div class="actions">
-          <button type="button" class="primary" onclick="adicionarItemProativo()">➕ Adicionar Item</button>
-          <button type="button" class="success" onclick="gerarExcel('proativo')">📊 Gerar Planilha Excel</button>
-        </div>
-      </div>
-
-      <!-- Tabela do Pró Ativo -->
-      <div class="card">
-        <h3>📋 Itens Lançados</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Cód. Barras</th>
-              <th>Descrição</th>
-              <th>Qtd</th>
-              <th>Unid.</th>
-              <th>Validade</th>
-              <th>Valor Unit.</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="proativo-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- 4. MÓDULO DE TROCAS -->
-    <div id="trocas-container" class="hidden">
-      <div class="card">
-        <div class="card-header">
-          <h2>🔄 Módulo de Trocas</h2>
-          <button type="button" class="secondary" onclick="voltarAoMenu()">⬅️ Voltar ao Menu</button>
-        </div>
-        <p style="color: #94a3b8;">Módulo de trocas pronto para uso.</p>
-      </div>
-    </div>
-
-    <!-- 5. MÓDULO DE PERDAS -->
-    <div id="perdas-container" class="hidden">
-      <div class="card">
-        <div class="card-header">
-          <h2>🗑️ Módulo de Perdas</h2>
-          <button type="button" class="secondary" onclick="voltarAoMenu()">⬅️ Voltar ao Menu</button>
-        </div>
-        <p style="color: #94a3b8;">Módulo de perdas em desenvolvimento.</p>
-      </div>
-    </div>
-
+  <div class="form-group">
+    <label for="pro_comprador">Comprador:</label>
+    <input type="text" id="pro_comprador" placeholder="Nome do Comprador">
+  </div>
+  <div class="form-group">
+    <label for="pro_digitou">Quem Digitou:</label>
+    <input type="text" id="pro_digitou" placeholder="Nome do Digitador">
   </div>
 
+  <hr>
+
+  <h3>Adicionar Item</h3>
+  <div class="form-group">
+    <label for="codigo">Código:</label>
+    <input type="text" id="codigo">
+    <label for="descricao">Descrição:</label>
+    <input type="text" id="descricao">
+  </div>
+  <div class="form-group">
+    <label for="quantidade">Qtd Estoque:</label>
+    <input type="number" id="quantidade">
+    <label for="unidade">Unidade/Caixa:</label>
+    <input type="text" id="unidade" placeholder="CX, UND, UN">
+  </div>
+  <div class="form-group">
+    <label for="validade">Data Validade:</label>
+    <input type="date" id="validade">
+    <label for="valor">Valor Unitário:</label>
+    <input type="number" step="0.01" id="valor">
+  </div>
+
+  <button onclick="adicionarItem()">Adicionar À Lista</button>
+  <button onclick="gerarExcel('proativo')">Gerar Excel</button>
+
+  <h3>Itens Adicionados</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Cód</th>
+        <th>Descrição</th>
+        <th>Qtd</th>
+        <th>Unidade</th>
+        <th>Validade</th>
+        <th>Valor Unit.</th>
+      </tr>
+    </thead>
+    <tbody id="tabela_itens"></tbody>
+  </table>
+
   <script>
-    // Dados salvos em memória
-    let itensProAtivo = [];
-    let html5QrCode = null;
+    const itensProAtivo = [];
+    const itensTrocas = [];
 
-    // --- AUTENTICAÇÃO E NAVEGAÇÃO ---
-    function realizarLogin() {
-      const user = document.getElementById('usuarioInput').value.trim().toLowerCase();
-      const pass = document.getElementById('senhaInput').value.trim();
-
-      if ((user === 'admin' || user === 'operador') && pass === '1234') {
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('menu-screen').classList.remove('hidden');
-        document.getElementById('loginError').classList.add('hidden');
-      } else {
-        document.getElementById('loginError').classList.remove('hidden');
-      }
+    function el(id) {
+      return document.getElementById(id);
     }
 
-    function fazerLogout() {
-      esconderTelas();
-      document.getElementById('login-screen').classList.remove('hidden');
-    }
-
-    function esconderTelas() {
-      document.getElementById('login-screen').classList.add('hidden');
-      document.getElementById('menu-screen').classList.add('hidden');
-      document.getElementById('proativo-container').classList.add('hidden');
-      document.getElementById('trocas-container').classList.add('hidden');
-      document.getElementById('perdas-container').classList.add('hidden');
-      pararCamera();
-    }
-
-    function navegarPara(modulo) {
-      esconderTelas();
-      if (modulo === 'proativo') document.getElementById('proativo-container').classList.remove('hidden');
-      if (modulo === 'trocas') document.getElementById('trocas-container').classList.remove('hidden');
-      if (modulo === 'perdas') document.getElementById('perdas-container').classList.remove('hidden');
-    }
-
-    function voltarAoMenu() {
-      esconderTelas();
-      document.getElementById('menu-screen').classList.remove('hidden');
-    }
-
-    // --- CÂMERA / LEITOR DE CÓDIGO DE BARRAS ---
-    function iniciarCamera() {
-      document.getElementById('scanner-wrapper').classList.remove('hidden');
-      html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 150 } },
-        (decodedText) => {
-          document.getElementById('pro_codigo').value = decodedText;
-          pararCamera();
-        },
-        (errorMessage) => { /* buscando... */ }
-      ).catch(err => alert("Erro ao abrir a câmera: " + err));
-    }
-
-    function pararCamera() {
-      if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => {
-          document.getElementById('scanner-wrapper').classList.add('hidden');
-        });
-      } else {
-        document.getElementById('scanner-wrapper').classList.add('hidden');
-      }
-    }
-
-    // --- MÓDULO PRÓ ATIVO (LOGICA) ---
-    function adicionarItemProativo() {
+    function adicionarItem() {
       const item = {
-        codigo: document.getElementById('pro_codigo').value,
-        descricao: document.getElementById('pro_descricao').value,
-        quantidade: document.getElementById('pro_qtd').value,
-        unidade: document.getElementById('pro_unidade').value,
-        validade: document.getElementById('pro_validade').value,
-        valor: document.getElementById('pro_valor').value
+        codigo: el('codigo').value,
+        descricao: el('descricao').value,
+        quantidade: el('quantidade').value,
+        unidade: el('unidade').value,
+        validade: el('validade').value,
+        valor: el('valor').value
       };
 
       if (!item.codigo || !item.descricao) {
-        alert("Preencha o código e a descrição do produto.");
+        alert("Preencha ao menos o Código e a Descrição.");
         return;
       }
 
       itensProAtivo.push(item);
-      atualizarTabelaProativo();
+      atualizarTabela();
 
-      // Limpar campos
-      document.getElementById('pro_codigo').value = '';
-      document.getElementById('pro_descricao').value = '';
-      document.getElementById('pro_qtd').value = '1';
-      document.getElementById('pro_unidade').value = '';
-      document.getElementById('pro_validade').value = '';
-      document.getElementById('pro_valor').value = '';
+      // Limpa os campos de item
+      el('codigo').value = '';
+      el('descricao').value = '';
+      el('quantidade').value = '';
+      el('unidade').value = '';
+      el('validade').value = '';
+      el('valor').value = '';
     }
 
-    function atualizarTabelaProativo() {
-      const tbody = document.getElementById('proativo-tbody');
-      tbody.innerHTML = itensProAtivo.map((item, index) => `
-        <tr>
+    function atualizarTabela() {
+      const tbody = el('tabela_itens');
+      tbody.innerHTML = '';
+      itensProAtivo.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
           <td>${item.codigo}</td>
           <td>${item.descricao}</td>
           <td>${item.quantidade}</td>
           <td>${item.unidade}</td>
-          <td>${item.validade ? item.validade.split('-').reverse().join('/') : ''}</td>
+          <td>${item.validade}</td>
           <td>R$ ${parseFloat(item.valor || 0).toFixed(2)}</td>
-          <td>
-            <button type="button" class="danger" style="padding: 4px 8px;" onclick="removerItem(${index})">🗑️</button>
-          </td>
-        </tr>
-      `).join('');
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
-    function removerItem(index) {
-      itensProAtivo.splice(index, 1);
-      atualizarTabelaProativo();
-    }
-
-    // --- GERAR EXCEL NO MODELO PLANILHA_PADRAO_ORIGINAL.XLSX ---
     async function gerarExcel(modulo) {
-      if (itensProAtivo.length === 0) {
+      const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
+      if (listaData.length === 0) {
         alert("Adicione itens antes de gerar a planilha.");
         return;
       }
 
       try {
-        const response = await fetch('./planilha_padrao_original.xlsx');
-        if (!response.ok) throw new Error("Arquivo 'planilha_padrao_original.xlsx' não encontrado na raiz.");
+        const urlModelo = './planilha_padrao_original.xlsx';
+        const response = await fetch(urlModelo);
+        
+        if (!response.ok) {
+          throw new Error("Arquivo modelo 'planilha_padrao_original.xlsx' não foi encontrado na raiz do projeto.");
+        }
 
         const arrayBuffer = await response.arrayBuffer();
         const workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
         const sheet = workbook.sheet(0);
 
-        const comprador = document.getElementById('pro_comprador').value;
-        const digitou = document.getElementById('pro_digitou').value;
+        const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+        
         const loja = "PATITIBA";
+        const digitou = el(prefix + 'digitou') ? el(prefix + 'digitou').value : "";
+        const comprador = el(prefix + 'comprador') ? el(prefix + 'comprador').value : "";
 
+        // Preenchimento do cabeçalho topo
         try { sheet.cell("H1").value(loja); } catch(e){}
-        try { sheet.cell("H4").value(digitou); } catch(e){}
+        try { sheet.cell("H2").value(digitou); } catch(e){}
 
         const LINHA_INICIAL = 7;
 
-        itensProAtivo.forEach((item, index) => {
-          const r = LINHA_INICIAL + index;
+        listaData.forEach((item, index) => {
+          const row = LINHA_INICIAL + index;
           const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
 
-          sheet.cell(`B${r}`).value(comprador || "");
-          sheet.cell(`C${r}`).value(loja);
-          sheet.cell(`D${r}`).value(String(item.codigo || ""));
-          sheet.cell(`E${r}`).value(String(item.descricao || ""));
-          sheet.cell(`F${r}`).value(Number(item.quantidade) || 0);
-          sheet.cell(`G${r}`).value(String(item.unidade || ""));
-          sheet.cell(`H${r}`).value(dataFmt);
-          sheet.cell(`I${r}`).value(Number(item.valor) || 0);
+          // Inserção por índice de coluna (2 = B, 3 = C, etc.)
+          sheet.row(row).cell(2).value(comprador);              // Coluna B: Comprador
+          sheet.row(row).cell(3).value(loja);                   // Coluna C: Loja
+          sheet.row(row).cell(4).value(String(item.codigo));    // Coluna D: Código do Produto
+          sheet.row(row).cell(5).value(String(item.descricao)); // Coluna E: Descrição do produto
+          sheet.row(row).cell(6).value(Number(item.quantidade));// Coluna F: Quantidade no Estoque
+          sheet.row(row).cell(7).value(String(item.unidade));   // Coluna G: Unidade / Caixa / Fardo
+          sheet.row(row).cell(8).value(dataFmt);                // Coluna H: Data de Validade
+          sheet.row(row).cell(9).value(Number(item.valor));      // Coluna I: Valor Unitário
         });
 
         const blob = await workbook.outputAsync();
