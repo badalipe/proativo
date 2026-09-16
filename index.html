@@ -3,181 +3,166 @@
 <head>
   <meta charset="UTF-8">
   <title>Gerador de Planilha - Pró Ativo Frios</title>
-  <!-- Biblioteca xlsx-populate via CDN -->
-  <script src="https://unpkg.com/xlsx-populate/browser/xlsx-populate.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f6f9; }
+    h1 { color: #0056b3; }
     .form-group { margin-bottom: 15px; }
-    label { display: inline-block; width: 120px; font-weight: bold; }
-    input, select { padding: 5px; width: 200px; }
-    button { padding: 8px 15px; background-color: #007bff; color: white; border: none; cursor: pointer; margin-right: 10px; }
+    label { display: inline-block; width: 140px; font-weight: bold; }
+    input, select { padding: 6px; width: 220px; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 8px 15px; background-color: #007bff; color: white;
+             border: none; cursor: pointer; margin-right: 10px; border-radius: 4px; }
     button:hover { background-color: #0056b3; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f4f4f4; }
+    th { background-color: #007bff; color: white; }
+    #status { margin-top: 15px; font-weight: bold; color: #0056b3; }
   </style>
 </head>
 <body>
-
-  <h2>Lançamento - Pró Ativo Frios</h2>
+  <h1>Cadastro de Produtos - Pró Ativo Frios</h1>
 
   <div class="form-group">
-    <label for="pro_comprador">Comprador:</label>
-    <input type="text" id="pro_comprador" placeholder="Nome do Comprador">
+    <label for="produto">Produto:</label>
+    <input type="text" id="produto">
   </div>
   <div class="form-group">
-    <label for="pro_digitou">Quem Digitou:</label>
-    <input type="text" id="pro_digitou" placeholder="Nome do Digitador">
-  </div>
-
-  <hr>
-
-  <h3>Adicionar Item</h3>
-  <div class="form-group">
-    <label for="codigo">Código:</label>
-    <input type="text" id="codigo">
-    <label for="descricao">Descrição:</label>
-    <input type="text" id="descricao">
-  </div>
-  <div class="form-group">
-    <label for="quantidade">Qtd Estoque:</label>
+    <label for="quantidade">Quantidade:</label>
     <input type="number" id="quantidade">
-    <label for="unidade">Unidade/Caixa:</label>
-    <input type="text" id="unidade" placeholder="CX, UND, UN">
   </div>
   <div class="form-group">
-    <label for="validade">Data Validade:</label>
-    <input type="date" id="validade">
-    <label for="valor">Valor Unitário:</label>
+    <label for="valor">Valor (R$):</label>
     <input type="number" step="0.01" id="valor">
   </div>
+  <div class="form-group">
+    <label for="categoria">Categoria:</label>
+    <select id="categoria">
+      <option value="Congelados">Congelados</option>
+      <option value="Refrigerados">Refrigerados</option>
+      <option value="Embutidos">Embutidos</option>
+    </select>
+  </div>
 
-  <button onclick="adicionarItem()">Adicionar À Lista</button>
-  <button onclick="gerarExcel('proativo')">Gerar Excel</button>
+  <button onclick="adicionarLinha()">Adicionar</button>
+  <button onclick="gerarPlanilha()">Baixar Planilha Preenchida</button>
+  <button onclick="limparTabela()">Limpar</button>
 
-  <h3>Itens Adicionados</h3>
-  <table>
+  <div id="status"></div>
+
+  <table id="tabela">
     <thead>
       <tr>
-        <th>Cód</th>
-        <th>Descrição</th>
-        <th>Qtd</th>
-        <th>Unidade</th>
-        <th>Validade</th>
-        <th>Valor Unit.</th>
+        <th>Produto</th>
+        <th>Quantidade</th>
+        <th>Valor (R$)</th>
+        <th>Categoria</th>
       </tr>
     </thead>
-    <tbody id="tabela_itens"></tbody>
+    <tbody></tbody>
   </table>
 
   <script>
-    const itensProAtivo = [];
-    const itensTrocas = [];
+    const dados = [];
+    const CAMINHO_TEMPLATE = 'planilha_padrao_original.xlsx'; // arquivo no seu repo
+    const NOME_ABA = 'Plan1'; // ⚠️ troque pelo nome da aba do seu template
 
-    function el(id) {
-      return document.getElementById(id);
-    }
+    function adicionarLinha() {
+      const produto    = document.getElementById('produto').value.trim();
+      const quantidade = document.getElementById('quantidade').value;
+      const valor      = document.getElementById('valor').value;
+      const categoria  = document.getElementById('categoria').value;
 
-    function adicionarItem() {
-      const item = {
-        codigo: el('codigo').value,
-        descricao: el('descricao').value,
-        quantidade: el('quantidade').value,
-        unidade: el('unidade').value,
-        validade: el('validade').value,
-        valor: el('valor').value
-      };
-
-      if (!item.codigo || !item.descricao) {
-        alert("Preencha ao menos o Código e a Descrição.");
+      if (!produto || !quantidade || !valor) {
+        alert('Preencha todos os campos!');
         return;
       }
 
-      itensProAtivo.push(item);
-      atualizarTabela();
+      dados.push({
+        Produto: produto,
+        Quantidade: Number(quantidade),
+        'Valor (R$)': Number(valor),
+        Categoria: categoria
+      });
 
-      // Limpa os campos de item
-      el('codigo').value = '';
-      el('descricao').value = '';
-      el('quantidade').value = '';
-      el('unidade').value = '';
-      el('validade').value = '';
-      el('valor').value = '';
+      renderizarTabela();
+      limparCampos();
     }
 
-    function atualizarTabela() {
-      const tbody = el('tabela_itens');
+    function renderizarTabela() {
+      const tbody = document.querySelector('#tabela tbody');
       tbody.innerHTML = '';
-      itensProAtivo.forEach(item => {
+      dados.forEach(d => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${item.codigo}</td>
-          <td>${item.descricao}</td>
-          <td>${item.quantidade}</td>
-          <td>${item.unidade}</td>
-          <td>${item.validade}</td>
-          <td>R$ ${parseFloat(item.valor || 0).toFixed(2)}</td>
-        `;
+          <td>${d.Produto}</td>
+          <td>${d.Quantidade}</td>
+          <td>${d['Valor (R$)'].toFixed(2)}</td>
+          <td>${d.Categoria}</td>`;
         tbody.appendChild(tr);
       });
     }
 
-    async function gerarExcel(modulo) {
-      const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
-      if (listaData.length === 0) {
-        alert("Adicione itens antes de gerar a planilha.");
+    function limparCampos() {
+      document.getElementById('produto').value = '';
+      document.getElementById('quantidade').value = '';
+      document.getElementById('valor').value = '';
+    }
+
+    function limparTabela() {
+      if (dados.length && !confirm('Apagar todos os registros?')) return;
+      dados.length = 0;
+      renderizarTabela();
+    }
+
+    async function gerarPlanilha() {
+      const status = document.getElementById('status');
+
+      if (dados.length === 0) {
+        alert('Nenhum dado para exportar!');
         return;
       }
 
+      status.textContent = 'Carregando modelo...';
+
       try {
-        const urlModelo = './planilha_padrao_original.xlsx';
-        const response = await fetch(urlModelo);
-        
-        if (!response.ok) {
-          throw new Error("Arquivo modelo 'planilha_padrao_original.xlsx' não foi encontrado na raiz do projeto.");
-        }
+        // 1) Baixa o template do próprio GitHub Pages
+        const resp = await fetch(CAMINHO_TEMPLATE);
+        if (!resp.ok) throw new Error('Não foi possível carregar o template.');
+        const arrayBuffer = await resp.arrayBuffer();
 
-        const arrayBuffer = await response.arrayBuffer();
-        const workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
-        const sheet = workbook.sheet(0);
+        // 2) Lê o template com SheetJS
+        const wb = XLSX.read(arrayBuffer, { type: 'array' });
 
-        const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
-        
-        const loja = "PATITIBA";
-        const digitou = el(prefix + 'digitou') ? el(prefix + 'digitou').value : "";
-        const comprador = el(prefix + 'comprador') ? el(prefix + 'comprador').value : "";
+        // 3) Seleciona a aba correta
+        const nomeAba = wb.SheetNames.includes(NOME_ABA)
+          ? NOME_ABA
+          : wb.SheetNames[0];
+        const ws = wb.Sheets[nomeAba];
 
-        // Preenchimento do cabeçalho topo
-        try { sheet.cell("H1").value(loja); } catch(e){}
-        try { sheet.cell("H2").value(digitou); } catch(e){}
-
-        const LINHA_INICIAL = 7;
-
-        listaData.forEach((item, index) => {
-          const row = LINHA_INICIAL + index;
-          const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
-
-          // Inserção por índice de coluna (2 = B, 3 = C, etc.)
-          sheet.row(row).cell(2).value(comprador);              // Coluna B: Comprador
-          sheet.row(row).cell(3).value(loja);                   // Coluna C: Loja
-          sheet.row(row).cell(4).value(String(item.codigo));    // Coluna D: Código do Produto
-          sheet.row(row).cell(5).value(String(item.descricao)); // Coluna E: Descrição do produto
-          sheet.row(row).cell(6).value(Number(item.quantidade));// Coluna F: Quantidade no Estoque
-          sheet.row(row).cell(7).value(String(item.unidade));   // Coluna G: Unidade / Caixa / Fardo
-          sheet.row(row).cell(8).value(dataFmt);                // Coluna H: Data de Validade
-          sheet.row(row).cell(9).value(Number(item.valor));      // Coluna I: Valor Unitário
+        // 4) Preenche a partir da linha 2 (A2, B2, C2, D2...)
+        //    Ajuste conforme o layout do seu template!
+        dados.forEach((d, i) => {
+          const linha = i + 2;
+          ws[`A${linha}`] = { t: 's', v: d.Produto };
+          ws[`B${linha}`] = { t: 'n', v: d.Quantidade };
+          ws[`C${linha}`] = { t: 'n', v: d['Valor (R$)'] };
+          ws[`D${linha}`] = { t: 's', v: d.Categoria };
         });
 
-        const blob = await workbook.outputAsync();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `Pro_Ativo_Frios_${new Date().toISOString().split('T')[0]}.xlsx`;
-        a.click();
-        window.URL.revokeObjectURL(url);
+        // 5) Recalcula o range (para não cortar dados)
+        ws['!ref'] = XLSX.utils.encode_range({
+          s: { r: 0, c: 0 },
+          e: { r: dados.length + 1, c: 3 }
+        });
 
-      } catch (e) {
-        alert("Erro ao exportar Excel: " + e.message);
+        // 6) Baixa
+        const nomeArquivo = `ProAtivoFrios_${new Date().toISOString().slice(0,10)}.xlsx`;
+        XLSX.writeFile(wb, nomeArquivo);
+
+        status.textContent = '✅ Planilha gerada com sucesso!';
+      } catch (err) {
+        console.error(err);
+        status.textContent = '❌ Erro: ' + err.message;
       }
     }
   </script>
