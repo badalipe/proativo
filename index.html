@@ -277,7 +277,7 @@
     /* SCANNER BEEP */
     #beep-scanner-overlay {
       position: fixed; inset: 0; background: #000; z-index: 999999;
-      display: flex; flex-direction: column; justify-content: space-between; animation: overlayFadeIn 0.25s ease;
+      display: flex; flex-direction: column; justify-space-between; animation: overlayFadeIn 0.25s ease;
     }
     @keyframes overlayFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -978,7 +978,7 @@
       return modulo === 'trocas' ? './PERDAS E TROCA.ods' : './planilha_padrao_original.xlsx';
     }
 
-    // EXPORTAR PLANILHA EXCEL
+    // EXPORTAR PLANILHA EXCEL - MAPEAMENTO ATUALIZADO
     async function gerarExcel(modulo) {
       const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
       if (listaData.length === 0) {
@@ -1004,7 +1004,7 @@
         sheet.name(nomeModulo);
 
         if (modulo === 'proativo') {
-          // 1. CABEÇALHO SUPERIOR DIREITO (PATITIBA, GERENTE, DATA)
+          // CABEÇALHO SUPERIOR
           const dataLev = el('pro_data').value;
           const dataFmt = dataLev ? dataLev.split('-').reverse().join('/') : '';
 
@@ -1012,19 +1012,25 @@
           sheet.cell("H2").value(el('pro_gerente').value.trim());
           sheet.cell("H3").value(dataFmt);
 
-          // 2. GRAVAÇÃO DA LISTA DE PRODUTOS NA PARTE BRANCA (A PARTIR DA LINHA 7)
+          // MAPEAMENTO DAS COLUNAS:
+          // Coluna B: Código de Barras (ex: 7899970402807)
+          // Coluna C: Loja ("Patitiba" fixa)
+          // Coluna D: Descrição do Produto
+          // Coluna E: Data de Validade / Unidade
+          // Coluna F: Quantidade
+          // Coluna G: Unidade
+          // Coluna H: Valor Unitário
           listaData.forEach((item, index) => {
-            const row = 7 + index;
+            const row = 1 + index; // Começa na linha 1
             const valFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
 
-            sheet.cell(`A${row}`).value(index + 1);       // Nº
-            sheet.cell(`B${row}`).value(item.codigo);      // Código de Barras
-            sheet.cell(`C${row}`).value(item.descricao);   // Descrição
-            sheet.cell(`D${row}`).value(item.codigo);      // Código / SKU
-            sheet.cell(`E${row}`).value(valFmt);           // Data de Validade
+            sheet.cell(`B${row}`).value(item.codigo);      // Código de barras (789...)
+            sheet.cell(`C${row}`).value("Patitiba");       // Loja FIXA como "Patitiba"
+            sheet.cell(`D${row}`).value(item.descricao);   // Descrição do Produto
+            sheet.cell(`E${row}`).value(valFmt);           // Validade / Unidade
             sheet.cell(`F${row}`).value(item.quantidade);  // Quantidade
             sheet.cell(`G${row}`).value(item.unidade);     // Unidade
-            sheet.cell(`H${row}`).value(item.valor);       // Valor Unitário
+            sheet.cell(`H${row}`).value(item.valor);       // Valor
           });
 
         } else {
