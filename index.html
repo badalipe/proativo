@@ -151,7 +151,7 @@
           </div>
           <div>
             <label for="pro_unidade">Unidade / Caixa</label>
-            <input type="text" id="pro_unidade" placeholder="Ex: CX, UND, KG">
+            <input type="text" id="pro_unidade" placeholder="Ex: CX, UND, KG" value="UND">
           </div>
           <div>
             <label for="pro_validade">Data de Validade</label>
@@ -214,11 +214,26 @@
             <input type="number" id="trc_qtd" value="1" min="1">
           </div>
           <div>
+            <label for="trc_unidade">Unidade</label>
+            <input type="text" id="trc_unidade" value="und" placeholder="und">
+          </div>
+          <div>
+            <label for="trc_validade">Data de Validade</label>
+            <input type="date" id="trc_validade">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
             <label for="trc_motivo">Motivo da Troca</label>
             <select id="trc_motivo">
               <option value="1">1 - Avaria</option>
               <option value="2">2 - Descarte</option>
             </select>
+          </div>
+          <div>
+            <label for="trc_valor">Valor Unitário (R$)</label>
+            <input type="number" step="0.01" id="trc_valor" placeholder="0.00" value="0">
           </div>
         </div>
 
@@ -237,7 +252,10 @@
               <th>Cód. Barras</th>
               <th>Descrição</th>
               <th>Qtd</th>
+              <th>Unid.</th>
+              <th>Validade</th>
               <th>Motivo</th>
+              <th>Valor Unit.</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -341,9 +359,9 @@
         codigo: document.getElementById('pro_codigo').value,
         descricao: document.getElementById('pro_descricao').value,
         quantidade: document.getElementById('pro_qtd').value,
-        unidade: document.getElementById('pro_unidade').value,
+        unidade: document.getElementById('pro_unidade').value || 'UND',
         validade: document.getElementById('pro_validade').value,
-        valor: document.getElementById('pro_valor').value
+        valor: document.getElementById('pro_valor').value || 0
       };
 
       if (!item.codigo || !item.descricao) {
@@ -357,7 +375,7 @@
       document.getElementById('pro_codigo').value = '';
       document.getElementById('pro_descricao').value = '';
       document.getElementById('pro_qtd').value = '1';
-      document.getElementById('pro_unidade').value = '';
+      document.getElementById('pro_unidade').value = 'UND';
       document.getElementById('pro_validade').value = '';
       document.getElementById('pro_valor').value = '';
     }
@@ -390,7 +408,10 @@
         codigo: document.getElementById('trc_codigo').value,
         descricao: document.getElementById('trc_descricao').value,
         quantidade: document.getElementById('trc_qtd').value,
-        motivo: document.getElementById('trc_motivo').value
+        unidade: document.getElementById('trc_unidade').value || 'und',
+        validade: document.getElementById('trc_validade').value,
+        motivo: document.getElementById('trc_motivo').value,
+        valor: document.getElementById('trc_valor').value || 0
       };
 
       if (!item.codigo || !item.descricao) {
@@ -404,6 +425,9 @@
       document.getElementById('trc_codigo').value = '';
       document.getElementById('trc_descricao').value = '';
       document.getElementById('trc_qtd').value = '1';
+      document.getElementById('trc_unidade').value = 'und';
+      document.getElementById('trc_validade').value = '';
+      document.getElementById('trc_valor').value = '0';
     }
 
     function atualizarTabelaTrocas() {
@@ -413,7 +437,10 @@
           <td>${item.codigo}</td>
           <td>${item.descricao}</td>
           <td>${item.quantidade}</td>
+          <td>${item.unidade}</td>
+          <td>${item.validade ? item.validade.split('-').reverse().join('/') : ''}</td>
           <td>${item.motivo === '1' ? '1 - Avaria' : '2 - Descarte'}</td>
+          <td>R$ ${parseFloat(item.valor || 0).toFixed(2)}</td>
           <td>
             <button type="button" class="danger" style="padding: 4px 8px;" onclick="removerItemTroca(${index})">🗑️</button>
           </td>
@@ -436,7 +463,7 @@
       }
 
       try {
-        // Busca o arquivo modelo PERDAS E TROCA.xlsx
+        // Busca o arquivo modelo PERDAS E TROCA.xlsx do repositório
         const response = await fetch('./PERDAS E TROCA.xlsx');
         if (!response.ok) throw new Error("Arquivo 'PERDAS E TROCA.xlsx' não encontrado no servidor.");
 
@@ -444,23 +471,26 @@
         const workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
         const sheet = workbook.sheet(0);
 
-        const LINHA_INICIAL = 7;
+        // Os dados começam na LINHA 4 na planilha "PERDAS E TROCA.xlsx"
+        const LINHA_INICIAL = 4;
 
         listaData.forEach((item, index) => {
           const r = LINHA_INICIAL + index;
-          const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
+          const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
 
           sheet.cell(`A${r}`).value(String(item.codigo || ""));
           sheet.cell(`B${r}`).value(String(item.descricao || ""));
           sheet.cell(`C${r}`).value(Number(item.quantidade) || 0);
+          sheet.cell(`D${r}`).value(String(item.unidade || "und"));
+          sheet.cell(`E${r}`).value(dataFmt);
 
           if (modulo === 'proativo') {
-            sheet.cell(`D${r}`).value(String(item.unidade || ""));
-            sheet.cell(`E${r}`).value(dataFmt);
-            sheet.cell(`F${r}`).value(Number(item.valor) || 0);
+            sheet.cell(`F${r}`).value(0);
+            sheet.cell(`G${r}`).value(Number(item.valor) || 0);
           } else {
-            // Módulo Trocas salva o motivo (1 ou 2)
-            sheet.cell(`D${r}`).value(Number(item.motivo) || 1);
+            // Módulo de Trocas preenche a Coluna F (Motivo: 1 ou 2) e Coluna G (Valor Unit)
+            sheet.cell(`F${r}`).value(Number(item.motivo) || 1);
+            sheet.cell(`G${r}`).value(Number(item.valor) || 0);
           }
         });
 
@@ -468,7 +498,7 @@
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `RELATORIO_${modulo.toUpperCase()}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        a.download = `Relatório_de_Trocas_${new Date().toISOString().split('T')[0]}.xlsx`;
         a.click();
         window.URL.revokeObjectURL(url);
 
