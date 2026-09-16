@@ -976,72 +976,60 @@
       }
     }
 
-    // EXPORTAR PLANILHA EXCEL
+    // EXPORTAR PLANILHA EXCEL DE ACORDO COM O LAYOUT DA IMAGEM
     async function gerarExcel(modulo) {
       const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
       if (listaData.length === 0) {
-        alert("Adicione itens para exportar.");
+        alert("Adicione itens antes de gerar a planilha.");
         return;
       }
 
       try {
-        let workbook;
-        // Utiliza o modelo .xlsx oficial fornecido no repositório
         const urlModelo = './planilha_padrao_original.xlsx';
-
-        try {
-          const response = await fetch(urlModelo);
-          const arrayBuffer = await response.arrayBuffer();
-          workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
-        } catch (e) {
-          // Fallback seguro caso a planilha modelo não seja encontrada
-          workbook = await XlsxPopulate.fromBlankAsync();
+        const response = await fetch(urlModelo);
+        
+        if (!response.ok) {
+          throw new Error("Arquivo modelo 'planilha_padrao_original.xlsx' não foi encontrado na raiz do projeto.");
         }
 
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
         const sheet = workbook.sheet(0);
-        const nomeModulo = modulo === 'proativo' ? "Pró Ativo Frios" : "Relatório de Trocas";
-        sheet.name(nomeModulo);
 
-        // Preenche o cabeçalho dos dados
-        const headers = modulo === 'trocas' 
-          ? ["Código", "Descrição", "Qtd", "Unidade", "Validade", "Motivo", "Valor Unit.", "Total"]
-          : ["Código", "Descrição", "Qtd", "Unidade", "Validade", "Valor Unit.", "Total"];
+        const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+        
+        // 1. Preenche dados do topo da folha
+        const loja = "PATITIBA";
+        const digitou = el(prefix + 'digitou') ? el(prefix + 'digitou').value : "";
 
-        headers.forEach((h, idx) => {
-          const col = String.fromCharCode(65 + idx);
-          const cell = sheet.cell(`${col}1`);
-          cell.value(h);
-          cell.style({ bold: true, fill: "0066b2", fontColor: "ffffff" });
-        });
+        sheet.cell("H1").value(loja);
+        sheet.cell("H2").value(digitou);
 
-        // Insere as linhas coletadas no aplicativo
+        // 2. Mapeamento das colunas conforme o layout original da imagem (Linha 7 em diante)
+        const LINHA_INICIAL = 7;
+
         listaData.forEach((item, index) => {
-          const row = 2 + index;
+          const row = LINHA_INICIAL + index;
           const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
 
-          sheet.cell(`A${row}`).value(item.codigo);
-          sheet.cell(`B${row}`).value(item.descricao);
-          sheet.cell(`C${row}`).value(item.quantidade);
-          sheet.cell(`D${row}`).value(item.unidade);
-          sheet.cell(`E${row}`).value(dataFmt);
-
-          if (modulo === 'trocas') {
-            sheet.cell(`F${row}`).value(item.motivo); // Motivo 1 (Avaria) ou 2 (Descarte)
-            sheet.cell(`G${row}`).value(item.valor);
-            sheet.cell(`H${row}`).value(item.total);
-          } else {
-            sheet.cell(`F${row}`).value(item.valor);
-            sheet.cell(`G${row}`).value(item.total);
-          }
+          sheet.cell(`C${row}`).value(loja);             // Coluna C: Loja
+          sheet.cell(`D${row}`).value(item.codigo);       // Coluna D: Código do Produto
+          sheet.cell(`E${row}`).value(item.descricao);    // Coluna E: Descrição do produto
+          sheet.cell(`F${row}`).value(item.quantidade);   // Coluna F: Quantidade no Estoque
+          sheet.cell(`G${row}`).value(item.unidade);      // Coluna G: Unidade / Caixa / Fardo
+          sheet.cell(`H${row}`).value(dataFmt);          // Coluna H: Data de Validade
+          sheet.cell(`I${row}`).value(item.valor);        // Coluna I: Valor Unitário
         });
 
+        // 3. Download do arquivo preenchido
         const blob = await workbook.outputAsync();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        a.download = `Pro_Ativo_Frios_${new Date().toISOString().split('T')[0]}.xlsx`;
         a.click();
         window.URL.revokeObjectURL(url);
+
       } catch (e) {
         alert("Erro ao exportar Excel: " + e.message);
       }
