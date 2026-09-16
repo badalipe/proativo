@@ -1,39 +1,311 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0f172a">
-  <title>Sistema de Gestão & Botões 3D</title>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Coletor de Dados - Rede Market</title>
+ <style>
+ body {
+ font-family: Arial, sans-serif;
+ margin: 20px;
+ background-color: #f4f4f9;
+ }
+ .container {
+ max-width: 600px;
+ margin: 0 auto;
+ background: #fff;
+ padding: 20px;
+ border-radius: 8px;
+ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+ }
+ h2 {
+ text-align: center;
+ color: #333;
+ }
+ .form-group {
+ margin-bottom: 15px;
+ }
+ label {
+ display: block;
+ margin-bottom: 5px;
+ font-weight: bold;
+ }
+ input, select {
+ width: 100%;
+ padding: 10px;
+ box-sizing: border-box;
+ border: 1px solid #ccc;
+ border-radius: 4px;
+ }
+ button {
+ width: 100%;
+ padding: 12px;
+ background-color: #007bff;
+ color: white;
+ border: none;
+ border-radius: 4px;
+ font-size: 16px;
+ cursor: pointer;
+ }
+ button:hover {
+ background-color: #0056b3;
+ }
+ .file-box {
+ background: #e9ecef;
+ border: 2px dashed #6c757d;
+ padding: 12px;
+ border-radius: 6px;
+ text-align: center;
+ margin-bottom: 15px;
+ }
+ .table-preview {
+ margin-top: 20px;
+ width: 100%;
+ border-collapse: collapse;
+ }
+ .table-preview th, .table-preview td {
+ border: 1px solid #ddd;
+ padding: 8px;
+ text-align: left;
+ }
+ .table-preview th {
+ background-color: #f2f2f2;
+ }
+ </style>
+ <!-- Biblioteca para ler e exportar arquivos Excel (.xlsx) -->
+ <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+ <h2>Lançamento de Estoque</h2>
   
-  <!-- Bibliotecas externas -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+ <!-- Seleção da planilha modelo oficial -->
+ <div class="file-box">
+ <label for="excelFile" style="cursor: pointer; color: #0056b3;">📁 <strong>1º Selecione sua planilha modelo (.xlsx)</strong></label>
+ <input type="file" id="excelFile" accept=".xlsx, .xls" style="margin-top: 8px;">
+ </div>
 
-  <style>
-    :root {
-      --primary: #0066b2;
-      --primary-hover: #004d87;
-      --accent-red: #e30613;
-      --bg-main: #f8fafc;
-      --card-bg: #ffffff;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
-      --accent-green: #10b981;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-    }
+<form id="stockForm">
+ <div class="form-group">
+ <label for="loja">Loja</label>
+ <input type="text" id="loja" value="Patitiba" required>
+ </div>
+ 
+ <div class="form-group">
+ <label for="codigo">Código do Produto</label>
+ <input type="text" id="codigo" placeholder="7896336006778" required>
+ </div>
+ 
+ <div class="form-group">
+ <label for="descricao">Descrição do Produto</label>
+ <input type="text" id="descricao" placeholder="Nome do produto" required>
+ </div>
+ 
+ <div class="form-group">
+ <label for="qtd">Quantidade no Estoque</label>
+ <input type="number" id="qtd" step="any" required>
+ </div>
+ 
+ <div class="form-group">
+ <label for="unidade">Unidade / Caixa / Fardo</label>
+ <select id="unidade">
+ <option value="und">und</option>
+ <option value="cx">cx</option>
+ <option value="fd">fd</option>
+ <option value="kg">kg</option>
+ </select>
+ </div>
+ 
+ <div class="form-group">
+ <label for="validade">Data de Validade</label>
+ <input type="text" id="validade" placeholder="DD/MM/AAAA">
+ </div>
+ 
+ <div class="form-group">
+ <label for="valor">Valor Unitário (R$)</label>
+ <input type="number" id="valor" step="0.01" value="0.00">
+ </div>
+ 
+ <button type="button" onclick="adicionarItem()">Adicionar à Lista</button>
+ </form>
+ 
+ <br>
+ <button type="button" onclick="exportarExcel()" style="background-color: #28a745;">💾 2º Salvar na Planilha (.xlsx)</button>
+ 
+ <h3>Itens Digitados</h3>
+ <table class="table-preview" id="itensTable">
+ <thead>
+ <tr>
+ <th>Item</th>
+ <th>Loja</th>
+ <th>Código</th>
+ <th>Descrição</th>
+ <th>Qtd</th>
+ <th>Emb.</th>
+ <th>Validade</th>
+ <th>Valor</th>
+ </tr>
+ </thead>
+ <tbody>
+ <!-- Os itens serão inseridos aqui -->
+ </tbody>
+ </table>
+</div>
 
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-      -webkit-tap-highlight-color: transparent;
-    }
+<script>
+ let templateWorkbook = null;
+ const itens = [];
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+ // Carrega a planilha modelo selecionada pelo usuário
+ document.getElementById('excelFile').addEventListener('change', function(e) {
+ const file = e.target.files[0];
+ if (!file) return;
+
+ const reader = new FileReader();
+ reader.onload = function(evt) {
+ const data = new Uint8Array(evt.target.result);
+ templateWorkbook = XLSX.read(data, { type: 'array' });
+ alert('Planilha modelo carregada com sucesso!');
+ };
+ reader.readAsArrayBuffer(file);
+ });
+
+ function adicionarItem() {
+ const lojaInput = document.getElementById('loja').value.trim();
+ const loja = lojaInput !== "" ? lojaInput : "Patitiba";
+ const codigo = document.getElementById('codigo').value;
+ const descricao = document.getElementById('descricao').value;
+ const qtd = document.getElementById('qtd').value;
+ const unidade = document.getElementById('unidade').value;
+ const validade = document.getElementById('validade').value;
+ const valor = parseFloat(document.getElementById('valor').value || 0).toFixed(2);
+ 
+ if (!codigo || !descricao || !qtd) {
+ alert('Preencha os campos obrigatórios!');
+ return;
+ }
+ 
+ const itemObj = {
+ itemNum: itens.length + 1,
+ comprador: '', // Mantido em branco na Coluna B
+ loja: loja,          // Na Coluna C (Patitiba)
+ codigo: codigo,      // Na Coluna D (Código do Produto)
+ descricao: descricao,// Na Coluna E (Descrição)
+ qtd: Number(qtd),    // Na Coluna F (Qtd)
+ unidade: unidade,    // Na Coluna G (Unidade)
+ validade: validade,  // Na Coluna H (Validade/Data)
+ valor: Number(valor) // Na Coluna I (Valor)
+ };
+ 
+ itens.push(itemObj);
+ atualizarTabela();
+ limparCampos();
+ }
+
+ function atualizarTabela() {
+ const tbody = document.querySelector('#itensTable tbody');
+ tbody.innerHTML = '';
+ 
+ itens.forEach(item => {
+ const tr = document.createElement('tr');
+ tr.innerHTML = `
+ <td>${item.itemNum}</td>
+ <td>${item.loja}</td>
+ <td>${item.codigo}</td>
+ <td>${item.descricao}</td>
+ <td>${item.qtd}</td>
+ <td>${item.unidade}</td>
+ <td>${item.validade}</td>
+ <td>R$ ${item.valor.toFixed(2)}</td>
+ `;
+ tbody.appendChild(tr);
+ });
+ }
+
+ function limparCampos() {
+ document.getElementById('codigo').value = '';
+ document.getElementById('descricao').value = '';
+ document.getElementById('qtd').value = '';
+ document.getElementById('validade').value = '';
+ document.getElementById('codigo').focus();
+ }
+
+ function exportarExcel() {
+ if (itens.length === 0) {
+ alert('Nenhum item para exportar!');
+ return;
+ }
+
+ // Se o usuário carregou o modelo, preenchemos direto nele preservando a formatação oficial
+ if (templateWorkbook) {
+ const firstSheetName = templateWorkbook.SheetNames[0];
+ const ws = templateWorkbook.Sheets[firstSheetName];
+
+ // Inserção exata respeitando a coluna A (número) e as demais colunas alinhadas
+ itens.forEach((item, index) => {
+ const rowIndex = 6 + index; // Linha 7 do Excel (índice 6)
+
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 0})] = { t: 'n', v: item.itemNum };   // Coluna A: Nº
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 1})] = { t: 's', v: item.comprador }; // Coluna B: Vazio
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 2})] = { t: 's', v: item.loja };     // Coluna C: Patitiba
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 3})] = { t: 's', v: item.codigo };   // Coluna D: Código do Produto
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 4})] = { t: 's', v: item.descricao };// Coluna E: Descrição
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 5})] = { t: 'n', v: item.qtd };      // Coluna F: Quantidade
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 6})] = { t: 's', v: item.unidade };  // Coluna G: Unidade
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 7})] = { t: 's', v: item.validade }; // Coluna H: Validade
+ ws[XLSX.utils.encode_cell({r: rowIndex, c: 8})] = { t: 'n', v: item.valor };    // Coluna I: Valor
+ });
+
+ XLSX.writeFile(templateWorkbook, "Pro_Ativo_Patitiba_Atualizado.xlsx");
+ alert('Planilha preenchida e salva com sucesso!');
+ } else {
+ // Caso não tenha carregado o modelo, gera uma planilha estruturada do zero com as colunas corretas
+ const ws_data = [];
+ ws_data[0] = []; 
+ ws_data[1] = ['', '', '', '', '', '', '666', 'und', '0']; 
+ ws_data[2] = ['', '', '', '', '', '', 'Gerente / Avaliação', ''];
+ ws_data[3] = ['', '', '', '', '', '', 'Data', new Date().toLocaleDateString('pt-BR')];
+ ws_data[4] = ['', '', '', '', '', '', 'Quem Digitou?', ''];
+  
+ ws_data[5] = [
+ '', 
+ 'Comprador', 
+ 'Loja', 
+ 'Código do Produto', 
+ 'Descrição do produto', 
+ 'Quantidade no Estoque', 
+ 'Unidade / Caixa / Fardo', 
+ 'Data de Validade', 
+ 'Valor Unitário'
+ ];
+ 
+ itens.forEach((item, index) => {
+ ws_data[6 + index] = [
+ item.itemNum,       // Coluna A
+ item.comprador,     // Coluna B (Vazio)
+ item.loja,          // Coluna C (Patitiba)
+ item.codigo,        // Coluna D (Código)
+ item.descricao,     // Coluna E (Descrição)
+ item.qtd,           // Coluna F (Qtd)
+ item.unidade,       // Coluna G (Emb)
+ item.validade,      // Coluna H (Validade)
+ item.valor          // Coluna I (Valor)
+ ];
+ });
+ 
+ const ws = XLSX.utils.aoa_to_sheet(ws_data);
+ const wb = XLSX.utils.book_new();
+ XLSX.utils.book_append_sheet(wb, ws, "Pró Ativo Frios");
+ 
+ XLSX.writeFile(wb, "Pro_Ativo_Patitiba.xlsx");
+ alert('Planilha gerada com sucesso!');
+ }
+ }
+</script>
+
+</body>
+</html>
       display: flex;
       justify-content: center;
       align-items: center;
