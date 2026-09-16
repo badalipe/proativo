@@ -1004,28 +1004,26 @@
         sheet.name(nomeModulo);
 
         if (modulo === 'proativo') {
-          // CAPTURA DOS DADOS DO CABEÇALHO
+          // 1. CABEÇALHO SUPERIOR DIREITO (PATITIBA, GERENTE, DATA)
           const dataLev = el('pro_data').value;
           const dataFmt = dataLev ? dataLev.split('-').reverse().join('/') : '';
 
-          // PREENCHE EXATAMENTE O CABEÇALHO DO MODELO DA IMAGEM
-          if (listaData.length > 0) {
-            const primeiroItem = listaData[0];
-            sheet.cell("B5").value(primeiroItem.descricao);
-            sheet.cell("C5").value(primeiroItem.quantidade);
-            sheet.cell("D5").value(primeiroItem.unidade);
-            sheet.cell("E6").value(dataFmt);
-          }
-          sheet.cell("C7").value("PATITIBA");
+          sheet.cell("H1").value("PATITIBA");
+          sheet.cell("H2").value(el('pro_gerente').value.trim());
+          sheet.cell("H3").value(dataFmt);
 
-          // LANÇAMENTO DA LISTA A PARTIR DA LINHA 7
+          // 2. GRAVAÇÃO DA LISTA DE PRODUTOS NA PARTE BRANCA (A PARTIR DA LINHA 7)
           listaData.forEach((item, index) => {
             const row = 7 + index;
-            sheet.cell(`A${row}`).value(index + 1);
-            sheet.cell(`B${row}`).value(item.codigo);
-            sheet.cell(`C${row}`).value(item.descricao);
-            sheet.cell(`D${row}`).value(item.quantidade);
-            sheet.cell(`E${row}`).value(item.validade ? item.validade.split('-').reverse().join('/') : '');
+            const valFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
+
+            sheet.cell(`A${row}`).value(index + 1);       // Nº
+            sheet.cell(`B${row}`).value(item.codigo);      // Código
+            sheet.cell(`C${row}`).value(item.descricao);   // Descrição
+            sheet.cell(`D${row}`).value(item.quantidade);  // Qtd
+            sheet.cell(`E${row}`).value(item.unidade);     // Unidade
+            sheet.cell(`H${row}`).value(valFmt);           // Data de Validade
+            sheet.cell(`I${row}`).value(item.valor);       // Valor Unitário
           });
 
         } else {
@@ -1060,6 +1058,7 @@
         a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
         a.click();
         window.URL.revokeObjectURL(url);
+
       } catch (e) {
         alert("Erro ao exportar Excel: " + e.message);
       }
