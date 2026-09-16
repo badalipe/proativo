@@ -5,35 +5,36 @@
   <title>Gerador de Planilha - Pró Ativo Frios</title>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f6f9; }
-    h1 { color: #0056b3; }
+    body { font-family: Arial, sans-serif; margin: 20px; }
     .form-group { margin-bottom: 15px; }
-    label { display: inline-block; width: 140px; font-weight: bold; }
-    input, select { padding: 6px; width: 220px; border: 1px solid #ccc; border-radius: 4px; }
-    button { padding: 8px 15px; background-color: #007bff; color: white;
-             border: none; cursor: pointer; margin-right: 10px; border-radius: 4px; }
+    label { display: inline-block; width: 120px; font-weight: bold; }
+    input, select { padding: 5px; width: 200px; }
+    button { padding: 8px 15px; background-color: #007bff; color: white; border: none; cursor: pointer; margin-right: 10px; }
     button:hover { background-color: #0056b3; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
     th { background-color: #007bff; color: white; }
-    #status { margin-top: 15px; font-weight: bold; color: #0056b3; }
   </style>
 </head>
 <body>
-  <h1>Cadastro de Produtos - Pró Ativo Frios</h1>
+
+  <h1>Pró Ativo Frios</h1>
 
   <div class="form-group">
     <label for="produto">Produto:</label>
     <input type="text" id="produto">
   </div>
+
   <div class="form-group">
     <label for="quantidade">Quantidade:</label>
     <input type="number" id="quantidade">
   </div>
+
   <div class="form-group">
-    <label for="valor">Valor (R$):</label>
+    <label for="valor">Valor:</label>
     <input type="number" step="0.01" id="valor">
   </div>
+
   <div class="form-group">
     <label for="categoria">Categoria:</label>
     <select id="categoria">
@@ -43,18 +44,16 @@
     </select>
   </div>
 
-  <button onclick="adicionarLinha()">Adicionar</button>
-  <button onclick="gerarPlanilha()">Baixar Planilha Preenchida</button>
-  <button onclick="limparTabela()">Limpar</button>
-
-  <div id="status"></div>
+  <button onclick="adicionar()">Adicionar</button>
+  <button onclick="gerarPlanilha()">Gerar Planilha</button>
+  <button onclick="limpar()">Limpar</button>
 
   <table id="tabela">
     <thead>
       <tr>
         <th>Produto</th>
         <th>Quantidade</th>
-        <th>Valor (R$)</th>
+        <th>Valor</th>
         <th>Categoria</th>
       </tr>
     </thead>
@@ -63,10 +62,8 @@
 
   <script>
     const dados = [];
-    const CAMINHO_TEMPLATE = 'planilha_padrao_original.xlsx'; // arquivo no seu repo
-    const NOME_ABA = 'Plan1'; // ⚠️ troque pelo nome da aba do seu template
 
-    function adicionarLinha() {
+    function adicionar() {
       const produto    = document.getElementById('produto').value.trim();
       const quantidade = document.getElementById('quantidade').value;
       const valor      = document.getElementById('valor').value;
@@ -80,15 +77,17 @@
       dados.push({
         Produto: produto,
         Quantidade: Number(quantidade),
-        'Valor (R$)': Number(valor),
+        Valor: Number(valor),
         Categoria: categoria
       });
 
-      renderizarTabela();
-      limparCampos();
+      renderizar();
+      document.getElementById('produto').value = '';
+      document.getElementById('quantidade').value = '';
+      document.getElementById('valor').value = '';
     }
 
-    function renderizarTabela() {
+    function renderizar() {
       const tbody = document.querySelector('#tabela tbody');
       tbody.innerHTML = '';
       dados.forEach(d => {
@@ -96,75 +95,31 @@
         tr.innerHTML = `
           <td>${d.Produto}</td>
           <td>${d.Quantidade}</td>
-          <td>${d['Valor (R$)'].toFixed(2)}</td>
+          <td>${d.Valor.toFixed(2)}</td>
           <td>${d.Categoria}</td>`;
         tbody.appendChild(tr);
       });
     }
 
-    function limparCampos() {
-      document.getElementById('produto').value = '';
-      document.getElementById('quantidade').value = '';
-      document.getElementById('valor').value = '';
-    }
-
-    function limparTabela() {
+    function limpar() {
       if (dados.length && !confirm('Apagar todos os registros?')) return;
       dados.length = 0;
-      renderizarTabela();
+      renderizar();
     }
 
-    async function gerarPlanilha() {
-      const status = document.getElementById('status');
-
+    function gerarPlanilha() {
       if (dados.length === 0) {
         alert('Nenhum dado para exportar!');
         return;
       }
 
-      status.textContent = 'Carregando modelo...';
+      const ws = XLSX.utils.json_to_sheet(dados);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Produtos');
 
-      try {
-        // 1) Baixa o template do próprio GitHub Pages
-        const resp = await fetch(CAMINHO_TEMPLATE);
-        if (!resp.ok) throw new Error('Não foi possível carregar o template.');
-        const arrayBuffer = await resp.arrayBuffer();
-
-        // 2) Lê o template com SheetJS
-        const wb = XLSX.read(arrayBuffer, { type: 'array' });
-
-        // 3) Seleciona a aba correta
-        const nomeAba = wb.SheetNames.includes(NOME_ABA)
-          ? NOME_ABA
-          : wb.SheetNames[0];
-        const ws = wb.Sheets[nomeAba];
-
-        // 4) Preenche a partir da linha 2 (A2, B2, C2, D2...)
-        //    Ajuste conforme o layout do seu template!
-        dados.forEach((d, i) => {
-          const linha = i + 2;
-          ws[`A${linha}`] = { t: 's', v: d.Produto };
-          ws[`B${linha}`] = { t: 'n', v: d.Quantidade };
-          ws[`C${linha}`] = { t: 'n', v: d['Valor (R$)'] };
-          ws[`D${linha}`] = { t: 's', v: d.Categoria };
-        });
-
-        // 5) Recalcula o range (para não cortar dados)
-        ws['!ref'] = XLSX.utils.encode_range({
-          s: { r: 0, c: 0 },
-          e: { r: dados.length + 1, c: 3 }
-        });
-
-        // 6) Baixa
-        const nomeArquivo = `ProAtivoFrios_${new Date().toISOString().slice(0,10)}.xlsx`;
-        XLSX.writeFile(wb, nomeArquivo);
-
-        status.textContent = '✅ Planilha gerada com sucesso!';
-      } catch (err) {
-        console.error(err);
-        status.textContent = '❌ Erro: ' + err.message;
-      }
+      XLSX.writeFile(wb, 'ProAtivoFrios.xlsx');
     }
   </script>
+
 </body>
 </html>
