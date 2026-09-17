@@ -398,7 +398,7 @@
  
  <section class="card">
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
- <label>Descrição do produto</label><input id="pro_descricao" placeholder="Descrição do produto">
+ <label>Descrição du produto</label><input id="pro_descricao" placeholder="Descrição do produto">
  <div class="row">
  <div><label>Quantidade *</label><input id="pro_quantidade" inputmode="decimal" placeholder="Ex.: 12"></div>
  <div><label>Unidade</label><input id="pro_unidade" value="und"></div>
@@ -854,7 +854,7 @@
  }
  
  function getModeloPlanilha(modulo) {
- return modulo === 'trocas' ? './PERDAS E TROCA.ods' : './planilha_padrao_original.xlsx';
+ return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './planilha_padrao_original.xlsx';
  }
  
  async function gerarExcel(modulo) {
@@ -873,6 +873,7 @@
  const arrayBuffer = await response.arrayBuffer();
  workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
  } catch (e) {
+ alert("Aviso: Não foi possível carregar o modelo oficial. Gerando planilha padrão.");
  workbook = await XlsxPopulate.fromBlankAsync();
  }
  
@@ -907,8 +908,8 @@
  const responsavel = el('trc_digitou').value;
  const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
  
- sheet.cell("B6").value("X"); 
- sheet.cell("A11").value(dataTroca);
+ sheet.cell("B7").value("X"); 
+ sheet.cell("A12").value(dataTroca);
  sheet.cell("A41").value(responsavel);
  
  listaData.forEach((item, index) => {
