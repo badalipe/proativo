@@ -504,7 +504,7 @@
  <div class="caixa">
  <select id="trc_motivo">
  <option value="1">1 - Avaria</option>
- <option value="2">2 - Descarte</option>
+ <option value="2">2 - Vencido</option>
  </select>
  </div>
  </div>
@@ -695,7 +695,6 @@
  html5QrCode = new Html5Qrcode("beep-reader");
  }
  
- // Configuração sem 'qrbox' para utilizar a tela inteira da câmera sem escurecimento
  const config = { 
  fps: 15, 
  videoConstraints: {
@@ -717,7 +716,6 @@
  el(prefix + 'codigo').value = decodedText;
  pararScanner();
  
- // Executa a busca e joga o foco direto no campo de data para abrir o seletor (dia, mês e ano)
  buscarProduto(modulo).then(() => {
  setTimeout(() => {
  const campoValidade = el(prefix + 'validade');
@@ -912,7 +910,7 @@
  const itemEl = document.createElement('div');
  itemEl.className = 'item';
  const dataFmt = item.validade.split('-').reverse().join('/');
- const motivoTexto = item.motivo === 1 ? '1 - Avaria' : (item.motivo === 2 ? '2 - Descarte' : item.motivo);
+ const motivoTexto = item.motivo === 1 ? '1 - Avaria' : (item.motivo === 2 ? '2 - Vencido' : item.motivo);
  const infoExtra = item.motivo ? ` | Motivo: ${motivoTexto}` : '';
  
  itemEl.innerHTML = `
@@ -1015,7 +1013,7 @@
  listaData.forEach((item, index) => {
  const row = 16 + index;
  if (row <= 38) {
- const motivoNome = item.motivo === 1 ? '1 - Avaria' : (item.motivo === 2 ? '2 - Descarte' : item.motivo);
+ const motivoNome = item.motivo === 1 ? '1 - Avaria' : (item.motivo === 2 ? '2 - Vencido' : item.motivo);
  
  sheet.cell(`A${row}`).value(String(item.codigo)).style({ horizontalAlignment: "center" });
  sheet.cell(`B${row}`).value(item.descricao).style({ horizontalAlignment: "center" });
