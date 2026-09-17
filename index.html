@@ -5,10 +5,10 @@
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
  <meta name="theme-color" content="#0f172a">
  <title>Sistema de Gestão - Rede Market</title>
-
+ 
  <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
+ 
  <style>
  :root {
  --primary: #0066b2;
@@ -23,14 +23,14 @@
  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
  }
-
+ 
  * { 
  margin: 0; 
  padding: 0; 
  box-sizing: border-box; 
  -webkit-tap-highlight-color: transparent;
  }
-
+ 
  body {
  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
  display: flex;
@@ -70,7 +70,7 @@
  gap: 16px;
  width: 100%;
  }
-
+ 
  .glass-btn {
  width: 100%;
  position: relative;
@@ -87,7 +87,7 @@
  min-height: 80px;
  text-decoration: none;
  }
-
+ 
  .glass-shine {
  position: absolute;
  top: -35%; left: -35%;
@@ -95,26 +95,26 @@
  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 65%);
  pointer-events: none; z-index: 1;
  }
-
+ 
  .glass-content {
  position: relative; z-index: 2;
  display: flex; align-items: center;
  gap: 16px; width: 100%;
  }
-
+ 
  .btn-svg {
  width: 32px; height: 32px;
  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
  flex-shrink: 0;
  }
-
+ 
  .btn-text {
  font-size: 18px; font-weight: 800;
  letter-spacing: 1.5px; color: #ffffff;
  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
  text-align: left;
  }
-
+ 
  .glass-1 {
  background: linear-gradient(145deg, rgba(6,182,212,0.9) 0%, rgba(29,78,216,0.9) 100%);
  box-shadow: 0 8px 24px rgba(6,182,212,0.4);
@@ -127,7 +127,7 @@
  background: linear-gradient(145deg, rgba(124,58,237,0.9) 0%, rgba(147,51,234,0.9) 100%);
  box-shadow: 0 8px 24px rgba(139,92,246,0.4);
  }
-
+ 
  #login-screen {
  position: fixed; inset: 0;
  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
@@ -144,13 +144,13 @@
  background: #fef2f2; color: var(--accent-red); padding: 8px;
  border-radius: 6px; font-size: 12px; margin-bottom: 14px; font-weight: 600;
  }
-
+ 
  .system-modal {
  position: fixed; inset: 0; z-index: 99999;
  background: var(--bg-main); overflow-y: auto; -webkit-overflow-scrolling: touch;
  }
  .hidden { display: none !important; }
-
+ 
  .top {
  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
  color: #fff; padding: 14px 12px; position: sticky; top: 0; z-index: 100;
@@ -165,9 +165,9 @@
  .header-logo { height: 28px; width: auto; object-fit: contain; }
  .header-text h1 { font-size: 15px; font-weight: 700; margin: 0; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
  .header-text .sub { color: #94a3b8; font-size: 10px; margin-top: 2px; }
-
+ 
  .wrap { width: 100%; max-width: 600px; margin: auto; padding: 12px 10px 80px; }
-
+ 
  .card {
  background: var(--card-bg); border-radius: 14px; padding: 16px 14px;
  margin-bottom: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
@@ -181,7 +181,7 @@
  .icon-scan { background: #e0f0ff; }
  .icon-conf { background: #ede9fe; }
  .icon-list { background: #d1fae5; }
-
+ 
  label { display: block; font-size: 12px; font-weight: 700; margin: 10px 0 4px; color: var(--text-muted); }
  input, select {
  font: inherit; width: 100%; padding: 11px 12px; border: 1px solid var(--border-color);
@@ -192,23 +192,23 @@
  box-shadow: 0 0 0 3px rgba(0, 102, 178, 0.15);
  }
  .input-codigo { font-family: 'Courier New', monospace; font-size: 18px !important; letter-spacing: 1px; font-weight: 700; }
-
+ 
  .campo label { margin: 0 0 3px; }
  .campo .caixa {
  display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px;
  border: 1px solid var(--border-color); border-radius: 10px; background: #f8fafc;
  }
  .campo .caixa input, .campo .caixa select { border: 0; background: transparent; padding: 0; height: 100%; font-size: 14px; }
-
+ 
  .header-right { display: flex; align-items: center; gap: 6px; }
  .chip-loja {
  display: flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.15);
  border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 11px; font-weight: 600;
  padding: 5px 8px; border-radius: 999px;
  }
-
+ 
  .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
-
+ 
  button {
  font: inherit; border: 0; border-radius: 10px; padding: 12px 14px; font-weight: 600;
  font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
@@ -216,14 +216,14 @@
  .primary { background: var(--primary); color: #fff; width: 100%; }
  .secondary { background: #f0f7ff; color: var(--primary); }
  .danger { background: #fef2f2; color: var(--accent-red); }
-
+ 
  .row { display: grid; grid-template-columns: 1fr; gap: 8px; }
  @media(min-width: 480px) {
  .row { grid-template-columns: 1fr 1fr; }
  .row-ident { grid-template-columns: 1fr 1fr; }
  }
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-
+ 
  #beep-scanner-overlay {
  position: fixed; inset: 0; background: #000; z-index: 999999;
  display: flex; flex-direction: column; justify-content: space-between;
@@ -267,7 +267,7 @@
  .notice { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
  .ok { color: var(--accent-green); font-weight: 700; }
  .warn { color: #d97706; }
-
+ 
  .item {
  border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1;
  border-radius: 10px; padding: 10px 12px; margin-top: 8px; display: flex; justify-content: space-between;
@@ -295,14 +295,14 @@
  </svg>
  <h2>Acesso ao Sistema</h2>
  <p>Insira suas credenciais para continuar</p>
-
+ 
  <div id="loginError" class="login-error hidden">Usuário ou senha incorretos!</div>
-
+ 
  <form id="loginForm" onsubmit="realizarLogin(event)">
  <div style="text-align: left;">
  <label>Usuário</label>
  <input id="usuarioInput" type="text" placeholder="Digite seu usuário" required autocomplete="username">
-
+ 
  <label>Senha</label>
  <input id="senhaInput" type="password" placeholder="••••••••" required autocomplete="current-password">
  </div>
@@ -325,7 +325,7 @@
  <span class="btn-text">PRÓATIVO</span>
  </div>
  </button>
-
+ 
  <button type="button" onclick="abrirModulo('trocas')" class="glass-btn glass-2">
  <div class="glass-shine"></div>
  <div class="glass-content">
@@ -335,7 +335,7 @@
  <span class="btn-text">TROCAS</span>
  </div>
  </button>
-
+ 
  <button type="button" onclick="abrirModulo('perdas')" class="glass-btn glass-3">
  <div class="glass-shine"></div>
  <div class="glass-content">
@@ -350,7 +350,7 @@
  <button type="button" class="danger" onclick="fazerLogout()" style="width: auto; padding: 10px 18px; font-size: 13px;">Sair do Sistema</button>
  </div>
  </div>
-
+ 
  <div id="proativo-modal" class="system-modal hidden">
  <div id="app-proativo">
  <header class="top">
@@ -376,7 +376,7 @@
  </div>
  </div>
  </header>
-
+ 
  <main class="wrap">
  <section class="card">
  <div class="row row-ident">
@@ -386,7 +386,7 @@
  <div class="campo"><label>Data do levantamento</label><div class="caixa"><input id="pro_data" type="date"></div></div>
  </div>
  </section>
-
+ 
  <section class="card">
  <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
  <div class="scan-zone"><button class="primary" onclick="abrirScanner('proativo')">📷 Abrir câmera para escanear</button></div>
@@ -395,7 +395,7 @@
  <div class="actions"><button class="primary" onclick="buscarProduto('proativo')" style="width:auto">🔍 Buscar produto</button></div>
  <div id="pro_status" class="notice" style="margin-top:8px"></div>
  </section>
-
+ 
  <section class="card">
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
  <label>Descrição do produto</label><input id="pro_descricao" placeholder="Descrição do produto">
@@ -409,7 +409,7 @@
  </div>
  <div class="actions"><button class="primary" onclick="adicionarItem('proativo')" style="width:auto">➕ Adicionar à lista</button></div>
  </section>
-
+ 
  <section class="card">
  <div class="card-header" style="justify-content: space-between;">
  <div style="display:flex;align-items:center;gap:8px;"><span class="card-icon icon-list">📋</span><h3>3. Produtos lançados</h3></div>
@@ -424,7 +424,7 @@
  </main>
  </div>
  </div>
-
+ 
  <div id="trocas-modal" class="system-modal hidden">
  <div id="app-trocas">
  <header class="top">
@@ -450,7 +450,7 @@
  </div>
  </div>
  </header>
-
+ 
  <main class="wrap">
  <section class="card">
  <div class="row row-ident">
@@ -468,7 +468,7 @@
  <div class="campo"><label>Data da Troca</label><div class="caixa"><input id="trc_data" type="date"></div></div>
  </div>
  </section>
-
+ 
  <section class="card">
  <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
  <div class="scan-zone"><button class="primary" onclick="abrirScanner('trocas')">📷 Abrir câmera para escanear</button></div>
@@ -477,7 +477,7 @@
  <div class="actions"><button class="primary" onclick="buscarProduto('trocas')" style="width:auto">🔍 Buscar produto</button></div>
  <div id="trc_status" class="notice" style="margin-top:8px"></div>
  </section>
-
+ 
  <section class="card">
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Dados da Troca</h3></div>
  <label>Descrição do produto</label><input id="trc_descricao" placeholder="Descrição do produto">
@@ -491,7 +491,7 @@
  </div>
  <div class="actions"><button class="primary" onclick="adicionarItem('trocas')" style="width:auto">➕ Registrar para Troca</button></div>
  </section>
-
+ 
  <section class="card">
  <div class="card-header" style="justify-content: space-between;">
  <div style="display:flex;align-items:center;gap:8px;"><span class="card-icon icon-list">📋</span><h3>3. Itens na Lista</h3></div>
@@ -506,7 +506,7 @@
  </main>
  </div>
  </div>
-
+ 
  <div id="beep-scanner-overlay" class="hidden">
  <div class="beep-top-bar">
  <button type="button" class="beep-back-btn" onclick="pararScanner()">← Fechar</button>
@@ -525,33 +525,33 @@
  </div>
  <div class="beep-bottom-bar"><button type="button" class="beep-btn-bottom-action" onclick="fecharScannerSemCodigo()">Inserir sem código</button></div>
  </div>
-
+ 
  <script>
  const usuariosPermitidos = {
  "felipe": "2026",
  "admin": "market123",
  "patitiba": "frios2026"
  };
-
+ 
  const produtosPreCadastrados = {
  "7896045112098": "Refresco em Pó Frisco Abacaxi 18g",
  "7896183210120": "Leite Glória",
  "7908077452537": "Caderno Universitário 80 Fls Foroni"
  };
-
+ 
  let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
  let itensProAtivo = JSON.parse(localStorage.getItem('sys_proative_itens') || '[]');
  let itensTrocas = JSON.parse(localStorage.getItem('sys_trocas_itens') || '[]');
-
+ 
  let moduloAtual = null;
  let html5QrCode = null;
  let lanternaAtiva = false;
-
+ 
  const el = id => document.getElementById(id);
-
+ 
  window.addEventListener('DOMContentLoaded', () => {
  const estaLogado = sessionStorage.getItem('sys_logado') === 'true';
-
+ 
  if (!estaLogado) {
  el('login-screen').classList.remove('hidden');
  el('menu-screen').classList.add('hidden');
@@ -559,17 +559,17 @@
  el('login-screen').classList.add('hidden');
  el('menu-screen').classList.remove('hidden');
  }
-
+ 
  const hoje = new Date().toISOString().split('T')[0];
  if (el('pro_data')) el('pro_data').value = hoje;
  if (el('trc_data')) el('trc_data').value = hoje;
  });
-
+ 
  function realizarLogin(e) {
  e.preventDefault();
  const user = el('usuarioInput').value.trim().toLowerCase();
  const pass = el('senhaInput').value;
-
+ 
  if (usuariosPermitidos[user] && usuariosPermitidos[user] === pass) {
  sessionStorage.setItem('sys_logado', 'true');
  sessionStorage.setItem('sys_user', user);
@@ -580,7 +580,7 @@
  el('loginError').classList.remove('hidden');
  }
  }
-
+ 
  function fazerLogout() {
  sessionStorage.removeItem('sys_logado');
  el('proativo-modal').classList.add('hidden');
@@ -590,16 +590,16 @@
  el('usuarioInput').value = '';
  el('senhaInput').value = '';
  }
-
+ 
  function abrirModulo(modulo) {
  if (modulo === 'perdas') {
  alert("⚠️ Área em desenvolvimento! Em breve esta funcionalidade estará disponível.");
  return;
  }
-
+ 
  moduloAtual = modulo;
  el('menu-screen').classList.add('hidden');
-
+ 
  if (modulo === 'proativo') {
  el('proativo-modal').classList.remove('hidden');
  renderizarLista('proativo');
@@ -608,14 +608,14 @@
  renderizarLista('trocas');
  }
  }
-
+ 
  function voltarAoMenu() {
  pararScanner();
  el('proativo-modal').classList.add('hidden');
  el('trocas-modal').classList.add('hidden');
  el('menu-screen').classList.remove('hidden');
  }
-
+ 
  function tocarBipe() {
  try {
  const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -631,24 +631,24 @@
  osc.stop(ctx.currentTime + 0.12);
  } catch (e) {}
  }
-
+ 
  function dispararFlashScan() {
  const flash = el('scanFlash');
  if (!flash) return;
  flash.classList.add('active');
  setTimeout(() => flash.classList.remove('active'), 350);
  }
-
+ 
  async function abrirScanner(modulo) {
  moduloAtual = modulo;
  el('beep-scanner-overlay').classList.remove('hidden');
-
+ 
  if (!html5QrCode) {
  html5QrCode = new Html5Qrcode("beep-reader");
  }
-
+ 
  const config = { fps: 15, qrbox: { width: 260, height: 140 } };
-
+ 
  try {
  await html5QrCode.start(
  { facingMode: "environment" },
@@ -663,7 +663,7 @@
  },
  () => {}
  );
-
+ 
  try {
  const capabilities = html5QrCode.getRunningTrackCapabilities();
  if (capabilities.zoom) {
@@ -677,13 +677,13 @@
  };
  }
  } catch(e){}
-
+ 
  } catch (e) {
  alert("Erro ao abrir a câmera: " + e);
  pararScanner();
  }
  }
-
+ 
  function pararScanner() {
  if (html5QrCode && html5QrCode.isScanning) {
  html5QrCode.stop().then(() => {
@@ -695,7 +695,7 @@
  el('beep-scanner-overlay').classList.add('hidden');
  }
  }
-
+ 
  async function alternarLanterna() {
  try {
  lanternaAtiva = !lanternaAtiva;
@@ -704,38 +704,38 @@
  alert("Lanterna não disponível.");
  }
  }
-
+ 
  function fecharScannerSemCodigo() {
  const prefix = moduloAtual === 'proativo' ? 'pro_' : 'trc_';
  pararScanner();
  el(prefix + 'codigo').value = "";
  el(prefix + 'descricao').focus();
  }
-
+ 
  async function buscarProduto(modulo) {
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  const code = el(prefix + 'codigo').value.trim();
  const statusEl = el(prefix + 'status');
-
+ 
  if (!code) {
  statusEl.innerHTML = '<span class="warn">Informe um código.</span>';
  return;
  }
-
+ 
  statusEl.innerHTML = '🔍 Buscando...';
-
+ 
  if (catalogoLocal[code]) {
  el(prefix + 'descricao').value = catalogoLocal[code];
  statusEl.innerHTML = '<span class="ok">Localizado no catálogo local!</span>';
  return;
  }
-
+ 
  if (produtosPreCadastrados[code]) {
  el(prefix + 'descricao').value = produtosPreCadastrados[code];
  statusEl.innerHTML = '<span class="ok">Localizado na base do sistema!</span>';
  return;
  }
-
+ 
  try {
  const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
  const data = await res.json();
@@ -750,19 +750,19 @@
  statusEl.innerHTML = '<span class="warn">Erro de consulta. Digite manualmente.</span>';
  }
  }
-
+ 
  function adicionarItem(modulo) {
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  const desc = el(prefix + 'descricao').value.trim();
  const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
  const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
  const validade = el(prefix + 'validade').value;
-
+ 
  if (!desc || isNaN(qtd) || !validade) {
  alert("Preencha descrição, quantidade e validade.");
  return;
  }
-
+ 
  const item = {
  id: Date.now(),
  codigo: el(prefix + 'codigo').value.trim() || 'S/C',
@@ -773,7 +773,7 @@
  valor: val,
  total: qtd * val
  };
-
+ 
  if (modulo === 'trocas') {
  item.motivo = parseInt(el('trc_motivo').value);
  itensTrocas.unshift(item);
@@ -782,9 +782,9 @@
  itensProAtivo.unshift(item);
  localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
  }
-
+ 
  renderizarLista(modulo);
-
+ 
  el(prefix + 'codigo').value = '';
  el(prefix + 'descricao').value = '';
  el(prefix + 'quantidade').value = '';
@@ -792,29 +792,29 @@
  el(prefix + 'valor').value = '0.00';
  el(prefix + 'status').innerHTML = '';
  }
-
+ 
  function renderizarLista(modulo) {
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  const listContainer = el(prefix + 'lista');
  const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
-
+ 
  el(prefix + 'contador').innerText = listaData.length;
-
+ 
  if (listaData.length === 0) {
  listContainer.className = 'empty';
  listContainer.innerHTML = 'Nenhum item registrado.';
  return;
  }
-
+ 
  listContainer.className = '';
  listContainer.innerHTML = '';
-
+ 
  listaData.forEach(item => {
  const itemEl = document.createElement('div');
  itemEl.className = 'item';
  const dataFmt = item.validade.split('-').reverse().join('/');
  const infoExtra = item.motivo ? ` | Motivo: ${item.motivo === 1 ? '1-Avaria' : '2-Descarte'}` : '';
-
+ 
  itemEl.innerHTML = `
  <div class="item-info">
  <strong>${item.descricao}</strong>
@@ -828,7 +828,7 @@
  listContainer.appendChild(itemEl);
  });
  }
-
+ 
  function removerItem(modulo, id) {
  if (modulo === 'proativo') {
  itensProAtivo = itensProAtivo.filter(i => i.id !== id);
@@ -839,7 +839,7 @@
  }
  renderizarLista(modulo);
  }
-
+ 
  function limparLista(modulo) {
  if (confirm("Deseja apagar todos os lançamentos deste módulo?")) {
  if (modulo === 'proativo') {
@@ -852,20 +852,20 @@
  renderizarLista(modulo);
  }
  }
-
+ 
  function getModeloPlanilha(modulo) {
  return modulo === 'trocas' ? './PERDAS E TROCA.ods' : './planilha_padrao_original.xlsx';
  }
-
+ 
  async function gerarExcel(modulo) {
  const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
  if (listaData.length === 0) {
  alert("Adicione itens para exportar.");
  return;
  }
-
+ 
  const urlModelo = getModeloPlanilha(modulo);
-
+ 
  try {
  let workbook;
  try {
@@ -875,24 +875,23 @@
  } catch (e) {
  workbook = await XlsxPopulate.fromBlankAsync();
  }
-
+ 
  const sheet = workbook.sheet(0);
  const nomeModulo = modulo === 'proativo' ? "Pró Ativo Frios" : "Relatório de Trocas";
- sheet.name(nomeModulo);
-
+ 
  if (modulo === 'proativo') {
  const digitou = el('pro_digitou').value;
  const gerente = el('pro_gerente').value;
  const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
-
+ 
  sheet.cell("H2").value(gerente);
  sheet.cell("H3").value(dataLev);
  sheet.cell("H4").value(digitou);
-
+ 
  listaData.forEach((item, index) => {
  const row = 7 + index;
  const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
-
+ 
  sheet.cell(`A${row}`).value(index + 1);
  sheet.cell(`B${row}`).value("");
  sheet.cell(`C${row}`).value("Patitiba");
@@ -903,31 +902,26 @@
  sheet.cell(`H${row}`).value(dataFmt);
  sheet.cell(`I${row}`).value(item.valor);
  });
-
+ 
  } else {
- const headers = ["Código", "Descrição", "Qtd", "Unidade", "Validade", "Motivo", "Valor Unit.", "Total"];
- headers.forEach((h, idx) => {
- const col = String.fromCharCode(65 + idx);
- const cell = sheet.cell(`${col}3`);
- cell.value(h);
- cell.style({ bold: true, fill: "0066b2", fontColor: "ffffff" });
- });
-
+ const responsavel = el('trc_digitou').value;
+ const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
+ 
+ sheet.cell("B6").value("X"); 
+ sheet.cell("A11").value(dataTroca);
+ sheet.cell("A41").value(responsavel);
+ 
  listaData.forEach((item, index) => {
- const row = 4 + index;
- const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
-
+ const row = 16 + index;
+ if (row <= 38) {
  sheet.cell(`A${row}`).value(item.codigo);
  sheet.cell(`B${row}`).value(item.descricao);
  sheet.cell(`C${row}`).value(item.quantidade);
- sheet.cell(`D${row}`).value(item.unidade);
- sheet.cell(`E${row}`).value(dataFmt);
- sheet.cell(`F${row}`).value(item.motivo);
- sheet.cell(`G${row}`).value(item.valor);
- sheet.cell(`H${row}`).value(item.total);
+ sheet.cell(`D${row}`).value(item.motivo);
+ }
  });
  }
-
+ 
  const blob = await workbook.outputAsync();
  const url = window.URL.createObjectURL(blob);
  const a = document.createElement("a");
@@ -935,7 +929,7 @@
  a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
  a.click();
  window.URL.revokeObjectURL(url);
- alert("Relatório gerado com sucesso nas colunas corretas!");
+ alert("Relatório preenchido perfeitamente no modelo oficial!");
  } catch (e) {
  alert("Erro ao exportar Excel: " + e.message);
  }
