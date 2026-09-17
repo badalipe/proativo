@@ -262,45 +262,63 @@
  
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
- /* SCANNER BEEP OTIMIZADO PARA CELULAR */
+ /* --- NOVO ESTILO DO SCANNER ESTILO BEEP --- */
  #beep-scanner-overlay {
  position: fixed; inset: 0; background: #000; z-index: 999999;
  display: flex; flex-direction: column; justify-content: space-between;
  }
- .beep-top-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: rgba(0, 0, 0, 0.8); color: #fff; font-size: 15px; font-weight: 600; z-index: 20; }
- .beep-back-btn, .beep-manual-link { background: none; border: none; color: #fff; font-size: 14px; cursor: pointer; }
+ .beep-top-bar { 
+ display: flex; align-items: center; justify-content: space-between; 
+ padding: 16px 16px; background: rgba(0, 0, 0, 0.85); color: #fff; 
+ font-size: 16px; font-weight: 700; z-index: 20; 
+ }
+ .beep-back-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; }
+ .beep-title-group { display: flex; gap: 20px; align-items: center; }
+ .beep-nav-item { color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 700; cursor: pointer; background: none; border: none; }
+ .beep-nav-item.active { color: #fff; border-bottom: 2px solid #fff; padding-bottom: 2px; }
+
  .beep-viewport { position: absolute; inset: 0; background: #000; z-index: 1; }
  #beep-reader { width: 100% !important; height: 100% !important; border: none !important; }
  #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+ 
  .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
+ 
+ /* Moldura apenas com cantos arredondados e a logo BEEP no canto inferior direito */
  .beep-target-box {
- width: 85%; max-width: 320px; height: 180px; border: 2px solid rgba(255, 255, 255, 0.4);
- border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); position: relative;
+ width: 80%; max-width: 300px; height: 180px; 
+ position: relative;
  }
- .scan-line {
- position: absolute; left: 8px; right: 8px; height: 2px; top: 8px;
- background: linear-gradient(90deg, transparent, #e30613, transparent);
- box-shadow: 0 0 8px rgba(227, 6, 19, 0.8); animation: scanline 2s ease-in-out infinite;
+ .corner { position: absolute; width: 30px; height: 30px; border-color: #fff; border-style: solid; border-width: 0; }
+ .corner-tl { top: 0; left: 0; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 8px; }
+ .corner-tr { top: 0; right: 0; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 8px; }
+ .corner-bl { bottom: 0; left: 0; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 8px; }
+ .corner-br { bottom: 0; right: 0; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 8px; }
+ 
+ .beep-logo-mark {
+ position: absolute; bottom: 8px; right: 12px; font-family: monospace; font-weight: 900; 
+ font-size: 18px; color: #fff; letter-spacing: 2px;
  }
- @keyframes scanline { 0%, 100% { top: 8px; } 50% { top: calc(100% - 10px); } }
+
  .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.35); opacity: 0; transition: opacity 0.15s ease; z-index: 15; }
  .scan-flash.active { opacity: 1; }
+ 
  .camera-controls-floating {
- position: absolute; bottom: 85px; left: 0; right: 0; display: flex;
+ position: absolute; bottom: 90px; left: 0; right: 0; display: flex;
  justify-content: center; align-items: center; gap: 10px; z-index: 20; padding: 0 16px;
  }
  .camera-controls-floating button, .camera-controls-floating .zoom-pill {
  background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255, 255, 255, 0.3);
- padding: 8px 12px; border-radius: 20px; font-size: 12px;
+ padding: 6px 12px; border-radius: 20px; font-size: 12px;
  }
+
  .beep-bottom-bar {
  position: absolute; bottom: 0; left: 0; right: 0;
- padding: 16px 16px calc(20px + env(safe-area-inset-bottom, 0px));
- background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); z-index: 20; display: flex; justify-content: center;
+ padding: 20px 16px calc(25px + env(safe-area-inset-bottom, 0px));
+ background: rgba(0,0,0,0.4); z-index: 20; display: flex; justify-content: center;
  }
  .beep-btn-bottom-action {
- background: transparent; border: 2px solid rgba(255, 255, 255, 0.9);
- color: #fff; border-radius: 99px; padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer;
+ background: transparent; border: 1px solid rgba(255, 255, 255, 0.6);
+ color: #fff; border-radius: 99px; padding: 12px 28px; font-size: 14px; font-weight: 600; cursor: pointer;
  }
 
  .notice { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
@@ -353,11 +371,10 @@
  </div>
  </div>
 
- <!-- 2. TELA DE MENU PRINCIPAL (3 BOTÕES 3D) -->
+ <!-- 2. TELA DE MENU PRINCIPAL -->
  <div id="menu-screen" class="hidden">
  <div class="menu-title">Selecione o Módulo Desejado</div>
  <div class="btn-row">
- <!-- Botão 1: Próativo -->
  <button type="button" onclick="abrirModulo('proativo')" class="glass-btn glass-1">
  <div class="glass-shine"></div>
  <div class="glass-content">
@@ -368,7 +385,6 @@
  </div>
  </button>
  
- <!-- Botão 2: Trocas -->
  <button type="button" onclick="abrirModulo('trocas')" class="glass-btn glass-2">
  <div class="glass-shine"></div>
  <div class="glass-content">
@@ -379,7 +395,6 @@
  </div>
  </button>
  
- <!-- Botão 3: Perdas -->
  <button type="button" onclick="abrirModulo('perdas')" class="glass-btn glass-3">
  <div class="glass-shine"></div>
  <div class="glass-content">
@@ -553,24 +568,38 @@
  </div>
  </div>
  
- <!-- LEITOR BEEP COMPARTILHADO -->
+ <!-- LEITOR BEEP ESTILO CUSTOMIZADO -->
  <div id="beep-scanner-overlay" class="hidden">
  <div class="beep-top-bar">
- <button type="button" class="beep-back-btn" onclick="pararScanner()">← Fechar</button>
- <span>Escanear Código</span>
- <button type="button" class="beep-manual-link" onclick="fecharScannerSemCodigo()">Manual</button>
+ <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
+ <div class="beep-title-group">
+ <button type="button" class="beep-nav-item active">Escanear...</button>
+ <button type="button" class="beep-nav-item" onclick="fecharScannerSemCodigo()">DIGITAR MANUALMENTE</button>
  </div>
+ </div>
+ 
  <div class="beep-viewport"><div id="beep-reader"></div></div>
+ 
  <div class="beep-target-container">
  <div class="scan-flash" id="scanFlash"></div>
- <div class="beep-target-box"><div class="scan-line"></div></div>
+ <div class="beep-target-box">
+ <div class="corner corner-tl"></div>
+ <div class="corner corner-tr"></div>
+ <div class="corner corner-bl"></div>
+ <div class="corner corner-br"></div>
+ <div class="beep-logo-mark">BEEP</div>
  </div>
+ </div>
+ 
  <div class="camera-controls-floating">
  <button type="button" onclick="alternarLanterna()">🔦 Lanterna</button>
  <div class="zoom-pill">Zoom: <span id="beepZoomVal">1.0</span>x</div>
  <input type="range" id="beepZoomRange" min="1" max="5" step="0.1" value="1" style="width: 70px; accent-color: #fff;">
  </div>
- <div class="beep-bottom-bar"><button type="button" class="beep-btn-bottom-action" onclick="fecharScannerSemCodigo()">Inserir sem código</button></div>
+ 
+ <div class="beep-bottom-bar">
+ <button type="button" class="beep-btn-bottom-action" onclick="fecharScannerSemCodigo()">Adicionar sem código de barras</button>
+ </div>
  </div>
  
  <script>
@@ -663,7 +692,6 @@
  el('menu-screen').classList.remove('hidden');
  }
  
- // SCANNER E CÂMERA
  function tocarBipe() {
  try {
  const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -958,10 +986,9 @@
  const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
  
  sheet.cell("B7").value(" ( X ) TROCA ");
- sheet.cell("A12").value(dataTroca);       // Data na linha 12
- sheet.cell("A41").value(responsavel);     // Encarregado / Responsável na linha 41
+ sheet.cell("A12").value(dataTroca);
+ sheet.cell("A41").value(responsavel);
  
- // Inserção de dados da linha 16 a 38 com alinhamento centralizado em todas as colunas
  listaData.forEach((item, index) => {
  const row = 16 + index;
  if (row <= 38) {
