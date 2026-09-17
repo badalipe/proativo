@@ -6,7 +6,6 @@
  <meta name="theme-color" content="#0f172a">
  <title>Sistema de Gestão - Rede Market</title>
  
- <!-- Bibliotecas externas -->
  <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
  
@@ -46,7 +45,7 @@
  -webkit-font-smoothing: antialiased;
  }
  
- /* --- TELA DE MENU COM OS 3 BOTÕES 3D (OTIMIZADA PARA CELULAR) --- */
+ /* --- TELA DE MENU --- */
  #menu-screen {
  display: flex;
  flex-direction: column;
@@ -340,7 +339,6 @@
 </head>
 <body>
 
- <!-- 1. TELA DE LOGIN -->
  <div id="login-screen" class="hidden">
  <div class="login-card">
  <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -370,7 +368,6 @@
  </div>
  </div>
 
- <!-- 2. TELA DE MENU PRINCIPAL -->
  <div id="menu-screen" class="hidden">
  <div class="menu-title">Selecione o Módulo Desejado</div>
  <div class="btn-row">
@@ -409,7 +406,6 @@
  </div>
  </div>
  
- <!-- MODAL DO MÓDULO PRÓ ATIVO -->
  <div id="proativo-modal" class="system-modal hidden">
  <div id="app-proativo">
  <header class="top">
@@ -484,7 +480,6 @@
  </div>
  </div>
  
- <!-- MODAL DO MÓDULO TROCAS -->
  <div id="trocas-modal" class="system-modal hidden">
  <div id="app-trocas">
  <header class="top">
@@ -567,7 +562,6 @@
  </div>
  </div>
  
- <!-- LEITOR BEEP ESTILO CUSTOMIZADO -->
  <div id="beep-scanner-overlay" class="hidden">
  <div class="beep-top-bar">
  <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
