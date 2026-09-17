@@ -813,7 +813,8 @@
  const itemEl = document.createElement('div');
  itemEl.className = 'item';
  const dataFmt = item.validade.split('-').reverse().join('/');
- const infoExtra = item.motivo ? ` | Motivo: ${item.motivo === 1 ? '1-Avaria' : '2-Descarte'}` : '';
+ const motivoTexto = item.motivo === 1 ? '1 - Avaria' : (item.motivo === 2 ? '2 - Descarte' : item.motivo);
+ const infoExtra = item.motivo ? ` | Motivo: ${motivoTexto}` : '';
  
  itemEl.innerHTML = `
  <div class="item-info">
@@ -909,18 +910,20 @@
  const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
  
  // Preenchimento exato mapeado pelo modelo oficial da empresa:
- sheet.cell("B7").value("X");        // Marca a opção de Troca
- sheet.cell("A12").value(dataTroca);  // Data na linha 12
- sheet.cell("A41").value(responsavel);// Encarregado / Responsável na linha 41
+ sheet.cell("B7").value("( X ) TROCA");    // Mantém o formato com X dentro dos parênteses
+ sheet.cell("A12").value(dataTroca);       // Data na linha 12
+ sheet.cell("A41").value(responsavel);     // Encarregado / Responsável na linha 41
  
- // Inserção limpa direto nas células de produto mantendo o layout do modelo nas linhas 16 a 38
+ // Inserção limpa nas células de produto mantendo o layout das linhas 16 a 38
  listaData.forEach((item, index) => {
  const row = 16 + index;
  if (row <= 38) {
+ const motivoNome = item.motivo === 1 ? '1 - Avaria' : (item.motivo === 2 ? '2 - Descarte' : item.motivo);
+ 
  sheet.cell(`A${row}`).value(String(item.codigo)); // EAN / CÓD PRODUTO
  sheet.cell(`B${row}`).value(item.descricao);       // PRODUTO
  sheet.cell(`C${row}`).value(item.quantidade);      // QUANTIDADE
- sheet.cell(`D${row}`).value(item.motivo);          // MOTIVO
+ sheet.cell(`D${row}`).value(motivoNome);           // MOTIVO POR EXTENSO
  }
  });
  }
