@@ -957,21 +957,20 @@
  const responsavel = el('trc_digitou').value;
  const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
  
- // Preenchimento exato na célula B7 mantendo o padrão ( X ) TROCA
  sheet.cell("B7").value(" ( X ) TROCA ");
  sheet.cell("A12").value(dataTroca);       // Data na linha 12
  sheet.cell("A41").value(responsavel);     // Encarregado / Responsável na linha 41
  
- // Inserção limpa nas células de produto mantendo o layout das linhas 16 a 38
+ // Inserção de dados da linha 16 a 38 com alinhamento centralizado em todas as colunas
  listaData.forEach((item, index) => {
  const row = 16 + index;
  if (row <= 38) {
  const motivoNome = item.motivo === 1 ? '1 - Avaria' : (item.motivo === 2 ? '2 - Descarte' : item.motivo);
  
- sheet.cell(`A${row}`).value(String(item.codigo)); // EAN / CÓD PRODUTO
- sheet.cell(`B${row}`).value(item.descricao);       // PRODUTO
- sheet.cell(`C${row}`).value(item.quantidade);      // QUANTIDADE
- sheet.cell(`D${row}`).value(motivoNome);           // MOTIVO POR EXTENSO
+ sheet.cell(`A${row}`).value(String(item.codigo)).style({ horizontalAlignment: "center" });
+ sheet.cell(`B${row}`).value(item.descricao).style({ horizontalAlignment: "center" });
+ sheet.cell(`C${row}`).value(item.quantidade).style({ horizontalAlignment: "center" });
+ sheet.cell(`D${row}`).value(motivoNome).style({ horizontalAlignment: "center" });
  }
  });
  }
