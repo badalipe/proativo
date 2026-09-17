@@ -398,7 +398,7 @@
  
  <section class="card">
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
- <label>Descrição du produto</label><input id="pro_descricao" placeholder="Descrição do produto">
+ <label>Descrição do produto</label><input id="pro_descricao" placeholder="Descrição do produto">
  <div class="row">
  <div><label>Quantidade *</label><input id="pro_quantidade" inputmode="decimal" placeholder="Ex.: 12"></div>
  <div><label>Unidade</label><input id="pro_unidade" value="und"></div>
@@ -873,7 +873,7 @@
  const arrayBuffer = await response.arrayBuffer();
  workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
  } catch (e) {
- alert("Aviso: Não foi possível carregar o modelo oficial. Gerando planilha padrão.");
+ alert("Aviso: Modelo oficial não encontrado. Gerando padrão.");
  workbook = await XlsxPopulate.fromBlankAsync();
  }
  
@@ -908,17 +908,19 @@
  const responsavel = el('trc_digitou').value;
  const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
  
- sheet.cell("B7").value("X"); 
- sheet.cell("A12").value(dataTroca);
- sheet.cell("A41").value(responsavel);
+ // Preenchimento exato mapeado pelo modelo oficial da empresa:
+ sheet.cell("B7").value("X");        // Marca a opção de Troca
+ sheet.cell("A12").value(dataTroca);  // Data na linha 12
+ sheet.cell("A41").value(responsavel);// Encarregado / Responsável na linha 41
  
+ // Inserção limpa direto nas células de produto mantendo o layout do modelo nas linhas 16 a 38
  listaData.forEach((item, index) => {
  const row = 16 + index;
  if (row <= 38) {
- sheet.cell(`A${row}`).value(item.codigo);
- sheet.cell(`B${row}`).value(item.descricao);
- sheet.cell(`C${row}`).value(item.quantidade);
- sheet.cell(`D${row}`).value(item.motivo);
+ sheet.cell(`A${row}`).value(String(item.codigo)); // EAN / CÓD PRODUTO
+ sheet.cell(`B${row}`).value(item.descricao);       // PRODUTO
+ sheet.cell(`C${row}`).value(item.quantidade);      // QUANTIDADE
+ sheet.cell(`D${row}`).value(item.motivo);          // MOTIVO
  }
  });
  }
@@ -930,7 +932,7 @@
  a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
  a.click();
  window.URL.revokeObjectURL(url);
- alert("Relatório preenchido perfeitamente no modelo oficial!");
+ alert("Relatório preenchido com sucesso no modelo oficial!");
  } catch (e) {
  alert("Erro ao exportar Excel: " + e.message);
  }
