@@ -262,7 +262,7 @@
  
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
- /* --- NOVO ESTILO DO SCANNER ESTILO BEEP --- */
+ /* --- ESTILO DO SCANNER CUSTOMIZADO (BEEP) --- */
  #beep-scanner-overlay {
  position: fixed; inset: 0; background: #000; z-index: 999999;
  display: flex; flex-direction: column; justify-content: space-between;
@@ -283,7 +283,6 @@
  
  .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
  
- /* Moldura apenas com cantos arredondados e a logo BEEP no canto inferior direito */
  .beep-target-box {
  width: 80%; max-width: 300px; height: 180px; 
  position: relative;
@@ -593,8 +592,8 @@
  
  <div class="camera-controls-floating">
  <button type="button" onclick="alternarLanterna()">🔦 Lanterna</button>
- <div class="zoom-pill">Zoom: <span id="beepZoomVal">1.0</span>x</div>
- <input type="range" id="beepZoomRange" min="1" max="5" step="0.1" value="1" style="width: 70px; accent-color: #fff;">
+ <div class="zoom-pill">Zoom: <span id="beepZoomVal">2.0</span>x</div>
+ <input type="range" id="beepZoomRange" min="1" max="5" step="0.1" value="2.0" style="width: 70px; accent-color: #fff;">
  </div>
  
  <div class="beep-bottom-bar">
@@ -723,7 +722,17 @@
  html5QrCode = new Html5Qrcode("beep-reader");
  }
  
- const config = { fps: 15, qrbox: { width: 260, height: 140 } };
+ // Configuração com resolução alta (HD/Full HD) e zoom inicial em 2.0x
+ const config = { 
+ fps: 15, 
+ qrbox: { width: 260, height: 140 },
+ videoConstraints: {
+ facingMode: "environment",
+ width: { min: 640, ideal: 1920, max: 3840 },
+ height: { min: 480, ideal: 1080, max: 2160 },
+ advanced: [{ zoom: 2.0 }]
+ }
+ };
  
  try {
  await html5QrCode.start(
@@ -740,23 +749,47 @@
  () => {}
  );
  
+ setTimeout(() => {
  try {
  const capabilities = html5QrCode.getRunningTrackCapabilities();
- if (capabilities.zoom) {
  const zoomInput = el('beepZoomRange');
+ const zoomValText = el('beepZoomVal');
+ 
+ if (capabilities.zoom) {
  zoomInput.min = capabilities.zoom.min || 1;
  zoomInput.max = capabilities.zoom.max || 5;
  zoomInput.step = capabilities.zoom.step || 0.1;
- zoomInput.oninput = (e) => {
- el('beepZoomVal').innerText = e.target.value;
- html5QrCode.applyVideoConstraints({ advanced: [{ zoom: e.target.value }] });
- };
  }
+ 
+ zoomInput.value = 2.0;
+ if (zoomValText) zoomValText.innerText = "2.0";
+ 
+ zoomInput.oninput = (e) => {
+ zoomValText.innerText = Number(e.target.value).toFixed(1);
+ html5QrCode.applyVideoConstraints({ advanced: [{ zoom: parseFloat(e.target.value) }] });
+ };
  } catch(e){}
+ }, 500);
  
  } catch (e) {
- alert("Erro ao abrir a câmera: " + e);
+ // Fallback caso o aparelho não suporte restrições avançadas
+ try {
+ await html5QrCode.start(
+ { facingMode: "environment" }, 
+ { fps: 15, qrbox: { width: 260, height: 140 } }, 
+ (decodedText) => {
+ tocarBipe();
+ dispararFlashScan();
+ const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+ el(prefix + 'codigo').value = decodedText;
  pararScanner();
+ buscarProduto(modulo);
+ }
+ );
+ } catch (err) {
+ alert("Erro ao abrir a câmera: " + err);
+ pararScanner();
+ }
  }
  }
  
