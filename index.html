@@ -6,6 +6,7 @@
  <meta name="theme-color" content="#0f172a">
  <title>Sistema de Gestão - Rede Market</title>
  
+ <!-- Bibliotecas externas -->
  <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
  
@@ -261,7 +262,7 @@
  
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
- /* --- ESTILO DO SCANNER CUSTOMIZADO (BEEP) --- */
+ /* --- ESTILO DO SCANNER LIMPO (SEM TELA ESCURA) --- */
  #beep-scanner-overlay {
  position: fixed; inset: 0; background: #000; z-index: 999999;
  display: flex; flex-direction: column; justify-content: space-between;
@@ -280,24 +281,7 @@
  #beep-reader { width: 100% !important; height: 100% !important; border: none !important; }
  #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
  
- .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
- 
- .beep-target-box {
- width: 80%; max-width: 300px; height: 180px; 
- position: relative;
- }
- .corner { position: absolute; width: 30px; height: 30px; border-color: #fff; border-style: solid; border-width: 0; }
- .corner-tl { top: 0; left: 0; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 8px; }
- .corner-tr { top: 0; right: 0; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 8px; }
- .corner-bl { bottom: 0; left: 0; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 8px; }
- .corner-br { bottom: 0; right: 0; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 8px; }
- 
- .beep-logo-mark {
- position: absolute; bottom: 8px; right: 12px; font-family: monospace; font-weight: 900; 
- font-size: 18px; color: #fff; letter-spacing: 2px;
- }
-
- .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.35); opacity: 0; transition: opacity 0.15s ease; z-index: 15; }
+ .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.35); opacity: 0; transition: opacity 0.15s ease; z-index: 15; pointer-events: none; }
  .scan-flash.active { opacity: 1; }
  
  .camera-controls-floating {
@@ -339,6 +323,7 @@
 </head>
 <body>
 
+ <!-- 1. TELA DE LOGIN -->
  <div id="login-screen" class="hidden">
  <div class="login-card">
  <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -368,6 +353,7 @@
  </div>
  </div>
 
+ <!-- 2. TELA DE MENU PRINCIPAL -->
  <div id="menu-screen" class="hidden">
  <div class="menu-title">Selecione o Módulo Desejado</div>
  <div class="btn-row">
@@ -406,6 +392,7 @@
  </div>
  </div>
  
+ <!-- MODAL DO MÓDULO PRÓ ATIVO -->
  <div id="proativo-modal" class="system-modal hidden">
  <div id="app-proativo">
  <header class="top">
@@ -459,7 +446,7 @@
  <div><label>Unidade</label><input id="pro_unidade" value="und"></div>
  </div>
  <div class="row">
- <div><label>Data de validade *</label><input id="pro_validade" type="date"></div>
+ <div><label>Data de validade * (Toque para selecionar)</label><input id="pro_validade" type="date"></div>
  <div><label>Valor unitário (R$)</label><input id="pro_valor" inputmode="decimal" value="0.00"></div>
  </div>
  <div class="actions"><button class="primary" onclick="adicionarItem('proativo')" style="width:auto">➕ Adicionar à lista</button></div>
@@ -480,6 +467,7 @@
  </div>
  </div>
  
+ <!-- MODAL DO MÓDULO TROCAS -->
  <div id="trocas-modal" class="system-modal hidden">
  <div id="app-trocas">
  <header class="top">
@@ -541,7 +529,7 @@
  <div><label>Unidade</label><input id="trc_unidade" value="und"></div>
  </div>
  <div class="row">
- <div><label>Data de Validade *</label><input id="trc_validade" type="date"></div>
+ <div><label>Data de Validade * (Toque para selecionar)</label><input id="trc_validade" type="date"></div>
  <div><label>Custo Unitário (R$)</label><input id="trc_valor" inputmode="decimal" value="0.00"></div>
  </div>
  <div class="actions"><button class="primary" onclick="adicionarItem('trocas')" style="width:auto">➕ Registrar para Troca</button></div>
@@ -562,6 +550,7 @@
  </div>
  </div>
  
+ <!-- LEITOR DE CÂMERA LIMPO (TELA TOTALMENTE VISÍVEL) -->
  <div id="beep-scanner-overlay" class="hidden">
  <div class="beep-top-bar">
  <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
@@ -572,17 +561,7 @@
  </div>
  
  <div class="beep-viewport"><div id="beep-reader"></div></div>
- 
- <div class="beep-target-container">
  <div class="scan-flash" id="scanFlash"></div>
- <div class="beep-target-box">
- <div class="corner corner-tl"></div>
- <div class="corner corner-tr"></div>
- <div class="corner corner-bl"></div>
- <div class="corner corner-br"></div>
- <div class="beep-logo-mark">BEEP</div>
- </div>
- </div>
  
  <div class="camera-controls-floating">
  <button type="button" onclick="alternarLanterna()">🔦 Lanterna</button>
@@ -716,10 +695,9 @@
  html5QrCode = new Html5Qrcode("beep-reader");
  }
  
- // Configuração com resolução alta (HD/Full HD) e zoom inicial em 2.0x
+ // Configuração sem 'qrbox' para utilizar a tela inteira da câmera sem escurecimento
  const config = { 
  fps: 15, 
- qrbox: { width: 260, height: 140 },
  videoConstraints: {
  facingMode: "environment",
  width: { min: 640, ideal: 1920, max: 3840 },
@@ -738,7 +716,17 @@
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  el(prefix + 'codigo').value = decodedText;
  pararScanner();
- buscarProduto(modulo);
+ 
+ // Executa a busca e joga o foco direto no campo de data para abrir o seletor (dia, mês e ano)
+ buscarProduto(modulo).then(() => {
+ setTimeout(() => {
+ const campoValidade = el(prefix + 'validade');
+ campoValidade.focus();
+ if (campoValidade.showPicker) {
+ try { campoValidade.showPicker(); } catch(err) {}
+ }
+ }, 300);
+ });
  },
  () => {}
  );
@@ -766,18 +754,26 @@
  }, 500);
  
  } catch (e) {
- // Fallback caso o aparelho não suporte restrições avançadas
  try {
  await html5QrCode.start(
  { facingMode: "environment" }, 
- { fps: 15, qrbox: { width: 260, height: 140 } }, 
+ { fps: 15 }, 
  (decodedText) => {
  tocarBipe();
  dispararFlashScan();
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  el(prefix + 'codigo').value = decodedText;
  pararScanner();
- buscarProduto(modulo);
+ 
+ buscarProduto(modulo).then(() => {
+ setTimeout(() => {
+ const campoValidade = el(prefix + 'validade');
+ campoValidade.focus();
+ if (campoValidade.showPicker) {
+ try { campoValidade.showPicker(); } catch(err) {}
+ }
+ }, 300);
+ });
  }
  );
  } catch (err) {
