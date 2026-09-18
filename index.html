@@ -227,6 +227,30 @@
  }
  .input-codigo { font-family: 'Courier New', monospace; font-size: 18px !important; letter-spacing: 1px; font-weight: 700; }
  
+ /* Área de visualização da foto do produto capturada */
+ .preview-container {
+ display: flex;
+ align-items: center;
+ gap: 12px;
+ margin-top: 10px;
+ background: #f1f5f9;
+ padding: 8px 12px;
+ border-radius: 10px;
+ border: 1px solid var(--border-color);
+ }
+ .preview-img {
+ width: 50px;
+ height: 50px;
+ object-fit: cover;
+ border-radius: 8px;
+ border: 1px solid var(--border-color);
+ background: #fff;
+ }
+ .preview-text {
+ font-size: 12px;
+ color: var(--text-muted);
+ }
+
  .campo label { margin: 0 0 3px; }
  .campo .caixa {
  display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px;
@@ -262,7 +286,7 @@
  
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
- /* --- ESTILO DO SCANNER LIMPO (SEM TELA ESCURA) --- */
+ /* --- ESTILO DO SCANNER LIMPO --- */
  #beep-scanner-overlay {
  position: fixed; inset: 0; background: #000; z-index: 999999;
  display: flex; flex-direction: column; justify-content: space-between;
@@ -307,12 +331,16 @@
  .ok { color: var(--accent-green); font-weight: 700; }
  .warn { color: #d97706; }
  
+ /* --- ITENS DA LISTA COM FOTO --- */
  .item {
  border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1;
  border-radius: 10px; padding: 10px 12px; margin-top: 8px; display: flex; justify-content: space-between;
- align-items: center; gap: 8px; background: #fff;
+ align-items: center; gap: 10px; background: #fff;
  }
- .item-info { min-width: 0; }
+ .item-thumb {
+ width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; flex-shrink: 0; background: #f8fafc;
+ }
+ .item-info { min-width: 0; flex-grow: 1; }
  .item strong { display: block; font-size: 13px; }
  .item small { color: var(--text-muted); font-size: 11px; display: block; margin-top: 2px; }
  .item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
@@ -441,7 +469,14 @@
  <section class="card">
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
  <label>Descrição do produto</label><input id="pro_descricao" placeholder="Descrição do produto">
- <div class="row">
+ 
+ <!-- Preview da Imagem -->
+ <div id="pro_preview_box" class="preview-container hidden">
+ <img id="pro_preview_img" class="preview-img" src="" alt="Foto">
+ <div class="preview-text">Foto obtida automaticamente do produto.</div>
+ </div>
+
+ <div class="row" style="margin-top: 10px;">
  <div><label>Quantidade *</label><input id="pro_quantidade" inputmode="decimal" placeholder="Ex.: 12"></div>
  <div><label>Unidade</label><input id="pro_unidade" value="und"></div>
  </div>
@@ -524,7 +559,14 @@
  <section class="card">
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Dados da Troca</h3></div>
  <label>Descrição do produto</label><input id="trc_descricao" placeholder="Descrição do produto">
- <div class="row">
+ 
+ <!-- Preview da Imagem -->
+ <div id="trc_preview_box" class="preview-container hidden">
+ <img id="trc_preview_img" class="preview-img" src="" alt="Foto">
+ <div class="preview-text">Foto obtida automaticamente do produto.</div>
+ </div>
+
+ <div class="row" style="margin-top: 10px;">
  <div><label>Quantidade a trocar *</label><input id="trc_quantidade" inputmode="decimal" placeholder="Ex.: 5"></div>
  <div><label>Unidade</label><input id="trc_unidade" value="und"></div>
  </div>
@@ -550,7 +592,7 @@
  </div>
  </div>
  
- <!-- LEITOR DE CÂMERA LIMPO (TELA TOTALMENTE VISÍVEL) -->
+ <!-- LEITOR DE CÂMERA LIMPO -->
  <div id="beep-scanner-overlay" class="hidden">
  <div class="beep-top-bar">
  <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
@@ -813,6 +855,8 @@
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  const code = el(prefix + 'codigo').value.trim();
  const statusEl = el(prefix + 'status');
+ const previewBox = el(prefix + 'preview_box');
+ const previewImg = el(prefix + 'preview_img');
  
  if (!code) {
  statusEl.innerHTML = '<span class="warn">Informe um código.</span>';
@@ -820,6 +864,8 @@
  }
  
  statusEl.innerHTML = '🔍 Buscando...';
+ previewBox.classList.add('hidden');
+ previewImg.src = '';
  
  if (catalogoLocal[code]) {
  el(prefix + 'descricao').value = catalogoLocal[code];
@@ -836,8 +882,14 @@
  try {
  const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
  const data = await res.json();
- if (data.status === 1 && data.product.product_name) {
+ if (data.status === 1 && data.product) {
+ if (data.product.product_name) {
  el(prefix + 'descricao').value = data.product.product_name;
+ }
+ if (data.product.image_front_url) {
+ previewImg.src = data.product.image_front_url;
+ previewBox.classList.remove('hidden');
+ }
  statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
  } else {
  statusEl.innerHTML = '<span class="warn">Não encontrado. Digite a descrição.</span>';
@@ -854,6 +906,7 @@
  const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
  const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
  const validade = el(prefix + 'validade').value;
+ const imgUrl = el(prefix + 'preview_img').src;
  
  if (!desc || isNaN(qtd) || !validade) {
  alert("Preencha descrição, quantidade e validade.");
@@ -868,7 +921,8 @@
  unidade: el(prefix + 'unidade').value || 'und',
  validade: validade,
  valor: val,
- total: qtd * val
+ total: qtd * val,
+ imagem: (!el(prefix + 'preview_box').classList.contains('hidden')) ? imgUrl : ''
  };
  
  if (modulo === 'trocas') {
@@ -888,6 +942,8 @@
  el(prefix + 'validade').value = '';
  el(prefix + 'valor').value = '0.00';
  el(prefix + 'status').innerHTML = '';
+ el(prefix + 'preview_box').classList.add('hidden');
+ el(prefix + 'preview_img').src = '';
  }
  
  function renderizarLista(modulo) {
@@ -913,7 +969,10 @@
  const motivoTexto = item.motivo === 1 ? '1 - Avaria' : (item.motivo === 2 ? '2 - Vencido' : item.motivo);
  const infoExtra = item.motivo ? ` | Motivo: ${motivoTexto}` : '';
  
+ const imgTag = item.imagem ? `<img src="${item.imagem}" class="item-thumb" alt="Foto">` : `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;font-size:16px;">📦</div>`;
+ 
  itemEl.innerHTML = `
+ ${imgTag}
  <div class="item-info">
  <strong>${item.descricao}</strong>
  <small>Cód: ${item.codigo} | Qtd: ${item.quantidade} ${item.unidade} | Val: ${dataFmt}${infoExtra}</small>
