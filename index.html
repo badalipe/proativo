@@ -6,7 +6,6 @@
  <meta name="theme-color" content="#0f172a">
  <title>Sistema de Gestão - Rede Market</title>
  
- <!-- Bibliotecas externas -->
  <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
  
@@ -467,7 +466,6 @@
 
  <div class="app-footer-credit">By Encarregado Felipe Farizeli - Patitiba</div>
 
- <!-- 1. TELA DE LOGIN -->
  <div id="login-screen" class="hidden">
  <div class="login-card">
  <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -497,7 +495,6 @@
  </div>
  </div>
 
- <!-- 2. TELA DE MENU PRINCIPAL -->
  <div id="menu-screen" class="hidden">
  <div class="menu-title">Selecione o Módulo Desejado</div>
  <div class="btn-row">
@@ -536,7 +533,6 @@
  </div>
  </div>
  
- <!-- MODAL DO MÓDULO PRÓ ATIVO -->
  <div id="proativo-modal" class="system-modal hidden">
  <div id="app-proativo">
  <header class="top">
@@ -602,7 +598,6 @@
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
  <label>Descrição do produto</label><input id="pro_descricao" placeholder="Descrição do produto">
  
- <!-- Preview da Imagem com Tratamento de Erro -->
  <div id="pro_preview_box" class="preview-container hidden">
  <img id="pro_preview_img" class="preview-img" src="" alt="Foto" onerror="this.src=''; this.parentElement.classList.add('hidden');">
  <div class="preview-text">Foto obtida automaticamente do produto.</div>
@@ -634,7 +629,6 @@
  </div>
  </div>
  
- <!-- MODAL DO MÓDULO TROCAS -->
  <div id="trocas-modal" class="system-modal hidden">
  <div id="app-trocas">
  <header class="top">
@@ -708,7 +702,6 @@
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Dados da Troca</h3></div>
  <label>Descrição do produto</label><input id="trc_descricao" placeholder="Descrição do produto">
  
- <!-- Preview da Imagem com Tratamento de Erro -->
  <div id="trc_preview_box" class="preview-container hidden">
  <img id="trc_preview_img" class="preview-img" src="" alt="Foto" onerror="this.src=''; this.parentElement.classList.add('hidden');">
  <div class="preview-text">Foto obtida automaticamente do produto.</div>
@@ -740,7 +733,6 @@
  </div>
  </div>
  
- <!-- LEITOR DE CÂMERA -->
  <div id="beep-scanner-overlay" class="hidden">
  <div class="beep-top-bar">
  <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
@@ -1249,10 +1241,10 @@
  const gerente = el('pro_gerente').value;
  const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
  
- // Pega a loja selecionada
+ // CAPTURA CORRETA DA LOJA SELECIONADA NO TOPO (MÓDULO PRÓ-ATIVO)
  const lojaSelecionada = el('pro_loja').value;
  
- // ATUALIZA A CÉLULA H1 DO CABEÇALHO SUPERIOR DA LOJA
+ // PREENCHE CORRETAMENTE A CÉLULA H1 DO CABEÇALHO SUPERIOR DA LOJA
  sheet.cell("H1").value(lojaSelecionada.toUpperCase());
  
  sheet.cell("H2").value(gerente);
@@ -1265,7 +1257,7 @@
  
  sheet.cell(`A${row}`).value(index + 1);
  sheet.cell(`B${row}`).value("");
- sheet.cell(`C${row}`).value(lojaSelecionada);
+ sheet.cell(`C${row}`).value(lojaSelecionada); // Preenche corretamente a coluna C com a loja selecionada
  sheet.cell(`D${row}`).value(item.codigo);
  sheet.cell(`E${row}`).value(item.descricao);
  sheet.cell(`F${row}`).value(item.quantidade);
