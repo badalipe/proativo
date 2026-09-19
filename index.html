@@ -225,6 +225,30 @@
  
  .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
  
+ /* Estilo para a foto do produto */
+ .product-preview-container {
+ display: flex;
+ align-items: center;
+ gap: 12px;
+ margin-top: 10px;
+ background: #f1f5f9;
+ padding: 8px 12px;
+ border-radius: 10px;
+ border: 1px solid var(--border-color);
+ }
+ .product-preview-img {
+ width: 50px;
+ height: 50px;
+ object-fit: contain;
+ background: #fff;
+ border-radius: 6px;
+ border: 1px solid #cbd5e1;
+ }
+ .product-preview-text {
+ font-size: 12px;
+ color: var(--text-muted);
+ }
+ 
  button {
  font: inherit; border: 0; border-radius: 10px; padding: 12px 14px; font-weight: 600;
  font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
@@ -431,6 +455,11 @@
  <input id="pro_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
  <div class="actions"><button class="primary" onclick="buscarProduto('proativo')" style="width:auto">🔍 Buscar produto</button></div>
  <div id="pro_status" class="notice" style="margin-top:8px"></div>
+ <!-- Preview da foto do produto -->
+ <div id="pro_preview" class="product-preview-container hidden">
+ <img id="pro_img_preview" class="product-preview-img" src="" alt="Foto">
+ <span class="product-preview-text">Foto ilustrativa da embalagem</span>
+ </div>
  </section>
  
  <section class="card">
@@ -534,6 +563,11 @@
  <input id="trc_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
  <div class="actions"><button class="primary" onclick="buscarProduto('trocas')" style="width:auto">🔍 Buscar produto</button></div>
  <div id="trc_status" class="notice" style="margin-top:8px"></div>
+ <!-- Preview da foto do produto -->
+ <div id="trc_preview" class="product-preview-container hidden">
+ <img id="trc_img_preview" class="product-preview-img" src="" alt="Foto">
+ <span class="product-preview-text">Foto ilustrativa da embalagem</span>
+ </div>
  </section>
  
  <section class="card">
@@ -598,6 +632,8 @@
  };
  
  let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
+ let catalogoImagens = JSON.parse(localStorage.getItem('sys_imagens') || '{}');
+ 
  let itensProAtivo = JSON.parse(localStorage.getItem('sys_proative_itens') || '[]');
  let itensTrocas = JSON.parse(localStorage.getItem('sys_trocas_itens') || '[]');
  
@@ -774,43 +810,84 @@
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  const code = el(prefix + 'codigo').value.trim();
  const statusEl = el(prefix + 'status');
+ const previewEl = el(prefix + 'preview');
+ const imgEl = el(prefix + 'img_preview');
+ 
+ // Limpa preview anterior
+ previewEl.classList.add('hidden');
+ imgEl.src = '';
  
  if (!code) {
- statusEl.innerHTML = '<span class="warn">Informe um código.</span>';
+ statusEl.innerHTML = '<span class="warn">Informe um código de barras.</span>';
  return;
  }
  
- statusEl.innerHTML = '🔍 Buscando...';
+ statusEl.innerHTML = '🔍 Buscando produto...';
  
+ // Verifica se já temos imagem salva em cache local
+ if (catalogoImagens[code]) {
+ imgEl.src = catalogoImagens[code];
+ previewEl.classList.remove('hidden');
+ }
+ 
+ // 1. Verifica no catálogo local salvo no aparelho
  if (catalogoLocal[code]) {
  el(prefix + 'descricao').value = catalogoLocal[code];
  statusEl.innerHTML = '<span class="ok">Localizado no catálogo local!</span>';
  return;
  }
  
+ // 2. Verifica na base pré-cadastrada no script
  if (produtosPreCadastrados[code]) {
  el(prefix + 'descricao').value = produtosPreCadastrados[code];
  statusEl.innerHTML = '<span class="ok">Localizado na base do sistema!</span>';
  return;
  }
  
+ // 3. Consulta online via API pública Open Food Facts
  try {
- const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+ const controller = new AbortController();
+ const timeoutId = setTimeout(() => controller.abort(), 6000);
+ 
+ const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, {
+ signal: controller.signal
+ });
+ clearTimeout(timeoutId);
+ 
  const data = await res.json();
- if (data.status === 1 && data.product.product_name) {
- el(prefix + 'descricao').value = data.product.product_name;
+ if (data.status === 1 && data.product && data.product.product_name) {
+ const nomeProd = data.product.product_name;
+ el(prefix + 'descricao').value = nomeProd;
+ 
+ // Captura a imagem pequena do produto se disponível na API
+ if (data.product.image_front_small_url || data.product.image_url) {
+ const imgUrl = data.product.image_front_small_url || data.product.image_url;
+ imgEl.src = imgUrl;
+ previewEl.classList.remove('hidden');
+ 
+ // Salva no cache local de imagens
+ catalogoImagens[code] = imgUrl;
+ localStorage.setItem('sys_imagens', JSON.stringify(catalogoImagens));
+ }
+ 
+ // Salva automaticamente no catálogo local
+ catalogoLocal[code] = nomeProd;
+ localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
+ 
  statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
  } else {
- statusEl.innerHTML = '<span class="warn">Não encontrado. Digite a descrição.</span>';
+ statusEl.innerHTML = '<span class="warn">Produto não catalogado. Digite a descrição abaixo.</span>';
  el(prefix + 'descricao').focus();
  }
  } catch (e) {
- statusEl.innerHTML = '<span class="warn">Erro de consulta. Digite manualmente.</span>';
+ statusEl.innerHTML = '<span class="warn">Consulta indisponível ou sem rede. Digite manualmente.</span>';
+ el(prefix + 'descricao').focus();
  }
  }
  
  function adicionarItem(modulo) {
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+ const code = el(prefix + 'codigo').value.trim();
  const desc = el(prefix + 'descricao').value.trim();
  const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
  const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
@@ -821,9 +898,14 @@
  return;
  }
  
+ if (code && code !== 'S/C' && !catalogoLocal[code]) {
+ catalogoLocal[code] = desc;
+ localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
+ }
+ 
  const item = {
  id: Date.now(),
- codigo: el(prefix + 'codigo').value.trim() || 'S/C',
+ codigo: code || 'S/C',
  descricao: desc,
  quantidade: qtd,
  unidade: el(prefix + 'unidade').value || 'und',
@@ -849,6 +931,8 @@
  el(prefix + 'validade').value = '';
  el(prefix + 'valor').value = '0.00';
  el(prefix + 'status').innerHTML = '';
+ el(prefix + 'preview').classList.add('hidden');
+ el(prefix + 'img_preview').src = '';
  }
  
  function renderizarLista(modulo) {
