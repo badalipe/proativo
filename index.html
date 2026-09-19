@@ -6,7 +6,6 @@
  <meta name="theme-color" content="#0f172a">
  <title>Sistema de Gestão - Rede Market</title>
  
- <!-- Bibliotecas externas -->
  <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
  
@@ -467,10 +466,8 @@
 </head>
 <body>
 
- <!-- Assinatura Global no Rodapé (Nítida) -->
  <div class="app-footer-credit">By Encarregado Felipe Farizeli - Patitiba</div>
 
- <!-- 1. TELA DE LOGIN -->
  <div id="login-screen" class="hidden">
  <div class="login-card">
  <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -500,7 +497,6 @@
  </div>
  </div>
 
- <!-- 2. TELA DE MENU PRINCIPAL -->
  <div id="menu-screen" class="hidden">
  <div class="menu-title">Selecione o Módulo Desejado</div>
  <div class="btn-row">
@@ -539,12 +535,10 @@
  </div>
  </div>
  
- <!-- MODAL DO MÓDULO PRÓ ATIVO -->
  <div id="proativo-modal" class="system-modal hidden">
  <div id="app-proativo">
  <header class="top">
  <div class="header-title-container">
- <!-- Linha Superior: Logo, Títulos e Botão Menu -->
  <div class="header-top-row">
  <div class="header-left">
  <div class="logo-container">
@@ -563,10 +557,9 @@
  </div>
  <button type="button" class="btn-menu-top" onclick="voltarAoMenu()">☰ Menu</button>
  </div>
- <!-- Linha Inferior: Seletor com as 12 Lojas Oficiais -->
  <div class="header-bottom-row">
  <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">Unidade Operacional</span>
- <select id="pro_loja" class="select-loja-top">
+ <select id="pro_loja" class="select-loja-top" onchange="forcarRedenhoSelect(this)">
  <option value="Patitiba" selected>📍 Patitiba</option>
  <option value="Bananal">📍 Bananal</option>
  <option value="Balneário">📍 Balneário</option>
@@ -607,7 +600,6 @@
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
  <label>Descrição do produto</label><input id="pro_descricao" placeholder="Descrição do produto">
  
- <!-- Preview da Imagem -->
  <div id="pro_preview_box" class="preview-container hidden">
  <img id="pro_preview_img" class="preview-img" src="" alt="Foto">
  <div class="preview-text">Foto obtida automaticamente do produto.</div>
@@ -639,12 +631,10 @@
  </div>
  </div>
  
- <!-- MODAL DO MÓDULO TROCAS -->
  <div id="trocas-modal" class="system-modal hidden">
  <div id="app-trocas">
  <header class="top">
  <div class="header-title-container">
- <!-- Linha Superior: Logo, Títulos e Botão Menu -->
  <div class="header-top-row">
  <div class="header-left">
  <div class="logo-container">
@@ -663,10 +653,9 @@
  </div>
  <button type="button" class="btn-menu-top" onclick="voltarAoMenu()">☰ Menu</button>
  </div>
- <!-- Linha Inferior: Seletor com as 12 Lojas Oficiais -->
  <div class="header-bottom-row">
  <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">Unidade Operacional</span>
- <select id="trc_loja" class="select-loja-top">
+ <select id="trc_loja" class="select-loja-top" onchange="forcarRedenhoSelect(this)">
  <option value="Patitiba" selected>📍 Patitiba</option>
  <option value="Bananal">📍 Bananal</option>
  <option value="Balneário">📍 Balneário</option>
@@ -715,7 +704,6 @@
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Dados da Troca</h3></div>
  <label>Descrição do produto</label><input id="trc_descricao" placeholder="Descrição do produto">
  
- <!-- Preview da Imagem -->
  <div id="trc_preview_box" class="preview-container hidden">
  <img id="trc_preview_img" class="preview-img" src="" alt="Foto">
  <div class="preview-text">Foto obtida automaticamente do produto.</div>
@@ -747,7 +735,6 @@
  </div>
  </div>
  
- <!-- LEITOR DE CÂMERA LIMPO -->
  <div id="beep-scanner-overlay" class="hidden">
  <div class="beep-top-bar">
  <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
@@ -793,6 +780,15 @@
  let lanternaAtiva = false;
  
  const el = id => document.getElementById(id);
+ 
+ /* Função para forçar o navegador do celular a redesenhar o select imediatamente */
+ function forcarRedenhoSelect(selectEl) {
+ selectEl.blur();
+ setTimeout(() => {
+ selectEl.focus();
+ selectEl.blur();
+ }, 10);
+ }
  
  window.addEventListener('DOMContentLoaded', () => {
  const estaLogado = sessionStorage.getItem('sys_logado') === 'true';
