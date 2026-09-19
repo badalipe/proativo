@@ -153,18 +153,41 @@
  
  .top {
  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
- color: #fff; padding: 14px 12px; position: sticky; top: 0; z-index: 100;
+ color: #fff; padding: 10px 12px; position: sticky; top: 0; z-index: 100;
  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
  }
- .header-title-container { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 600px; margin: 0 auto; }
- .header-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+ .header-title-container { 
+ display: flex; 
+ flex-direction: column; 
+ gap: 8px; 
+ width: 100%; 
+ max-width: 600px; 
+ margin: 0 auto; 
+ }
+ .header-top-row {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ width: 100%;
+ }
+ .header-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
  .logo-container {
- background: #ffffff; padding: 4px 8px; border-radius: 8px;
+ background: #ffffff; padding: 3px 6px; border-radius: 6px;
  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
  }
- .header-logo { height: 28px; width: auto; object-fit: contain; }
- .header-text h1 { font-size: 15px; font-weight: 700; margin: 0; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
- .header-text .sub { color: #94a3b8; font-size: 10px; margin-top: 2px; }
+ .header-logo { height: 24px; width: auto; object-fit: contain; }
+ .header-text h1 { font-size: 14px; font-weight: 700; margin: 0; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ .header-text .sub { color: #94a3b8; font-size: 9px; margin-top: 1px; }
+
+ .header-bottom-row {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 8px;
+ width: 100%;
+ border-top: 1px solid rgba(255, 255, 255, 0.1);
+ padding-top: 6px;
+ }
  
  .wrap { width: 100%; max-width: 600px; margin: auto; padding: 12px 10px 80px; }
  
@@ -199,8 +222,6 @@
  border: 1px solid var(--border-color); border-radius: 10px; background: #f8fafc;
  }
  .campo .caixa input, .campo .caixa select { border: 0; background: transparent; padding: 0; height: 100%; font-size: 14px; }
- 
- .header-right { display: flex; align-items: center; gap: 6px; }
  
  .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
  
@@ -350,6 +371,7 @@
  <div id="app-proativo">
  <header class="top">
  <div class="header-title-container">
+ <div class="header-top-row">
  <div class="header-left">
  <div class="logo-container">
  <svg class="header-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -365,8 +387,12 @@
  <div class="sub"><span>Validades e Estoque</span></div>
  </div>
  </div>
- <div class="header-right">
- <select id="pro_loja" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 11px; font-weight: 600; padding: 5px 4px; border-radius: 6px; outline: none;">
+ <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 5px 10px; font-size: 11px; width: auto;">Menu</button>
+ </div>
+ 
+ <div class="header-bottom-row">
+ <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;">Loja:</span>
+ <select id="pro_loja" style="flex: 1; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 12px; font-weight: 600; padding: 6px 8px; border-radius: 6px; outline: none;">
  <optgroup label="Paraty" style="color: #000;">
  <option value="Patitiba" selected>Patitiba</option>
  <option value="Bananal">Bananal</option>
@@ -384,7 +410,6 @@
  <option value="Parque Mambucaba">Parque Mambucaba</option>
  </optgroup>
  </select>
- <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 8px; font-size: 11px;">Menu</button>
  </div>
  </div>
  </header>
@@ -441,6 +466,7 @@
  <div id="app-trocas">
  <header class="top">
  <div class="header-title-container">
+ <div class="header-top-row">
  <div class="header-left">
  <div class="logo-container">
  <svg class="header-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -456,8 +482,12 @@
  <div class="sub"><span>Devoluções</span></div>
  </div>
  </div>
- <div class="header-right">
- <select id="trc_loja" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 11px; font-weight: 600; padding: 5px 4px; border-radius: 6px; outline: none;">
+ <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 5px 10px; font-size: 11px; width: auto;">Menu</button>
+ </div>
+ 
+ <div class="header-bottom-row">
+ <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;">Loja:</span>
+ <select id="trc_loja" style="flex: 1; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 12px; font-weight: 600; padding: 6px 8px; border-radius: 6px; outline: none;">
  <optgroup label="Paraty" style="color: #000;">
  <option value="Patitiba" selected>Patitiba</option>
  <option value="Bananal">Bananal</option>
@@ -475,7 +505,6 @@
  <option value="Parque Mambucaba">Parque Mambucaba</option>
  </optgroup>
  </select>
- <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 8px; font-size: 11px;">Menu</button>
  </div>
  </div>
  </header>
