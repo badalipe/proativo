@@ -251,7 +251,7 @@
  }
 
  .header-logo { 
- height: 34px; /* Logo maior e bem destacada */
+ height: 34px; 
  width: auto; 
  object-fit: contain; 
  }
@@ -295,7 +295,7 @@
  background: rgba(255, 255, 255, 0.22);
  }
 
- /* Linha inferior do header (Loja) */
+ /* Linha inferior do header (Seletor de Lojas Funcional) */
  .header-bottom-row {
  display: flex;
  align-items: center;
@@ -305,17 +305,20 @@
  padding-top: 8px;
  }
 
- .chip-loja {
- display: flex; 
- align-items: center; 
- gap: 6px; 
+ .select-loja-top {
  background: rgba(255, 255, 255, 0.12);
- border: 1px solid rgba(255, 255, 255, 0.2); 
- color: #fff; 
- font-size: 11px; 
- font-weight: 600;
- padding: 4px 10px; 
+ border: 1px solid rgba(255, 255, 255, 0.25);
+ color: #fff;
+ font-size: 11px;
+ font-weight: 700;
+ padding: 4px 10px;
  border-radius: 999px;
+ outline: none;
+ cursor: pointer;
+ }
+ .select-loja-top option {
+ background: #1e293b;
+ color: #fff;
  }
  
  .wrap { width: 100%; max-width: 600px; margin: auto; padding: 12px 10px 80px; }
@@ -560,10 +563,23 @@
  </div>
  <button type="button" class="btn-menu-top" onclick="voltarAoMenu()">☰ Menu</button>
  </div>
- <!-- Linha Inferior: Loja -->
+ <!-- Linha Inferior: Seletor com as 12 Lojas Oficiais -->
  <div class="header-bottom-row">
  <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">Unidade Operacional</span>
- <div class="chip-loja"><span>📍 PATITIBA</span></div>
+ <select id="pro_loja" class="select-loja-top">
+ <option value="Patitiba" selected>📍 Patitiba</option>
+ <option value="Bananal">📍 Bananal</option>
+ <option value="Balneário">📍 Balneário</option>
+ <option value="Texaco">📍 Texaco</option>
+ <option value="Nova Angra">📍 Nova Angra</option>
+ <option value="Encruzo da Enseada">📍 Encruzo da Enseada</option>
+ <option value="Lapa">📍 Lapa</option>
+ <option value="Frade">📍 Frade</option>
+ <option value="Ribeira">📍 Ribeira</option>
+ <option value="Cais">📍 Cais</option>
+ <option value="Japuíba">📍 Japuíba</option>
+ <option value="Parque Mambucaba">📍 Parque Mambucaba</option>
+ </select>
  </div>
  </div>
  </header>
@@ -647,10 +663,23 @@
  </div>
  <button type="button" class="btn-menu-top" onclick="voltarAoMenu()">☰ Menu</button>
  </div>
- <!-- Linha Inferior: Loja -->
+ <!-- Linha Inferior: Seletor com as 12 Lojas Oficiais -->
  <div class="header-bottom-row">
  <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">Unidade Operacional</span>
- <div class="chip-loja"><span>📍 PATITIBA</span></div>
+ <select id="trc_loja" class="select-loja-top">
+ <option value="Patitiba" selected>📍 Patitiba</option>
+ <option value="Bananal">📍 Bananal</option>
+ <option value="Balneário">📍 Balneário</option>
+ <option value="Texaco">📍 Texaco</option>
+ <option value="Nova Angra">📍 Nova Angra</option>
+ <option value="Encruzo da Enseada">📍 Encruzo da Enseada</option>
+ <option value="Lapa">📍 Lapa</option>
+ <option value="Frade">📍 Frade</option>
+ <option value="Ribeira">📍 Ribeira</option>
+ <option value="Cais">📍 Cais</option>
+ <option value="Japuíba">📍 Japuíba</option>
+ <option value="Parque Mambucaba">📍 Parque Mambucaba</option>
+ </select>
  </div>
  </div>
  </header>
@@ -1223,4 +1252,3 @@
  </script>
 </body>
 </html>
-
