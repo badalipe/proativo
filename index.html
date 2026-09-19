@@ -1249,8 +1249,11 @@
  const gerente = el('pro_gerente').value;
  const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
  
- // PEGA DINAMICAMENTE A LOJA SELECIONADA NO SELECT DO PRÓ-ATIVO
+ // Pega a loja selecionada
  const lojaSelecionada = el('pro_loja').value;
+ 
+ // ATUALIZA A CÉLULA H1 DO CABEÇALHO SUPERIOR DA LOJA
+ sheet.cell("H1").value(lojaSelecionada.toUpperCase());
  
  sheet.cell("H2").value(gerente);
  sheet.cell("H3").value(dataLev);
@@ -1303,7 +1306,7 @@
  } catch (e) {
  alert("Erro ao exportar Excel: " + e.message);
  }
- }
+}
  </script>
 </body>
 </html>
