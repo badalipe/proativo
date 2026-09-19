@@ -258,9 +258,9 @@
  border: 1px solid var(--border-color);
  }
  .preview-img {
- width: 140px;  /* Aumentado para 140px */
- height: 140px; /* Aumentado para 140px */
- object-fit: contain; /* Alterado para contain para mostrar a embalagem inteira sem cortar */
+ width: 140px; 
+ height: 140px; 
+ object-fit: contain; 
  border-radius: 10px;
  border: 1px solid var(--border-color);
  background: #fff;
@@ -282,10 +282,25 @@
  .campo .caixa input, .campo .caixa select { border: 0; background: transparent; padding: 0; height: 100%; font-size: 14px; }
  
  .header-right { display: flex; align-items: center; gap: 6px; }
- .chip-loja {
- display: flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.15);
- border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 11px; font-weight: 600;
- padding: 5px 8px; border-radius: 999px;
+ 
+ /* --- SELETOR DE LOJA INTERATIVO NO TOPO --- */
+ .select-loja-header {
+ background: rgba(255, 255, 255, 0.15);
+ border: 1px solid rgba(255, 255, 255, 0.3);
+ color: #fff;
+ font-size: 11px;
+ font-weight: 700;
+ padding: 5px 8px;
+ border-radius: 8px;
+ outline: none;
+ cursor: pointer;
+ text-transform: uppercase;
+ max-width: 130px;
+ }
+ .select-loja-header option {
+ background: #0f172a;
+ color: #fff;
+ font-weight: 600;
  }
  
  .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
@@ -354,15 +369,15 @@
  .ok { color: var(--accent-green); font-weight: 700; }
  .warn { color: #d97706; }
  
- /* --- ITENS DA LISTA COM FOTO MAIOR TAMBÉM --- */
+ /* --- ITENS DA LISTA COM FOTO MAIOR --- */
  .item {
  border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1;
  border-radius: 10px; padding: 10px 12px; margin-top: 8px; display: flex; justify-content: space-between;
  align-items: center; gap: 12px; background: #fff;
  }
  .item-thumb {
- width: 90px;  /* Aumentado para 90px na lista */
- height: 90px; /* Aumentado para 90px na lista */
+ width: 90px;  
+ height: 90px; 
  object-fit: contain;
  border-radius: 8px;
  border: 1px solid #e2e8f0;
@@ -380,7 +395,7 @@
 </head>
 <body>
 
- <!-- Assinatura Global no Rodapé (Nítida e com fundo de destaque) -->
+ <!-- Assinatura Global no Rodapé -->
  <div class="app-footer-credit">By Encarregado Felipe Farizeli - Patitiba</div>
 
  <!-- 1. TELA DE LOGIN -->
@@ -473,7 +488,25 @@
  </div>
  </div>
  <div class="header-right">
- <button type="button" class="chip-loja"><span>PATITIBA</span></button>
+ <!-- SELETOR DE LOJAS ATUALIZADO COM BANANAL -->
+ <select id="selectLojaGlobal" class="select-loja-header" onchange="atualizarLojaSelecionada(this.value)">
+ <optgroup label="Loja Paraty">
+ <option value="Patitiba" selected>Patitiba</option>
+ <option value="Bananal">Bananal</option>
+ </optgroup>
+ <optgroup label="Lojas Angra">
+ <option value="Balneário">Balneário</option>
+ <option value="Texaco">Texaco</option>
+ <option value="Nova Angra">Nova Angra</option>
+ <option value="Encruzo da Enseada">Encruzo da Enseada</option>
+ <option value="Lapa">Lapa</option>
+ <option value="Frade">Frade</option>
+ <option value="Ribeira">Ribeira</option>
+ <option value="Cais">Cais</option>
+ <option value="Japuíba">Japuíba</option>
+ <option value="Parque Mambucaba">Parque Mambucaba</option>
+ </optgroup>
+ </select>
  <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 10px; font-size: 11px;">Menu</button>
  </div>
  </div>
@@ -502,7 +535,7 @@
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
  <label>Descrição do produto</label><input id="pro_descricao" placeholder="Descrição do produto">
  
- <!-- Preview da Imagem Bem Maior -->
+ <!-- Preview da Imagem -->
  <div id="pro_preview_box" class="preview-container hidden">
  <img id="pro_preview_img" class="preview-img" src="" alt="Foto">
  <div class="preview-text">Foto obtida automaticamente do produto.</div>
@@ -555,7 +588,6 @@
  </div>
  </div>
  <div class="header-right">
- <button type="button" class="chip-loja"><span>PATITIBA</span></button>
  <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 10px; font-size: 11px;">Menu</button>
  </div>
  </div>
@@ -592,7 +624,7 @@
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Dados da Troca</h3></div>
  <label>Descrição do produto</label><input id="trc_descricao" placeholder="Descrição do produto">
  
- <!-- Preview da Imagem Bem Maior -->
+ <!-- Preview da Imagem -->
  <div id="trc_preview_box" class="preview-container hidden">
  <img id="trc_preview_img" class="preview-img" src="" alt="Foto">
  <div class="preview-text">Foto obtida automaticamente do produto.</div>
@@ -624,7 +656,7 @@
  </div>
  </div>
  
- <!-- LEITOR DE CÂMERA LIMPO -->
+ <!-- LEITOR DE CÂMERA -->
  <div id="beep-scanner-overlay" class="hidden">
  <div class="beep-top-bar">
  <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
@@ -664,6 +696,7 @@
  let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
  let itensProAtivo = JSON.parse(localStorage.getItem('sys_proative_itens') || '[]');
  let itensTrocas = JSON.parse(localStorage.getItem('sys_trocas_itens') || '[]');
+ let lojaAtualSelecionada = localStorage.getItem('sys_loja_atual') || 'Patitiba';
  
  let moduloAtual = null;
  let html5QrCode = null;
@@ -682,10 +715,20 @@
  el('menu-screen').classList.remove('hidden');
  }
  
+ const selectLoja = el('selectLojaGlobal');
+ if (selectLoja) {
+ selectLoja.value = lojaAtualSelecionada;
+ }
+ 
  const hoje = new Date().toISOString().split('T')[0];
  if (el('pro_data')) el('pro_data').value = hoje;
  if (el('trc_data')) el('trc_data').value = hoje;
  });
+ 
+ function atualizarLojaSelecionada(novaLoja) {
+ lojaAtualSelecionada = novaLoja;
+ localStorage.setItem('sys_loja_atual', novaLoja);
+ }
  
  function realizarLogin(e) {
  e.preventDefault();
@@ -1084,7 +1127,7 @@
  
  sheet.cell(`A${row}`).value(index + 1);
  sheet.cell(`B${row}`).value("");
- sheet.cell(`C${row}`).value("Patitiba");
+ sheet.cell(`C${row}`).value(lojaAtualSelecionada); // <--- Aqui injeta dinamicamente a loja selecionada!
  sheet.cell(`D${row}`).value(item.codigo);
  sheet.cell(`E${row}`).value(item.descricao);
  sheet.cell(`F${row}`).value(item.quantidade);
@@ -1108,7 +1151,7 @@
  
  sheet.cell(`A${row}`).value(String(item.codigo)).style({ horizontalAlignment: "center" });
  sheet.cell(`B${row}`).value(item.descricao).style({ horizontalAlignment: "center" });
- sheet.cell(`C${row}`,).value(item.quantidade).style({ horizontalAlignment: "center" });
+ sheet.cell(`C${row}`).value(item.quantidade).style({ horizontalAlignment: "center" });
  sheet.cell(`D${row}`).value(motivoNome).style({ horizontalAlignment: "center" });
  }
  });
@@ -1118,10 +1161,10 @@
  const url = window.URL.createObjectURL(blob);
  const a = document.createElement("a");
  a.href = url;
- a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+ a.download = `${nomeModulo.replace(/\s+/g, '_')}_${lojaAtualSelecionada}_${new Date().toISOString().split('T')[0]}.xlsx`;
  a.click();
  window.URL.revokeObjectURL(url);
- alert("Relatório preenchido com sucesso no modelo oficial!");
+ alert("Relatório preenchido com sucesso no modelo oficial para a loja " + lojaAtualSelecionada + "!");
  } catch (e) {
  alert("Erro ao exportar Excel: " + e.message);
  }
