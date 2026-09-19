@@ -6,7 +6,6 @@
  <meta name="theme-color" content="#0f172a">
  <title>Sistema de Gestão - Rede Market</title>
  
- <!-- Bibliotecas externas -->
  <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
  
@@ -43,29 +42,8 @@
  padding: 12px;
  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
  color: var(--text-main);
- -webkit-font-smoothing: antialiased;
- position: relative;
  }
 
- /* --- ASSINATURA / RODAPÉ GLOBAL FIXO (NÍDIDO) --- */
- .app-footer-credit {
- position: fixed;
- bottom: 6px;
- left: 0;
- right: 0;
- text-align: center;
- font-size: 11px;
- color: #334155;
- font-weight: 700;
- letter-spacing: 0.5px;
- z-index: 999999;
- pointer-events: none;
- background: rgba(248, 250, 252, 0.85);
- padding: 2px 0;
- backdrop-filter: blur(2px);
- }
- 
- /* --- TELA DE MENU --- */
  #menu-screen {
  display: flex;
  flex-direction: column;
@@ -84,7 +62,6 @@
  font-weight: 800;
  margin-bottom: 24px;
  text-shadow: 0 2px 4px rgba(0,0,0,0.4);
- letter-spacing: 0.5px;
  }
 
  .btn-row {
@@ -103,50 +80,37 @@
  color: #ffffff;
  cursor: pointer;
  overflow: hidden;
- transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
- -webkit-backdrop-filter: blur(12px);
- backdrop-filter: blur(12px);
  display: flex;
  align-items: center;
  justify-content: flex-start;
  gap: 20px;
  min-height: 80px;
  text-decoration: none;
- touch-action: manipulation;
  }
  
  .glass-shine {
  position: absolute;
- top: -35%; 
- left: -35%;
- width: 70%; 
- height: 70%;
+ top: -35%; left: -35%;
+ width: 70%; height: 70%;
  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 65%);
- pointer-events: none; 
- z-index: 1;
+ pointer-events: none; z-index: 1;
  }
  
  .glass-content {
- position: relative; 
- z-index: 2;
- display: flex;
- align-items: center;
- gap: 16px;
- width: 100%;
+ position: relative; z-index: 2;
+ display: flex; align-items: center;
+ gap: 16px; width: 100%;
  }
  
  .btn-svg {
- width: 32px; 
- height: 32px;
+ width: 32px; height: 32px;
  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
  flex-shrink: 0;
  }
  
  .btn-text {
- font-size: 18px;
- font-weight: 800;
- letter-spacing: 1.5px;
- color: #ffffff;
+ font-size: 18px; font-weight: 800;
+ letter-spacing: 1.5px; color: #ffffff;
  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
  text-align: left;
  }
@@ -164,25 +128,14 @@
  box-shadow: 0 8px 24px rgba(139,92,246,0.4);
  }
  
- /* --- TELA DE LOGIN --- */
  #login-screen {
- position: fixed;
- inset: 0;
+ position: fixed; inset: 0;
  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
- display: flex;
- align-items: center;
- justify-content: center;
- z-index: 99999;
- padding: 16px;
+ display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 16px;
  }
  .login-card {
- background: rgba(255, 255, 255, 0.96);
- width: 100%;
- max-width: 380px;
- padding: 28px 20px;
- border-radius: 20px;
- box-shadow: 0 10px 30px rgba(0,0,0,0.4);
- text-align: center;
+ background: rgba(255, 255, 255, 0.96); width: 100%; max-width: 380px;
+ padding: 28px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); text-align: center;
  }
  .login-logo { height: 48px; margin-bottom: 16px; }
  .login-card h2 { margin: 0 0 6px; font-size: 20px; font-weight: 700; color: var(--text-main); }
@@ -192,16 +145,10 @@
  border-radius: 6px; font-size: 12px; margin-bottom: 14px; font-weight: 600;
  }
  
- /* --- MODAIS DOS MÓDULOS --- */
  .system-modal {
- position: fixed;
- inset: 0;
- z-index: 99999;
- background: var(--bg-main);
- overflow-y: auto;
- -webkit-overflow-scrolling: touch;
+ position: fixed; inset: 0; z-index: 99999;
+ background: var(--bg-main); overflow-y: auto; -webkit-overflow-scrolling: touch;
  }
- 
  .hidden { display: none !important; }
  
  .top {
@@ -246,34 +193,6 @@
  }
  .input-codigo { font-family: 'Courier New', monospace; font-size: 18px !important; letter-spacing: 1px; font-weight: 700; }
  
- /* --- ÁREA DE VISUALIZAÇÃO DA FOTO DO PRODUTO (BEM MAIOR) --- */
- .preview-container {
- display: flex;
- align-items: center;
- gap: 16px;
- margin-top: 12px;
- background: #f1f5f9;
- padding: 14px 16px;
- border-radius: 12px;
- border: 1px solid var(--border-color);
- }
- .preview-img {
- width: 140px; 
- height: 140px; 
- object-fit: contain; 
- border-radius: 10px;
- border: 1px solid var(--border-color);
- background: #fff;
- box-shadow: 0 2px 8px rgba(0,0,0,0.12);
- flex-shrink: 0;
- }
- .preview-text {
- font-size: 13px;
- color: var(--text-main);
- font-weight: 600;
- line-height: 1.4;
- }
-
  .campo label { margin: 0 0 3px; }
  .campo .caixa {
  display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px;
@@ -283,36 +202,13 @@
  
  .header-right { display: flex; align-items: center; gap: 6px; }
  
- /* --- SELETOR DE LOJA INTERATIVO NO TOPO --- */
- .select-loja-header {
- background: rgba(255, 255, 255, 0.15);
- border: 1px solid rgba(255, 255, 255, 0.3);
- color: #fff;
- font-size: 11px;
- font-weight: 700;
- padding: 5px 8px;
- border-radius: 8px;
- outline: none;
- cursor: pointer;
- text-transform: uppercase;
- max-width: 130px;
- }
- .select-loja-header option {
- background: #0f172a;
- color: #fff;
- font-weight: 600;
- }
- 
  .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
  
  button {
  font: inherit; border: 0; border-radius: 10px; padding: 12px 14px; font-weight: 600;
- font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;
+ font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
  }
- button:active { transform: scale(0.97); }
- 
  .primary { background: var(--primary); color: #fff; width: 100%; }
- .primary:hover { background: var(--primary-hover); }
  .secondary { background: #f0f7ff; color: var(--primary); }
  .danger { background: #fef2f2; color: var(--accent-red); }
  
@@ -321,70 +217,58 @@
  .row { grid-template-columns: 1fr 1fr; }
  .row-ident { grid-template-columns: 1fr 1fr; }
  }
- 
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
- /* --- ESTILO DO SCANNER LIMPO --- */
  #beep-scanner-overlay {
  position: fixed; inset: 0; background: #000; z-index: 999999;
  display: flex; flex-direction: column; justify-content: space-between;
  }
- .beep-top-bar { 
- display: flex; align-items: center; justify-content: space-between; 
- padding: 16px 16px; background: rgba(0, 0, 0, 0.85); color: #fff; 
- font-size: 16px; font-weight: 700; z-index: 20; 
- }
- .beep-back-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; }
- .beep-title-group { display: flex; gap: 20px; align-items: center; }
- .beep-nav-item { color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 700; cursor: pointer; background: none; border: none; }
- .beep-nav-item.active { color: #fff; border-bottom: 2px solid #fff; padding-bottom: 2px; }
-
+ .beep-top-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: rgba(0, 0, 0, 0.8); color: #fff; font-size: 15px; font-weight: 600; z-index: 20; }
+ .beep-back-btn, .beep-manual-link { background: none; border: none; color: #fff; font-size: 14px; cursor: pointer; }
  .beep-viewport { position: absolute; inset: 0; background: #000; z-index: 1; }
  #beep-reader { width: 100% !important; height: 100% !important; border: none !important; }
  #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
- 
- .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.35); opacity: 0; transition: opacity 0.15s ease; z-index: 15; pointer-events: none; }
+ .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
+ .beep-target-box {
+ width: 85%; max-width: 320px; height: 180px; border: 2px solid rgba(255, 255, 255, 0.4);
+ border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); position: relative;
+ }
+ .scan-line {
+ position: absolute; left: 8px; right: 8px; height: 2px; top: 8px;
+ background: linear-gradient(90deg, transparent, #e30613, transparent);
+ box-shadow: 0 0 8px rgba(227, 6, 19, 0.8); animation: scanline 2s ease-in-out infinite;
+ }
+ @keyframes scanline { 0%, 100% { top: 8px; } 50% { top: calc(100% - 10px); } }
+ .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.35); opacity: 0; transition: opacity 0.15s ease; z-index: 15; }
  .scan-flash.active { opacity: 1; }
- 
  .camera-controls-floating {
- position: absolute; bottom: 90px; left: 0; right: 0; display: flex;
+ position: absolute; bottom: 85px; left: 0; right: 0; display: flex;
  justify-content: center; align-items: center; gap: 10px; z-index: 20; padding: 0 16px;
  }
  .camera-controls-floating button, .camera-controls-floating .zoom-pill {
  background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255, 255, 255, 0.3);
- padding: 6px 12px; border-radius: 20px; font-size: 12px;
+ padding: 8px 12px; border-radius: 20px; font-size: 12px;
  }
-
  .beep-bottom-bar {
  position: absolute; bottom: 0; left: 0; right: 0;
- padding: 20px 16px calc(25px + env(safe-area-inset-bottom, 0px));
- background: rgba(0,0,0,0.4); z-index: 20; display: flex; justify-content: center;
+ padding: 16px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+ background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); z-index: 20; display: flex; justify-content: center;
  }
  .beep-btn-bottom-action {
- background: transparent; border: 1px solid rgba(255, 255, 255, 0.6);
- color: #fff; border-radius: 99px; padding: 12px 28px; font-size: 14px; font-weight: 600; cursor: pointer;
+ background: transparent; border: 2px solid rgba(255, 255, 255, 0.9);
+ color: #fff; border-radius: 99px; padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer;
  }
 
  .notice { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
  .ok { color: var(--accent-green); font-weight: 700; }
  .warn { color: #d97706; }
  
- /* --- ITENS DA LISTA COM FOTO MAIOR --- */
  .item {
  border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1;
  border-radius: 10px; padding: 10px 12px; margin-top: 8px; display: flex; justify-content: space-between;
- align-items: center; gap: 12px; background: #fff;
+ align-items: center; gap: 8px; background: #fff;
  }
- .item-thumb {
- width: 90px;  
- height: 90px; 
- object-fit: contain;
- border-radius: 8px;
- border: 1px solid #e2e8f0;
- flex-shrink: 0;
- background: #f8fafc;
- }
- .item-info { min-width: 0; flex-grow: 1; }
+ .item-info { min-width: 0; }
  .item strong { display: block; font-size: 13px; }
  .item small { color: var(--text-muted); font-size: 11px; display: block; margin-top: 2px; }
  .item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
@@ -395,10 +279,6 @@
 </head>
 <body>
 
- <!-- Assinatura Global no Rodapé -->
- <div class="app-footer-credit">By Encarregado Felipe Farizeli - Patitiba</div>
-
- <!-- 1. TELA DE LOGIN -->
  <div id="login-screen" class="hidden">
  <div class="login-card">
  <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -428,7 +308,6 @@
  </div>
  </div>
 
- <!-- 2. TELA DE MENU PRINCIPAL -->
  <div id="menu-screen" class="hidden">
  <div class="menu-title">Selecione o Módulo Desejado</div>
  <div class="btn-row">
@@ -467,7 +346,6 @@
  </div>
  </div>
  
- <!-- MODAL DO MÓDULO PRÓ ATIVO -->
  <div id="proativo-modal" class="system-modal hidden">
  <div id="app-proativo">
  <header class="top">
@@ -488,13 +366,12 @@
  </div>
  </div>
  <div class="header-right">
- <!-- SELETOR DE LOJAS ATUALIZADO COM BANANAL -->
- <select id="selectLojaGlobal" class="select-loja-header" onchange="atualizarLojaSelecionada(this.value)">
- <optgroup label="Loja Paraty">
+ <select id="pro_loja" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 11px; font-weight: 600; padding: 5px 4px; border-radius: 6px; outline: none;">
+ <optgroup label="Paraty" style="color: #000;">
  <option value="Patitiba" selected>Patitiba</option>
  <option value="Bananal">Bananal</option>
  </optgroup>
- <optgroup label="Lojas Angra">
+ <optgroup label="Angra dos Reis" style="color: #000;">
  <option value="Balneário">Balneário</option>
  <option value="Texaco">Texaco</option>
  <option value="Nova Angra">Nova Angra</option>
@@ -507,7 +384,7 @@
  <option value="Parque Mambucaba">Parque Mambucaba</option>
  </optgroup>
  </select>
- <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 10px; font-size: 11px;">Menu</button>
+ <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 8px; font-size: 11px;">Menu</button>
  </div>
  </div>
  </header>
@@ -534,19 +411,12 @@
  <section class="card">
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
  <label>Descrição do produto</label><input id="pro_descricao" placeholder="Descrição do produto">
- 
- <!-- Preview da Imagem -->
- <div id="pro_preview_box" class="preview-container hidden">
- <img id="pro_preview_img" class="preview-img" src="" alt="Foto">
- <div class="preview-text">Foto obtida automaticamente do produto.</div>
- </div>
-
- <div class="row" style="margin-top: 10px;">
+ <div class="row">
  <div><label>Quantidade *</label><input id="pro_quantidade" inputmode="decimal" placeholder="Ex.: 12"></div>
  <div><label>Unidade</label><input id="pro_unidade" value="und"></div>
  </div>
  <div class="row">
- <div><label>Data de validade * (Toque para selecionar)</label><input id="pro_validade" type="date"></div>
+ <div><label>Data de validade *</label><input id="pro_validade" type="date"></div>
  <div><label>Valor unitário (R$)</label><input id="pro_valor" inputmode="decimal" value="0.00"></div>
  </div>
  <div class="actions"><button class="primary" onclick="adicionarItem('proativo')" style="width:auto">➕ Adicionar à lista</button></div>
@@ -567,7 +437,6 @@
  </div>
  </div>
  
- <!-- MODAL DO MÓDULO TROCAS -->
  <div id="trocas-modal" class="system-modal hidden">
  <div id="app-trocas">
  <header class="top">
@@ -588,7 +457,25 @@
  </div>
  </div>
  <div class="header-right">
- <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 10px; font-size: 11px;">Menu</button>
+ <select id="trc_loja" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 11px; font-weight: 600; padding: 5px 4px; border-radius: 6px; outline: none;">
+ <optgroup label="Paraty" style="color: #000;">
+ <option value="Patitiba" selected>Patitiba</option>
+ <option value="Bananal">Bananal</option>
+ </optgroup>
+ <optgroup label="Angra dos Reis" style="color: #000;">
+ <option value="Balneário">Balneário</option>
+ <option value="Texaco">Texaco</option>
+ <option value="Nova Angra">Nova Angra</option>
+ <option value="Encruzo da Enseada">Encruzo da Enseada</option>
+ <option value="Lapa">Lapa</option>
+ <option value="Frade">Frade</option>
+ <option value="Ribeira">Ribeira</option>
+ <option value="Cais">Cais</option>
+ <option value="Japuíba">Japuíba</option>
+ <option value="Parque Mambucaba">Parque Mambucaba</option>
+ </optgroup>
+ </select>
+ <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 8px; font-size: 11px;">Menu</button>
  </div>
  </div>
  </header>
@@ -623,19 +510,12 @@
  <section class="card">
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Dados da Troca</h3></div>
  <label>Descrição do produto</label><input id="trc_descricao" placeholder="Descrição do produto">
- 
- <!-- Preview da Imagem -->
- <div id="trc_preview_box" class="preview-container hidden">
- <img id="trc_preview_img" class="preview-img" src="" alt="Foto">
- <div class="preview-text">Foto obtida automaticamente do produto.</div>
- </div>
-
- <div class="row" style="margin-top: 10px;">
+ <div class="row">
  <div><label>Quantidade a trocar *</label><input id="trc_quantidade" inputmode="decimal" placeholder="Ex.: 5"></div>
  <div><label>Unidade</label><input id="trc_unidade" value="und"></div>
  </div>
  <div class="row">
- <div><label>Data de Validade * (Toque para selecionar)</label><input id="trc_validade" type="date"></div>
+ <div><label>Data de Validade *</label><input id="trc_validade" type="date"></div>
  <div><label>Custo Unitário (R$)</label><input id="trc_valor" inputmode="decimal" value="0.00"></div>
  </div>
  <div class="actions"><button class="primary" onclick="adicionarItem('trocas')" style="width:auto">➕ Registrar para Troca</button></div>
@@ -656,28 +536,23 @@
  </div>
  </div>
  
- <!-- LEITOR DE CÂMERA -->
  <div id="beep-scanner-overlay" class="hidden">
  <div class="beep-top-bar">
- <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
- <div class="beep-title-group">
- <button type="button" class="beep-nav-item active">Escanear...</button>
- <button type="button" class="beep-nav-item" onclick="fecharScannerSemCodigo()">DIGITAR MANUALMENTE</button>
+ <button type="button" class="beep-back-btn" onclick="pararScanner()">← Fechar</button>
+ <span>Escanear Código</span>
+ <button type="button" class="beep-manual-link" onclick="fecharScannerSemCodigo()">Manual</button>
  </div>
- </div>
- 
  <div class="beep-viewport"><div id="beep-reader"></div></div>
+ <div class="beep-target-container">
  <div class="scan-flash" id="scanFlash"></div>
- 
+ <div class="beep-target-box"><div class="scan-line"></div></div>
+ </div>
  <div class="camera-controls-floating">
  <button type="button" onclick="alternarLanterna()">🔦 Lanterna</button>
- <div class="zoom-pill">Zoom: <span id="beepZoomVal">2.0</span>x</div>
- <input type="range" id="beepZoomRange" min="1" max="5" step="0.1" value="2.0" style="width: 70px; accent-color: #fff;">
+ <div class="zoom-pill">Zoom: <span id="beepZoomVal">1.0</span>x</div>
+ <input type="range" id="beepZoomRange" min="1" max="5" step="0.1" value="1" style="width: 70px; accent-color: #fff;">
  </div>
- 
- <div class="beep-bottom-bar">
- <button type="button" class="beep-btn-bottom-action" onclick="fecharScannerSemCodigo()">Adicionar sem código de barras</button>
- </div>
+ <div class="beep-bottom-bar"><button type="button" class="beep-btn-bottom-action" onclick="fecharScannerSemCodigo()">Inserir sem código</button></div>
  </div>
  
  <script>
@@ -696,7 +571,6 @@
  let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
  let itensProAtivo = JSON.parse(localStorage.getItem('sys_proative_itens') || '[]');
  let itensTrocas = JSON.parse(localStorage.getItem('sys_trocas_itens') || '[]');
- let lojaAtualSelecionada = localStorage.getItem('sys_loja_atual') || 'Patitiba';
  
  let moduloAtual = null;
  let html5QrCode = null;
@@ -715,20 +589,10 @@
  el('menu-screen').classList.remove('hidden');
  }
  
- const selectLoja = el('selectLojaGlobal');
- if (selectLoja) {
- selectLoja.value = lojaAtualSelecionada;
- }
- 
  const hoje = new Date().toISOString().split('T')[0];
  if (el('pro_data')) el('pro_data').value = hoje;
  if (el('trc_data')) el('trc_data').value = hoje;
  });
- 
- function atualizarLojaSelecionada(novaLoja) {
- lojaAtualSelecionada = novaLoja;
- localStorage.setItem('sys_loja_atual', novaLoja);
- }
  
  function realizarLogin(e) {
  e.preventDefault();
@@ -812,15 +676,7 @@
  html5QrCode = new Html5Qrcode("beep-reader");
  }
  
- const config = { 
- fps: 15, 
- videoConstraints: {
- facingMode: "environment",
- width: { min: 640, ideal: 1920, max: 3840 },
- height: { min: 480, ideal: 1080, max: 2160 },
- advanced: [{ zoom: 2.0 }]
- }
- };
+ const config = { fps: 15, qrbox: { width: 260, height: 140 } };
  
  try {
  await html5QrCode.start(
@@ -832,69 +688,28 @@
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  el(prefix + 'codigo').value = decodedText;
  pararScanner();
- 
- buscarProduto(modulo).then(() => {
- setTimeout(() => {
- const campoValidade = el(prefix + 'validade');
- campoValidade.focus();
- if (campoValidade.showPicker) {
- try { campoValidade.showPicker(); } catch(err) {}
- }
- }, 300);
- });
+ buscarProduto(modulo);
  },
  () => {}
  );
  
- setTimeout(() => {
  try {
  const capabilities = html5QrCode.getRunningTrackCapabilities();
- const zoomInput = el('beepZoomRange');
- const zoomValText = el('beepZoomVal');
- 
  if (capabilities.zoom) {
+ const zoomInput = el('beepZoomRange');
  zoomInput.min = capabilities.zoom.min || 1;
  zoomInput.max = capabilities.zoom.max || 5;
  zoomInput.step = capabilities.zoom.step || 0.1;
- }
- 
- zoomInput.value = 2.0;
- if (zoomValText) zoomValText.innerText = "2.0";
- 
  zoomInput.oninput = (e) => {
- zoomValText.innerText = Number(e.target.value).toFixed(1);
- html5QrCode.applyVideoConstraints({ advanced: [{ zoom: parseFloat(e.target.value) }] });
+ el('beepZoomVal').innerText = e.target.value;
+ html5QrCode.applyVideoConstraints({ advanced: [{ zoom: e.target.value }] });
  };
+ }
  } catch(e){}
- }, 500);
  
  } catch (e) {
- try {
- await html5QrCode.start(
- { facingMode: "environment" }, 
- { fps: 15 }, 
- (decodedText) => {
- tocarBipe();
- dispararFlashScan();
- const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- el(prefix + 'codigo').value = decodedText;
+ alert("Erro ao abrir a câmera: " + e);
  pararScanner();
- 
- buscarProduto(modulo).then(() => {
- setTimeout(() => {
- const campoValidade = el(prefix + 'validade');
- campoValidade.focus();
- if (campoValidade.showPicker) {
- try { campoValidade.showPicker(); } catch(err) {}
- }
- }, 300);
- });
- }
- );
- } catch (err) {
- alert("Erro ao abrir a câmera: " + err);
- pararScanner();
- }
  }
  }
  
@@ -930,8 +745,6 @@
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  const code = el(prefix + 'codigo').value.trim();
  const statusEl = el(prefix + 'status');
- const previewBox = el(prefix + 'preview_box');
- const previewImg = el(prefix + 'preview_img');
  
  if (!code) {
  statusEl.innerHTML = '<span class="warn">Informe um código.</span>';
@@ -939,8 +752,6 @@
  }
  
  statusEl.innerHTML = '🔍 Buscando...';
- previewBox.classList.add('hidden');
- previewImg.src = '';
  
  if (catalogoLocal[code]) {
  el(prefix + 'descricao').value = catalogoLocal[code];
@@ -957,14 +768,8 @@
  try {
  const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
  const data = await res.json();
- if (data.status === 1 && data.product) {
- if (data.product.product_name) {
+ if (data.status === 1 && data.product.product_name) {
  el(prefix + 'descricao').value = data.product.product_name;
- }
- if (data.product.image_front_url) {
- previewImg.src = data.product.image_front_url;
- previewBox.classList.remove('hidden');
- }
  statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
  } else {
  statusEl.innerHTML = '<span class="warn">Não encontrado. Digite a descrição.</span>';
@@ -981,7 +786,6 @@
  const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
  const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
  const validade = el(prefix + 'validade').value;
- const imgUrl = el(prefix + 'preview_img').src;
  
  if (!desc || isNaN(qtd) || !validade) {
  alert("Preencha descrição, quantidade e validade.");
@@ -996,8 +800,7 @@
  unidade: el(prefix + 'unidade').value || 'und',
  validade: validade,
  valor: val,
- total: qtd * val,
- imagem: (!el(prefix + 'preview_box').classList.contains('hidden')) ? imgUrl : ''
+ total: qtd * val
  };
  
  if (modulo === 'trocas') {
@@ -1017,8 +820,6 @@
  el(prefix + 'validade').value = '';
  el(prefix + 'valor').value = '0.00';
  el(prefix + 'status').innerHTML = '';
- el(prefix + 'preview_box').classList.add('hidden');
- el(prefix + 'preview_img').src = '';
  }
  
  function renderizarLista(modulo) {
@@ -1044,10 +845,7 @@
  const motivoTexto = item.motivo === 1 ? '1 - Avaria' : (item.motivo === 2 ? '2 - Vencido' : item.motivo);
  const infoExtra = item.motivo ? ` | Motivo: ${motivoTexto}` : '';
  
- const imgTag = item.imagem ? `<img src="${item.imagem}" class="item-thumb" alt="Foto">` : `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;font-size:24px;">📦</div>`;
- 
  itemEl.innerHTML = `
- ${imgTag}
  <div class="item-info">
  <strong>${item.descricao}</strong>
  <small>Cód: ${item.codigo} | Qtd: ${item.quantidade} ${item.unidade} | Val: ${dataFmt}${infoExtra}</small>
@@ -1116,6 +914,7 @@
  const digitou = el('pro_digitou').value;
  const gerente = el('pro_gerente').value;
  const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
+ const lojaSel = el('pro_loja').value;
  
  sheet.cell("H2").value(gerente);
  sheet.cell("H3").value(dataLev);
@@ -1127,7 +926,7 @@
  
  sheet.cell(`A${row}`).value(index + 1);
  sheet.cell(`B${row}`).value("");
- sheet.cell(`C${row}`).value(lojaAtualSelecionada); // <--- Aqui injeta dinamicamente a loja selecionada!
+ sheet.cell(`C${row}`).value(lojaSel);
  sheet.cell(`D${row}`).value(item.codigo);
  sheet.cell(`E${row}`).value(item.descricao);
  sheet.cell(`F${row}`).value(item.quantidade);
@@ -1140,7 +939,7 @@
  const responsavel = el('trc_digitou').value;
  const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
  
- sheet.cell("B7").value(" ( X ) TROCA ");
+ sheet.cell("B7").value(" ( X ) TROCA "); 
  sheet.cell("A12").value(dataTroca);
  sheet.cell("A41").value(responsavel);
  
@@ -1149,10 +948,10 @@
  if (row <= 38) {
  const motivoNome = item.motivo === 1 ? '1 - Avaria' : (item.motivo === 2 ? '2 - Vencido' : item.motivo);
  
- sheet.cell(`A${row}`).value(String(item.codigo)).style({ horizontalAlignment: "center" });
- sheet.cell(`B${row}`).value(item.descricao).style({ horizontalAlignment: "center" });
- sheet.cell(`C${row}`).value(item.quantidade).style({ horizontalAlignment: "center" });
- sheet.cell(`D${row}`).value(motivoNome).style({ horizontalAlignment: "center" });
+ sheet.cell(`A${row}`).value(String(item.codigo));
+ sheet.cell(`B${row}`).value(item.descricao);
+ sheet.cell(`C${row}`).value(item.quantidade);
+ sheet.cell(`D${row}`).value(motivoNome);
  }
  });
  }
@@ -1161,10 +960,10 @@
  const url = window.URL.createObjectURL(blob);
  const a = document.createElement("a");
  a.href = url;
- a.download = `${nomeModulo.replace(/\s+/g, '_')}_${lojaAtualSelecionada}_${new Date().toISOString().split('T')[0]}.xlsx`;
+ a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
  a.click();
  window.URL.revokeObjectURL(url);
- alert("Relatório preenchido com sucesso no modelo oficial para a loja " + lojaAtualSelecionada + "!");
+ alert("Relatório preenchido com sucesso no modelo oficial!");
  } catch (e) {
  alert("Erro ao exportar Excel: " + e.message);
  }
