@@ -6,6 +6,7 @@
  <meta name="theme-color" content="#0f172a">
  <title>Sistema de Gestão - Rede Market</title>
  
+ <!-- Bibliotecas externas -->
  <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
  
@@ -420,7 +421,7 @@
  .scan-flash.active { opacity: 1; }
  
  .camera-controls-floating {
- position: absolute; bottom: 90px; left: 0; right: 0; display: flex;
+ position: absolute; bottom: 100px; left: 0; right: 0; display: flex;
  justify-content: center; align-items: center; gap: 10px; z-index: 20; padding: 0 16px;
  }
  .camera-controls-floating button, .camera-controls-floating .zoom-pill {
@@ -430,12 +431,13 @@
 
  .beep-bottom-bar {
  position: absolute; bottom: 0; left: 0; right: 0;
- padding: 20px 16px calc(25px + env(safe-area-inset-bottom, 0px));
- background: rgba(0,0,0,0.4); z-index: 20; display: flex; justify-content: center;
+ padding: 16px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+ background: rgba(0,0,0,0.5); z-index: 20; display: flex; justify-content: center;
  }
  .beep-btn-bottom-action {
- background: transparent; border: 1px solid rgba(255, 255, 255, 0.6);
+ background: transparent; border: 1px solid rgba(255, 255, 255, 0.7);
  color: #fff; border-radius: 99px; padding: 12px 28px; font-size: 14px; font-weight: 600; cursor: pointer;
+ line-height: 1.2;
  }
 
  .notice { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
@@ -464,6 +466,7 @@
 
  <div class="app-footer-credit">By Encarregado Felipe Farizeli - Patitiba</div>
 
+ <!-- 1. TELA DE LOGIN -->
  <div id="login-screen" class="hidden">
  <div class="login-card">
  <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -493,6 +496,7 @@
  </div>
  </div>
 
+ <!-- 2. TELA DE MENU PRINCIPAL COM 4 BOTÕES -->
  <div id="menu-screen" class="hidden">
  <div class="menu-title">Selecione o Módulo Desejado</div>
  <div class="btn-row">
@@ -541,6 +545,7 @@
  </div>
  </div>
  
+ <!-- MODAL DO MÓDULO PRÓ ATIVO -->
  <div id="proativo-modal" class="system-modal hidden">
  <div id="app-proativo">
  <header class="top">
@@ -637,6 +642,7 @@
  </div>
  </div>
  
+ <!-- MODAL DO MÓDULO TROCAS -->
  <div id="trocas-modal" class="system-modal hidden">
  <div id="app-trocas">
  <header class="top">
@@ -741,6 +747,7 @@
  </div>
  </div>
  
+ <!-- LEITOR DE CÂMERA -->
  <div id="beep-scanner-overlay" class="hidden">
  <div class="beep-top-bar">
  <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
@@ -760,7 +767,7 @@
  </div>
  
  <div class="beep-bottom-bar">
- <button type="button" class="beep-btn-bottom-action" onclick="fecharScannerSemCodigo()">Adicionar sem código de barras</button>
+ <button type="button" class="beep-btn-bottom-action" onclick="fecharScannerSemCodigo()">Fechar Câmera</button>
  </div>
  </div>
  
