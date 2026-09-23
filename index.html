@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>União dos Sites</title>
-    <!-- Carregamento da biblioteca de código de barras -->
     <script src="https://unpkg.com/@zxing/library@latest" type="text/javascript"></script>
     <style>
         * {
@@ -14,14 +13,21 @@
             font-family: system-ui, -apple-system, sans-serif;
         }
 
-        body {
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             background-color: #1a1a2e;
             color: #ffffff;
+        }
+
+        /* Container do Menu Inicial */
+        #menuPrincipal {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            height: 100vh;
             padding: 20px;
         }
 
@@ -54,241 +60,184 @@
             gap: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             text-decoration: none;
-            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .btn-modulo:active {
             transform: scale(0.98);
         }
 
-        /* Estilos de Impressão */
-        @media print {
-            @page {
-                size: A4 landscape !important;
-                margin: 0mm !important;
-            }
-            html, body {
-                width: 100% !important;
-                height: auto !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: #ffffff !important;
-            }
-            *, *::before, *::after {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            #btnCamFlutuante, #modalScannerOverlay {
-                display: none !important;
-            }
+        /* Moldura para carregar os sites mantendo o botão visível */
+        #frameSite {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+        }
+
+        /* Botão Flutuante */
+        #btnCamFlutuante {
+            position: fixed !important;
+            bottom: 30px !important;
+            right: 20px !important;
+            width: 68px !important;
+            height: 68px !important;
+            z-index: 2147483647 !important;
+            background: linear-gradient(145deg, #1e88e5, #0d47a1) !important;
+            border: 2px solid rgba(255, 255, 255, 0.9) !important;
+            border-radius: 50% !important;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.4) !important;
+            cursor: pointer !important;
+            display: none;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        /* Tela inteira da câmera ao escanear */
+        #modalScannerOverlay {
+            position: fixed !important;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 2147483647;
+            display: flex; flex-direction: column; justify-content: space-between;
         }
     </style>
 </head>
 <body>
 
-    <h1>Selecione o Módulo Desejado</h1>
-
-    <div class="container-botoes">
-        <!-- Botão 1 -->
-        <button class="btn-modulo" onclick="navegarPara('https://badalipe.github.io/proativo/')">
-            ↑ PRÓATIVO
-        </button>
-
-        <!-- Botão 2 -->
-        <button class="btn-modulo" onclick="navegarPara('https://badalipe.github.io/proativo/')">
-            ⇄ TROCAS
-        </button>
-
-        <!-- Botão 3 -->
-        <button class="btn-modulo" onclick="navegarPara('https://badalipe.github.io/proativo/')">
-            ↓ PERDAS
-        </button>
-
-        <!-- Botão 4: Cartaz Fácil -->
-        <button class="btn-modulo" style="background: linear-gradient(135deg, #2e7d32, #1b5e20);" onclick="abrirCartazFacil()">
-            📋 CARTAZ FÁCIL
-        </button>
+    <!-- Menu de navegação inicial -->
+    <div id="menuPrincipal">
+        <h1>Selecione o Módulo Desejado</h1>
+        <div class="container-botoes">
+            <button class="btn-modulo" onclick="abrirNoFrame('https://badalipe.github.io/proativo/')">
+                ↑ PRÓATIVO
+            </button>
+            <button class="btn-modulo" onclick="abrirNoFrame('https://badalipe.github.io/proativo/')">
+                ⇄ TROCAS
+            </button>
+            <button class="btn-modulo" onclick="abrirNoFrame('https://badalipe.github.io/proativo/')">
+                ↓ PERDAS
+            </button>
+            <button class="btn-modulo" style="background: linear-gradient(135deg, #2e7d32, #1b5e20);" onclick="abrirNoFrame('https://rmarket.cartazfacil.pro/index.php')">
+                📋 CARTAZ FÁCIL
+            </button>
+        </div>
     </div>
 
+    <!-- Iframe onde o site selecionado roda -->
+    <iframe id="frameSite"></iframe>
+
+    <!-- Botão Flutuante BIPAR -->
+    <button id="btnCamFlutuante" onclick="abrirScanner()">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 7V5C3 3.89543 3.89543 3 5 3H7" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M17 3H19C20.1046 3 21 3.89543 21 5V7" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M21 17V19C21 20.1046 20.1046 21 19 21H17" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M7 21H5C3.89543 21 3 20.1046 3 19V17" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+                <line x1="7" y1="8" x2="7" y2="16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+                <line x1="10" y1="8" x2="10" y2="16" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="14" y1="8" x2="14" y2="16" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="17" y1="8" x2="17" y2="16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+                <line x1="2" y1="12" x2="22" y2="12" stroke="#FF3B30" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span style="font-size: 9px; font-weight: 900; color: #FFFFFF; margin-top: 1px;">BIPAR</span>
+        </div>
+    </button>
+
     <script>
-        function navegarPara(url) {
-            window.location.href = url;
+        var currentStream = null;
+        var codeReader = null;
+
+        function abrirNoFrame(url) {
+            document.getElementById('menuPrincipal').style.display = 'none';
+            var iframe = document.getElementById('frameSite');
+            iframe.style.display = 'block';
+            iframe.src = url;
+            
+            // Exibe o botão BIPAR assim que entra no site
+            document.getElementById('btnCamFlutuante').style.display = 'flex';
         }
 
-        // Credenciais do Cartaz Fácil
-        const USUARIO_CARTAZ = "rmarket07";
-        const SENHA_CARTAZ = "sup12345";
-
-        function abrirCartazFacil() {
-            window.location.href = "https://rmarket.cartazfacil.pro/index.php";
+        function tocarBeep() {
+            try {
+                var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                var osc = audioCtx.createOscillator();
+                var gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } catch(e) {}
         }
 
-        (function() {
-            'use strict';
+        function abrirScanner() {
+            if (document.getElementById('modalScannerOverlay')) return;
 
-            // Oculta "DOBRE AQUI" na impressão
-            function ocultarApenasTextosDobra() {
-                var urlAtual = window.location.href.toLowerCase();
-                if (urlAtual.includes('imprim') || urlAtual.includes('preview')) {
-                    var elementos = document.querySelectorAll('span, p, div, small, b, strong');
-                    elementos.forEach(function(el) {
-                        if (el.children.length === 0 && el.textContent) {
-                            var txt = el.textContent.trim().toUpperCase();
-                            if (txt === 'DOBRE AQUI' || txt === 'CORTE AQUI' || txt === 'DOBRE' || txt === 'CORTE') {
-                                el.style.visibility = 'hidden';
-                                el.style.fontSize = '0px';
-                            }
-                        }
-                    });
-                }
-            }
-            setInterval(ocultarApenasTextosDobra, 400);
+            var overlay = document.createElement('div');
+            overlay.id = 'modalScannerOverlay';
+            overlay.innerHTML = `
+                <video id="videoScanner" playsinline autoplay muted style="position: absolute; width: 100%; height: 100%; object-fit: cover;"></video>
+                <div style="position: relative; z-index: 10; padding: 20px; color: #fff; text-align: center; font-weight: bold;">Escanear código de barras...</div>
+                <div style="position: relative; z-index: 10; padding: 25px; text-align: center;">
+                    <button id="btnFecharScanner" style="padding: 14px 30px; background: rgba(0,0,0,0.8); color: #fff; border: 1px solid #fff; border-radius: 25px; font-weight: bold;">Fechar Câmera</button>
+                </div>
+            `;
 
-            var currentStream = null;
-            var codeReader = null;
+            document.body.appendChild(overlay);
+            document.getElementById('btnFecharScanner').onclick = function() { fecharEPreencher(null); };
 
-            function tocarBeep() {
-                try {
-                    var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    var osc = audioCtx.createOscillator();
-                    var gain = audioCtx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
-                    gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.15);
-                } catch(e) {}
-            }
+            iniciarCamera();
+        }
 
-            function forcarBotao() {
-                var urlAtual = window.location.href.toLowerCase();
-                
-                // Realiza Auto Login na tela inicial do Cartaz Fácil
-                if (urlAtual.includes('cartazfacil.pro')) {
-                    var campoUser = document.querySelector('input[type="text"], input[name*="user"], input[name*="login"]');
-                    var campoPass = document.querySelector('input[type="password"]');
-                    var btnSubmit = document.querySelector('button[type="submit"], input[type="submit"]');
-
-                    if (campoUser && campoPass && campoUser.value === "") {
-                        campoUser.value = USUARIO_CARTAZ;
-                        campoPass.value = SENHA_CARTAZ;
-                        if (btnSubmit) btnSubmit.click();
+        function iniciarCamera() {
+            var videoElem = document.getElementById('videoScanner');
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } } }).then(function(stream) {
+                currentStream = stream;
+                videoElem.srcObject = stream;
+                codeReader = new ZXing.BrowserMultiFormatReader();
+                codeReader.decodeFromConstraints({ video: { facingMode: { ideal: "environment" } } }, 'videoScanner', function(result) {
+                    if (result) {
+                        tocarBeep();
+                        fecharEPreencher(result.getText());
                     }
-                }
+                });
+            }).catch(function(err) {
+                alert("Erro ao acessar a câmera. Verifique se o Chrome tem permissão de Câmera.");
+            });
+        }
 
-                var ehTelaLogin = urlAtual.includes('login') || (document.querySelector('input[type="password"]') !== null && !urlAtual.includes('badalipe'));
-                var ehTelaImpressao = urlAtual.includes('imprim') || urlAtual.includes('preview');
-
-                // Oculta o botão apenas durante login ou prévia de impressão
-                if (ehTelaLogin || ehTelaImpressao) {
-                    var btnExistente = document.getElementById('btnCamFlutuante');
-                    if (btnExistente) btnExistente.style.display = 'none';
-                    return;
-                }
-
-                if (document.getElementById('btnCamFlutuante')) {
-                    document.getElementById('btnCamFlutuante').style.display = 'flex';
-                    return;
-                }
-
-                // Criação do botão visual moderno de scan
-                var btn = document.createElement('button');
-                btn.id = 'btnCamFlutuante';
-                btn.innerHTML = `
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; pointer-events: none;">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 7V5C3 3.89543 3.89543 3 5 3H7" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
-                            <path d="M17 3H19C20.1046 3 21 3.89543 21 5V7" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
-                            <path d="M21 17V19C21 20.1046 20.1046 21 19 21H17" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
-                            <path d="M7 21H5C3.89543 21 3 20.1046 3 19V17" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
-                            <line x1="7" y1="8" x2="7" y2="16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
-                            <line x1="10" y1="8" x2="10" y2="16" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
-                            <line x1="14" y1="8" x2="14" y2="16" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
-                            <line x1="17" y1="8" x2="17" y2="16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
-                            <line x1="2" y1="12" x2="22" y2="12" stroke="#FF3B30" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                        <span style="font-size: 9px; font-weight: 900; color: #FFFFFF; margin-top: 1px;">BIPAR</span>
-                    </div>
-                `;
-
-                btn.style.cssText = `
-                    position: fixed !important; bottom: 30px !important; right: 20px !important;
-                    width: 68px !important; height: 68px !important; z-index: 2147483647 !important;
-                    background: linear-gradient(145deg, #1e88e5, #0d47a1) !important;
-                    border: 2px solid rgba(255, 255, 255, 0.9) !important; border-radius: 50% !important;
-                    box-shadow: 0 8px 18px rgba(0,0,0,0.4) !important; cursor: pointer !important;
-                    display: flex !important; align-items: center !important; justify-content: center !important;
-                `;
-
-                btn.onclick = function(e) {
-                    e.preventDefault();
-                    abrirScanner();
-                };
-
-                (document.body || document.documentElement).appendChild(btn);
+        function fecharEPreencher(codigo) {
+            if (codeReader) { try { codeReader.reset(); } catch(e){} }
+            if (currentStream) { currentStream.getTracks().forEach(track => track.stop()); }
+            var overlay = document.getElementById('modalScannerOverlay');
+            if (overlay) overlay.parentNode.removeChild(overlay);
+            
+            if (codigo) {
+                preencherEBuscar(codigo);
             }
+        }
 
-            function abrirScanner() {
-                if (document.getElementById('modalScannerOverlay')) return;
-
-                var overlay = document.createElement('div');
-                overlay.id = 'modalScannerOverlay';
-                overlay.style.cssText = 'position: fixed !important; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 2147483647; display: flex; flex-direction: column; justify-content: space-between;';
-
-                overlay.innerHTML = `
-                    <video id="videoScanner" playsinline autoplay muted style="position: absolute; width: 100%; height: 100%; object-fit: cover;"></video>
-                    <div style="position: relative; z-index: 10; padding: 20px; color: #fff; text-align: center; font-weight: bold;">Escanear código de barras...</div>
-                    <div style="position: relative; z-index: 10; padding: 25px; text-align: center;">
-                        <button id="btnFecharScanner" style="padding: 14px 30px; background: rgba(0,0,0,0.8); color: #fff; border: 1px solid #fff; border-radius: 25px; font-weight: bold;">Fechar Câmera</button>
-                    </div>
-                `;
-
-                document.body.appendChild(overlay);
-                document.getElementById('btnFecharScanner').onclick = function() { fecharEPreencher(null); };
-
-                iniciarCamera();
-            }
-
-            function iniciarCamera() {
-                var videoElem = document.getElementById('videoScanner');
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } } }).then(function(stream) {
-                    currentStream = stream;
-                    videoElem.srcObject = stream;
-                    codeReader = new ZXing.BrowserMultiFormatReader();
-                    codeReader.decodeFromConstraints({ video: { facingMode: { ideal: "environment" } } }, 'videoScanner', function(result) {
-                        if (result) {
-                            tocarBeep();
-                            fecharEPreencher(result.getText());
-                        }
-                    });
-                }).catch(function() {});
-            }
-
-            function fecharEPreencher(codigo) {
-                if (codeReader) { try { codeReader.reset(); } catch(e){} }
-                if (currentStream) { currentStream.getTracks().forEach(track => track.stop()); }
-                var overlay = document.getElementById('modalScannerOverlay');
-                if (overlay) overlay.parentNode.removeChild(overlay);
-                if (codigo) preencherEBuscar(codigo);
-            }
-
-            function preencherEBuscar(codigo) {
-                var inputs = Array.from(document.querySelectorAll('input'));
+        function preencherEBuscar(codigo) {
+            var iframe = document.getElementById('frameSite');
+            try {
+                var doc = iframe.contentDocument || iframe.contentWindow.document;
+                var inputs = Array.from(doc.querySelectorAll('input'));
                 var inputAlvo = inputs.find(i => i.type === 'text' || i.type === 'search');
                 if (inputAlvo) {
                     inputAlvo.value = codigo;
                     inputAlvo.dispatchEvent(new Event('input', { bubbles: true }));
                     inputAlvo.dispatchEvent(new Event('change', { bubbles: true }));
 
-                    var btnPesquisar = document.querySelector('button[type="submit"], input[type="submit"]');
+                    var btnPesquisar = doc.querySelector('button[type="submit"], input[type="submit"]');
                     if (btnPesquisar) btnPesquisar.click();
                 }
+            } catch(e) {
+                // Caso haja restrição de cross-origin do navegador ao ler o iframe
+                alert("Código lido: " + codigo + "\nCole no campo do site caso não preencha automaticamente.");
             }
-
-            setInterval(forcarBotao, 500);
-        })();
+        }
     </script>
 </body>
 </html>
