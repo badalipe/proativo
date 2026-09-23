@@ -1,212 +1,258 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rede Market - Gestão</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Html5-QRCode Scanner -->
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <!-- xlsx-populate para exportação de Excel -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx-populate/browser/xlsx-populate.min.js"></script>
-    <style>
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coletor de Dados - Rede Market</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f9;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .table-preview {
+      margin-top: 20px;
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .table-preview th, .table-preview td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    .table-preview th {
+      background-color: #f2f2f2;
+    }
+  </style>
+  <!-- Biblioteca para exportar diretamente para Excel (XLSX) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col font-sans">
+<body>
 
-    <!-- Header / Navbar -->
-    <header class="bg-red-600 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <i data-lucide="store" class="w-8 h-8"></i>
-                <h1 class="text-xl font-bold tracking-wide">Rede Market</h1>
-            </div>
-            <div id="userInfo" class="hidden items-center space-x-4">
-                <span id="userName" class="font-medium bg-red-700 px-3 py-1 rounded-full text-sm"></span>
-                <button onclick="logout()" class="text-white hover:text-red-200 transition">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                </button>
-            </div>
-        </div>
-    </header>
+<div class="container">
+  <h2>Lançamento de Estoque</h2>
+  
+  <form id="stockForm">
+    <div class="form-group">
+      <label for="loja">Loja</label>
+      <input type="text" id="loja" value="PATITIBA" required>
+    </div>
 
-    <!-- Main Container -->
-    <main class="flex-grow max-w-7xl w-full mx-auto p-4 flex flex-col justify-center">
+    <div class="form-group">
+      <label for="codigo">Código do Produto</label>
+      <input type="text" id="codigo" placeholder="7896336006778" required>
+    </div>
 
-        <!-- Tela de Login -->
-        <div id="loginScreen" class="max-w-md w-full mx-auto glass-effect p-8 rounded-2xl shadow-xl border border-slate-200">
-            <div class="text-center mb-6">
-                <i data-lucide="shield-check" class="w-12 h-12 mx-auto text-red-600 mb-2"></i>
-                <h2 class="text-2xl font-bold text-slate-800">Acesso ao Sistema</h2>
-                <p class="text-slate-500 text-sm">Insira suas credenciais para continuar</p>
-            </div>
-            <form onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Usuário</label>
-                    <input type="text" id="userInput" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="Digite seu usuário">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Senha</label>
-                    <input type="password" id="passInput" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="Digite sua senha">
-                </div>
-                <div id="loginError" class="text-red-500 text-sm hidden text-center font-medium">
-                    Usuário ou senha inválidos.
-                </div>
-                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg shadow-md transition duration-200">
-                    Entrar
-                </button>
-            </form>
-        </div>
+    <div class="form-group">
+      <label for="descricao">Descrição do Produto</label>
+      <input type="text" id="descricao" placeholder="Nome do produto" required>
+    </div>
 
-        <!-- Menu Principal / Módulos -->
-        <div id="menuScreen" class="hidden max-w-4xl w-full mx-auto space-y-6">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-extrabold text-slate-800">Painel do Operador</h2>
-                <p class="text-slate-500 mt-1">Selecione o módulo que deseja acessar</p>
-            </div>
+    <div class="form-group">
+      <label for="qtd">Quantidade no Estoque</label>
+      <input type="number" id="qtd" step="any" required>
+    </div>
 
-            <!-- Grid com os 4 botões -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                <!-- Botão 1: Pró-Ativo (Frios) -->
-                <button onclick="openModule('proativo')" class="flex flex-col items-center p-6 bg-white rounded-2xl shadow-md border border-slate-200 hover:shadow-lg hover:border-red-500 transition duration-200 group">
-                    <div class="p-4 bg-red-50 text-red-600 rounded-full mb-4 group-hover:bg-red-600 group-hover:text-white transition duration-200">
-                        <i data-lucide="clipboard-list" class="w-8 h-8"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-800">Pró-Ativo (Frios)</h3>
-                    <p class="text-sm text-slate-500 text-center mt-2">Controle de inventário, validades e contagem prévia.</p>
-                </button>
+    <div class="form-group">
+      <label for="unidade">Unidade / Caixa / Fardo</label>
+      <select id="unidade">
+        <option value="und">und</option>
+        <option value="cx">cx</option>
+        <option value="fd">fd</option>
+        <option value="kg">kg</option>
+      </select>
+    </div>
 
-                <!-- Botão 2: Trocas -->
-                <button onclick="openModule('trocas')" class="flex flex-col items-center p-6 bg-white rounded-2xl shadow-md border border-slate-200 hover:shadow-lg hover:border-red-500 transition duration-200 group">
-                    <div class="p-4 bg-red-50 text-red-600 rounded-full mb-4 group-hover:bg-red-600 group-hover:text-white transition duration-200">
-                        <i data-lucide="refresh-cw" class="w-8 h-8"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-800">Trocas</h3>
-                    <p class="text-sm text-slate-500 text-center mt-2">Registro e devolução de produtos avariados ou vencidos.</p>
-                </button>
+    <div class="form-group">
+      <label for="validade">Data de Validade</label>
+      <input type="text" id="validade" placeholder="DD/MM/AAAA">
+    </div>
 
-                <!-- Botão 3: Perdas -->
-                <button onclick="openModule('perdas')" class="flex flex-col items-center p-6 bg-white rounded-2xl shadow-md border border-slate-200 hover:shadow-lg hover:border-red-500 transition duration-200 group">
-                    <div class="p-4 bg-red-50 text-red-600 rounded-full mb-4 group-hover:bg-red-600 group-hover:text-white transition duration-200">
-                        <i data-lucide="alert-triangle" class="w-8 h-8"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-800">Perdas</h3>
-                    <p class="text-sm text-slate-500 text-center mt-2">Lançamento e baixa de perdas internas do setor.</p>
-                </button>
+    <div class="form-group">
+      <label for="valor">Valor Unitário (R$)</label>
+      <input type="number" id="valor" step="0.01" value="0.00">
+    </div>
 
-                <!-- Botão 4: Cartaz Fácil (Novo Botão) -->
-                <a href="https://rmarket.cartazfacil.pro" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center p-6 bg-white rounded-2xl shadow-md border border-slate-200 hover:shadow-lg hover:border-red-500 transition duration-200 group">
-                    <div class="p-4 bg-red-50 text-red-600 rounded-full mb-4 group-hover:bg-red-600 group-hover:text-white transition duration-200">
-                        <i data-lucide="printer" class="w-8 h-8"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-800">Cartaz Fácil</h3>
-                    <p class="text-sm text-slate-500 text-center mt-2">Acesse o portal externo para emissão e impressão de cartazes.</p>
-                </a>
+    <button type="button" onclick="adicionarItem()">Adicionar à Lista</button>
+  </form>
 
-            </div>
-        </div>
+  <br>
+  <button type="button" onclick="exportarExcel()" style="background-color: #28a745;">Exportar para Excel (.xlsx)</button>
 
-        <!-- Módulo de Trabalho (Aparece ao selecionar uma opção) -->
-        <div id="moduleScreen" class="hidden max-w-3xl w-full mx-auto bg-white p-6 rounded-2xl shadow-md border border-slate-200">
-            <div class="flex justify-between items-center pb-4 mb-6 border-b border-slate-200">
-                <button onclick="backToMenu()" class="flex items-center text-slate-600 hover:text-red-600 font-medium transition">
-                    <i data-lucide="arrow-left" class="w-5 h-5 mr-1"></i> Voltar ao Menu
-                </button>
-                <h3 id="moduleTitle" class="text-xl font-bold text-slate-800"></h3>
-            </div>
+  <h3>Itens Digitados</h3>
+  <table class="table-preview" id="itensTable">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Loja</th>
+        <th>Código</th>
+        <th>Descrição</th>
+        <th>Qtd</th>
+        <th>Emb.</th>
+        <th>Validade</th>
+        <th>Valor</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Os itens serão inseridos aqui -->
+    </tbody>
+  </table>
+</div>
 
-            <!-- Conteúdo Genérico do Módulo -->
-            <div class="space-y-4 text-center py-8">
-                <i data-lucide="wrench" class="w-16 h-16 text-slate-300 mx-auto"></i>
-                <p class="text-slate-600 font-medium">Módulo em execução.</p>
-            </div>
-        </div>
+<script>
+  const itens = [];
 
-    </main>
+  function adicionarItem() {
+    const loja = document.getElementById('loja').value;
+    const codigo = document.getElementById('codigo').value;
+    const descricao = document.getElementById('descricao').value;
+    const qtd = document.getElementById('qtd').value;
+    const unidade = document.getElementById('unidade').value;
+    const validade = document.getElementById('validade').value;
+    const valor = parseFloat(document.getElementById('valor').value || 0).toFixed(2);
 
-    <!-- Footer -->
-    <footer class="bg-slate-800 text-slate-400 py-4 text-center text-sm mt-auto">
-        &copy; 2026 Rede Market - Todos os direitos reservados.
-    </footer>
+    if (!codigo || !descricao || !qtd) {
+      alert('Preencha os campos obrigatórios!');
+      return;
+    }
 
-    <script>
-        // Inicializa os ícones do Lucide
-        lucide.createIcons();
+    const itemObj = {
+      itemNum: itens.length + 1,
+      comprador: '',
+      loja: loja,
+      codigo: codigo,
+      descricao: descricao,
+      qtd: Number(qtd),
+      unidade: unidade,
+      validade: validade,
+      valor: Number(valor)
+    };
 
-        // Credenciais pré-definidas
-        const users = {
-            'felipe': '2026',
-            'admin': 'market123',
-            'patitiba': 'frios2026'
-        };
+    itens.push(itemObj);
+    atualizarTabela();
+    limparCampos();
+  }
 
-        let currentUser = null;
+  function atualizarTabela() {
+    const tbody = document.querySelector('#itensTable tbody');
+    tbody.innerHTML = '';
 
-        // Função de Login
-        function handleLogin(event) {
-            event.preventDefault();
-            const user = document.getElementById('userInput').value.trim();
-            const pass = document.getElementById('passInput').value.trim();
-            const errorElement = document.getElementById('loginError');
+    itens.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${item.itemNum}</td>
+        <td>${item.loja}</td>
+        <td>${item.codigo}</td>
+        <td>${item.descricao}</td>
+        <td>${item.qtd}</td>
+        <td>${item.unidade}</td>
+        <td>${item.validade}</td>
+        <td>R$ ${item.valor.toFixed(2)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 
-            if (users[user] && users[user] === pass) {
-                currentUser = user;
-                errorElement.classList.add('hidden');
-                
-                // Atualiza a interface
-                document.getElementById('userName').textContent = user;
-                document.getElementById('userInfo').classList.remove('hidden');
-                document.getElementById('userInfo').classList.add('flex');
-                
-                // Transição de telas
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('menuScreen').classList.remove('hidden');
-            } else {
-                errorElement.classList.remove('hidden');
-            }
-        }
+  function limparCampos() {
+    document.getElementById('codigo').value = '';
+    document.getElementById('descricao').value = '';
+    document.getElementById('qtd').value = '';
+    document.getElementById('codigo').focus();
+  }
 
-        // Função de Logout
-        function logout() {
-            currentUser = null;
-            document.getElementById('userInfo').classList.add('hidden');
-            document.getElementById('userInfo').classList.remove('flex');
-            document.getElementById('menuScreen').classList.add('hidden');
-            document.getElementById('moduleScreen').classList.add('hidden');
-            document.getElementById('loginScreen').classList.remove('hidden');
-            
-            // Limpa formulário
-            document.getElementById('userInput').value = '';
-            document.getElementById('passInput').value = '';
-        }
+  function exportarExcel() {
+    if (itens.length === 0) {
+      alert('Nenhum item para exportar!');
+      return;
+    }
 
-        // Abrir Módulo
-        function openModule(moduleName) {
-            document.getElementById('menuScreen').classList.add('hidden');
-            document.getElementById('moduleScreen').classList.remove('hidden');
+    // Criar uma nova planilha zerada
+    const ws_data = [];
 
-            const titleMap = {
-                'proativo': 'Pró-Ativo (Frios)',
-                'trocas': 'Trocas',
-                'perdas': 'Perdas'
-            };
+    // Linhas de cabeçalho (Linhas 1 a 5 da planilha padrão)
+    ws_data[0] = []; 
+    ws_data[1] = ['', '', '', '', '', '', '666', 'und', '0']; // Cabeçalho fixo topo
+    ws_data[2] = ['', '', '', '', '', '', 'Gerente / Avaliação', ''];
+    ws_data[3] = ['', '', '', '', '', '', 'Data', '16/09/2026'];
+    ws_data[4] = ['', '', '', '', '', '', 'Quem Digitou?', ''];
+    
+    // Cabeçalho da tabela principal na Linha 6 (Índice 5 do array)
+    ws_data[5] = [
+      '', 
+      'Comprador', 
+      'Loja', 
+      'Código de Produto', 
+      'Descrição do produto', 
+      'Quantidade no Estoque', 
+      'Unidade / Caixa / Fardo', 
+      'Data de Validade', 
+      'Valor Unitário'
+    ];
 
-            document.getElementById('moduleTitle').textContent = titleMap[moduleName] || 'Módulo';
-        }
+    // Popula a partir da Linha 7 (Índice 6 do array)
+    itens.forEach((item, index) => {
+      ws_data[6 + index] = [
+        item.itemNum,    // Coluna A
+        item.comprador,  // Coluna B
+        item.loja,       // Coluna C (PATITIBA)
+        item.codigo,     // Coluna D (Código do Produto)
+        item.descricao,  // Coluna E (Descrição)
+        item.qtd,        // Coluna F (Quantidade no Estoque)
+        item.unidade,    // Coluna G (Unidade/Caixa/Fardo)
+        item.validade,   // Coluna H (Data de Validade)
+        item.valor       // Coluna I (Valor Unitário)
+      ];
+    });
 
-        // Voltar ao Menu Principal
-        function backToMenu() {
-            document.getElementById('moduleScreen').classList.add('hidden');
-            document.getElementById('menuScreen').classList.remove('hidden');
-        }
-    </script>
+    // Cria a folha de trabalho e o arquivo Excel
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Pró Ativo Frios");
+
+    // Baixa o arquivo formatado corretamente
+    XLSX.writeFile(wb, "Pro_Ativo_Frios_Atualizado.xlsx");
+  }
+</script>
+
 </body>
 </html>
