@@ -11,23 +11,26 @@
             margin: 0;
             padding: 0;
             font-family: system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body, html {
             width: 100%;
             height: 100%;
-            overflow: hidden;
             background-color: #1a1a2e;
             color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Container do Menu Inicial */
         #menuPrincipal {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            width: 100%;
             padding: 20px;
         }
 
@@ -66,33 +69,25 @@
             transform: scale(0.98);
         }
 
-        /* Moldura para carregar os sites mantendo o botão visível */
-        #frameSite {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: none;
-        }
-
-        /* Botão Flutuante */
+        /* Botão Flutuante e Arrastável */
         #btnCamFlutuante {
             position: fixed !important;
-            bottom: 30px !important;
-            right: 20px !important;
+            bottom: 30px;
+            right: 20px;
             width: 68px !important;
             height: 68px !important;
             z-index: 2147483647 !important;
             background: linear-gradient(145deg, #1e88e5, #0d47a1) !important;
             border: 2px solid rgba(255, 255, 255, 0.9) !important;
             border-radius: 50% !important;
-            box-shadow: 0 8px 18px rgba(0,0,0,0.4) !important;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.5) !important;
             cursor: pointer !important;
-            display: none;
+            display: flex;
             align-items: center !important;
             justify-content: center !important;
+            touch-action: none;
         }
 
-        /* Tela inteira da câmera ao escanear */
         #modalScannerOverlay {
             position: fixed !important;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -103,30 +98,26 @@
 </head>
 <body>
 
-    <!-- Menu de navegação inicial -->
     <div id="menuPrincipal">
         <h1>Selecione o Módulo Desejado</h1>
         <div class="container-botoes">
-            <button class="btn-modulo" onclick="abrirNoFrame('https://badalipe.github.io/proativo/')">
+            <button class="btn-modulo" onclick="abrirModulo('https://badalipe.github.io/proativo/')">
                 ↑ PRÓATIVO
             </button>
-            <button class="btn-modulo" onclick="abrirNoFrame('https://badalipe.github.io/proativo/')">
+            <button class="btn-modulo" onclick="abrirModulo('https://badalipe.github.io/proativo/')">
                 ⇄ TROCAS
             </button>
-            <button class="btn-modulo" onclick="abrirNoFrame('https://badalipe.github.io/proativo/')">
+            <button class="btn-modulo" onclick="abrirModulo('https://badalipe.github.io/proativo/')">
                 ↓ PERDAS
             </button>
-            <button class="btn-modulo" style="background: linear-gradient(135deg, #2e7d32, #1b5e20);" onclick="abrirNoFrame('https://rmarket.cartazfacil.pro/index.php')">
+            <button class="btn-modulo" style="background: linear-gradient(135deg, #2e7d32, #1b5e20);" onclick="abrirCartazDirect()">
                 📋 CARTAZ FÁCIL
             </button>
         </div>
     </div>
 
-    <!-- Iframe onde o site selecionado roda -->
-    <iframe id="frameSite"></iframe>
-
-    <!-- Botão Flutuante BIPAR -->
-    <button id="btnCamFlutuante" onclick="abrirScanner()">
+    <!-- Botão BIPAR (Arrastável) -->
+    <button id="btnCamFlutuante" style="display: none;">
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M3 7V5C3 3.89543 3.89543 3 5 3H7" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
@@ -146,16 +137,50 @@
     <script>
         var currentStream = null;
         var codeReader = null;
+        var btn = document.getElementById('btnCamFlutuante');
 
-        function abrirNoFrame(url) {
-            document.getElementById('menuPrincipal').style.display = 'none';
-            var iframe = document.getElementById('frameSite');
-            iframe.style.display = 'block';
-            iframe.src = url;
-            
-            // Exibe o botão BIPAR assim que entra no site
-            document.getElementById('btnCamFlutuante').style.display = 'flex';
+        function abrirModulo(url) {
+            window.location.href = url;
         }
+
+        function abrirCartazDirect() {
+            // Abre o Cartaz Fácil em tela cheia corrigindo a URL para fazer o login normalmente
+            window.location.href = "https://rmarket.cartazfacil.pro/index.php";
+        }
+
+        // Configuração de movimento por toque
+        var isDragging = false;
+        var touchStartX, touchStartY, initialLeft, initialTop;
+
+        btn.addEventListener('touchstart', function(e) {
+            isDragging = false;
+            var touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            var rect = btn.getBoundingClientRect();
+            initialLeft = rect.left;
+            initialTop = rect.top;
+        }, { passive: true });
+
+        btn.addEventListener('touchmove', function(e) {
+            var touch = e.touches[0];
+            var deltaX = touch.clientX - touchStartX;
+            var deltaY = touch.clientY - touchStartY;
+
+            if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+                isDragging = true;
+                btn.style.left = (initialLeft + deltaX) + 'px';
+                btn.style.top = (initialTop + deltaY) + 'px';
+                btn.style.bottom = 'auto';
+                btn.style.right = 'auto';
+            }
+        }, { passive: true });
+
+        btn.addEventListener('click', function(e) {
+            if (!isDragging) {
+                abrirScanner();
+            }
+        });
 
         function tocarBeep() {
             try {
@@ -204,7 +229,7 @@
                     }
                 });
             }).catch(function(err) {
-                alert("Erro ao acessar a câmera. Verifique se o Chrome tem permissão de Câmera.");
+                alert("Erro na câmera. Verifique as permissões do Chrome.");
             });
         }
 
@@ -215,27 +240,15 @@
             if (overlay) overlay.parentNode.removeChild(overlay);
             
             if (codigo) {
-                preencherEBuscar(codigo);
-            }
-        }
-
-        function preencherEBuscar(codigo) {
-            var iframe = document.getElementById('frameSite');
-            try {
-                var doc = iframe.contentDocument || iframe.contentWindow.document;
-                var inputs = Array.from(doc.querySelectorAll('input'));
+                var inputs = Array.from(document.querySelectorAll('input'));
                 var inputAlvo = inputs.find(i => i.type === 'text' || i.type === 'search');
                 if (inputAlvo) {
                     inputAlvo.value = codigo;
                     inputAlvo.dispatchEvent(new Event('input', { bubbles: true }));
                     inputAlvo.dispatchEvent(new Event('change', { bubbles: true }));
-
-                    var btnPesquisar = doc.querySelector('button[type="submit"], input[type="submit"]');
-                    if (btnPesquisar) btnPesquisar.click();
+                } else {
+                    alert("Código bipado: " + codigo);
                 }
-            } catch(e) {
-                // Caso haja restrição de cross-origin do navegador ao ler o iframe
-                alert("Código lido: " + codigo + "\nCole no campo do site caso não preencha automaticamente.");
             }
         }
     </script>
