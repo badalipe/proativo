@@ -38,22 +38,26 @@
  justify-content: center;
  align-items: center;
  min-height: 100vh;
+ width: 100vw;
+ overflow-x: hidden;
  padding: 12px;
  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
  color: var(--text-main);
  -webkit-font-smoothing: antialiased;
+ position: relative;
  }
- 
- /* --- TELA DE MENU COM OS 3 BOTÕES 3D (OTIMIZADA PARA CELULAR) --- */
+
+ /* --- TELA DE MENU --- */
  #menu-screen {
  display: flex;
  flex-direction: column;
  align-items: center;
  justify-content: center;
  width: 100%;
- max-width: 500px;
+ max-width: 400px;
  text-align: center;
  padding: 10px;
+ margin: auto;
  }
 
  .menu-title {
@@ -504,7 +508,7 @@
  <div class="caixa">
  <select id="trc_motivo">
  <option value="1">1 - Avaria</option>
- <option value="2">2 - Vencido</option>
+ <option value="2">2 - Descarte</option>
  </select>
  </div>
  </div>
@@ -590,7 +594,6 @@
  let moduloAtual = null;
  let html5QrCode = null;
  let lanternaAtiva = false;
- window.isScanningPaused = false;
  
  const el = id => document.getElementById(id);
  
@@ -693,9 +696,8 @@
  html5QrCode = new Html5Qrcode("beep-reader");
  }
  
- // Configuração otimizada para capturar códigos de barras lineares de supermercado
  const config = { 
- fps: 15, 
+ fps: 20, 
  qrbox: { width: 280, height: 160 },
  formatsToSupport: [ 
  Html5QrcodeSupportedFormats.EAN_13,
@@ -711,9 +713,6 @@
  { facingMode: "environment" },
  config,
  (decodedText) => {
- if (window.isScanningPaused) return;
- window.isScanningPaused = true;
-
  tocarBipe();
  dispararFlashScan();
  
@@ -753,7 +752,6 @@
  }
  
  function pararScanner() {
- window.isScanningPaused = false;
  if (html5QrCode && html5QrCode.isScanning) {
  html5QrCode.stop().then(() => {
  el('beep-scanner-overlay').classList.add('hidden');
@@ -882,7 +880,7 @@
  const itemEl = document.createElement('div');
  itemEl.className = 'item';
  const dataFmt = item.validade.split('-').reverse().join('/');
- const infoExtra = item.motivo ? ` | Motivo: ${item.motivo === 1 ? '1-Avaria' : '2-Vencido'}` : '';
+ const infoExtra = item.motivo ? ` | Motivo: ${item.motivo === 1 ? '1-Avaria' : '2-Descarte'}` : '';
  
  itemEl.innerHTML = `
  <div class="item-info">
@@ -990,7 +988,7 @@
  sheet.cell(`B${row}`).value(item.descricao);
  sheet.cell(`C${row}`).value(item.quantidade);
  sheet.cell(`D${row}`).value(item.unidade);
- sheet.cell(`E${row}`).value(valFmt = dataFmt);
+ sheet.cell(`E${row}`).value(dataFmt);
  sheet.cell(`F${row}`).value(item.motivo);
  sheet.cell(`G${row}`).value(item.valor);
  sheet.cell(`H${row}`).value(item.total);
