@@ -910,27 +910,41 @@
  }
  };
  
- try {
- await html5QrCode.start(
- { facingMode: "environment" },
- config,
- (decodedText) => {
+ // Função de tratamento de sucesso na leitura corrigida
+ const aoLerComSucesso = async (decodedText) => {
  tocarBipe();
  dispararFlashScan();
+ 
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- el(prefix + 'codigo').value = decodedText;
+ const campoCodigo = el(prefix + 'codigo');
+ 
+ if (campoCodigo) {
+ campoCodigo.value = decodedText;
+ campoCodigo.dispatchEvent(new Event('input', { bubbles: true }));
+ campoCodigo.dispatchEvent(new Event('change', { bubbles: true }));
+ }
+ 
  pararScanner();
  
- buscarProduto(modulo).then(() => {
+ // Executa a busca automática e foca na validade logo em seguida
+ await buscarProduto(modulo);
+ 
  setTimeout(() => {
  const campoValidade = el(prefix + 'validade');
+ if (campoValidade) {
  campoValidade.focus();
  if (campoValidade.showPicker) {
  try { campoValidade.showPicker(); } catch(err) {}
  }
- }, 300);
- });
- },
+ }
+ }, 250);
+ };
+
+ try {
+ await html5QrCode.start(
+ { facingMode: "environment" },
+ config,
+ aoLerComSucesso,
  () => {}
  );
  
@@ -961,23 +975,7 @@
  await html5QrCode.start(
  { facingMode: "environment" }, 
  { fps: 15 }, 
- (decodedText) => {
- tocarBipe();
- dispararFlashScan();
- const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- el(prefix + 'codigo').value = decodedText;
- pararScanner();
- 
- buscarProduto(modulo).then(() => {
- setTimeout(() => {
- const campoValidade = el(prefix + 'validade');
- campoValidade.focus();
- if (campoValidade.showPicker) {
- try { campoValidade.showPicker(); } catch(err) {}
- }
- }, 300);
- });
- }
+ aoLerComSucesso
  );
  } catch (err) {
  alert("Erro ao abrir a câmera: " + err);
