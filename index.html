@@ -58,7 +58,7 @@
  color: #334155;
  font-weight: 700;
  letter-spacing: 0.5px;
- z-index: 999999;
+ z-index: 99999;
  pointer-events: none;
  background: rgba(248, 250, 252, 0.85);
  padding: 2px 0;
@@ -1014,6 +1014,7 @@
  el(prefix + 'descricao').focus();
  }
  
+ // === BUSCA ULTRARRÁPIDA COM CACHE E PRIORIDADE NA MEMÓRIA ===
  async function buscarProduto(modulo) {
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  const code = el(prefix + 'codigo').value.trim();
@@ -1026,25 +1027,31 @@
  return;
  }
  
- statusEl.innerHTML = '🔍 Buscando...';
+ statusEl.innerHTML = '⚡ Busca rápida...';
  previewBox.classList.add('hidden');
  previewImg.src = '';
  
- let produtoEncontrado = false;
- 
+ // 1. Prioridade absoluta: Catálogo local em memória/localStorage
  if (catalogoLocal[code]) {
  el(prefix + 'descricao').value = catalogoLocal[code];
- statusEl.innerHTML = '<span class="ok">Localizado no catálogo local!</span>';
- produtoEncontrado = true;
+ statusEl.innerHTML = '<span class="ok">⚡ Encontrado instantaneamente (Base Local)!</span>';
  return;
- } else if (produtosPreCadastrados[code]) {
- el(prefix + 'descricao').value = produtosPreCadastrados[code];
- statusEl.innerHTML = '<span class="ok">Localizado na base do sistema!</span>';
- produtoEncontrado = true;
+ } 
+ 
+ // 2. Segunda prioridade: Produtos pré-cadastrados no código fonte
+ if (produtosPreCadastrados[code]) {
+ const nomeProd = produtosPreCadastrados[code];
+ el(prefix + 'descricao').value = nomeProd;
+ 
+ // Salva automaticamente no cache local para buscas futuras instantâneas
+ catalogoLocal[code] = nomeProd;
+ localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
+ 
+ statusEl.innerHTML = '<span class="ok">⚡ Encontrado (Base do Sistema)!</span>';
  return;
  }
 
- const fetchComTimeout = async (url, timeout = 3500) => {
+ const fetchComTimeout = async (url, timeout = 2500) => {
  const controller = new AbortController();
  const id = setTimeout(() => controller.abort(), timeout);
  try {
@@ -1057,56 +1064,59 @@
  }
  };
 
+ // 3. Consulta rápida às APIs externas se não achar localmente
  try {
- statusEl.innerHTML = '🔍 Consultando base principal...';
  const res = await fetchComTimeout(`https://world.openfoodfacts.org/api/v2/product/${code}.json`);
  const data = await res.json();
  
  if (data.status === 1 && data.product) {
- if (data.product.product_name) {
- el(prefix + 'descricao').value = data.product.product_name;
+ const nomeProd = data.product.product_name || '';
+ if (nomeProd) {
+ el(prefix + 'descricao').value = nomeProd;
+ 
+ // Grava no catálogo local para nunca mais precisar buscar na internet este item
+ catalogoLocal[code] = nomeProd;
+ localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
  }
  const imgFront = data.product.image_front_url || data.product.image_url;
  if (imgFront) {
  previewImg.src = imgFront;
  previewBox.classList.remove('hidden');
  }
- statusEl.innerHTML = '<span class="ok">Localizado via base principal!</span>';
- produtoEncontrado = true;
+ statusEl.innerHTML = '<span class="ok">✔ Localizado via base principal!</span>';
  return;
  }
  } catch (e) {}
 
- if (!produtoEncontrado) {
  try {
- statusEl.innerHTML = '⚡ Tentando base reserva...';
  const resReserva = await fetchComTimeout(`https://world.openproductsfacts.org/api/v0/product/${code}.json`);
  const dataReserva = await resReserva.json();
  
  if (dataReserva.status === 1 && dataReserva.product) {
- if (dataReserva.product.product_name) {
- el(prefix + 'descricao').value = dataReserva.product.product_name;
+ const nomeProd = dataReserva.product.product_name || '';
+ if (nomeProd) {
+ el(prefix + 'descricao').value = nomeProd;
+ 
+ catalogoLocal[code] = nomeProd;
+ localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
  }
  const imgReserva = dataReserva.product.image_front_url || dataReserva.product.image_url;
  if (imgReserva) {
  previewImg.src = imgReserva;
  previewBox.classList.remove('hidden');
  }
- statusEl.innerHTML = '<span class="ok">Localizado via base reserva!</span>';
- produtoEncontrado = true;
+ statusEl.innerHTML = '<span class="ok">✔ Localizado via base reserva!</span>';
  return;
  }
  } catch (err) {}
- }
 
- if (!produtoEncontrado) {
- statusEl.innerHTML = '<span class="warn">Não encontrado nas bases online. Digite a descrição.</span>';
+ statusEl.innerHTML = '<span class="warn">Não encontrado nas bases. Digite a descrição para salvá-lo automaticamente.</span>';
  el(prefix + 'descricao').focus();
- }
  }
  
  function adicionarItem(modulo) {
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+ const code = el(prefix + 'codigo').value.trim();
  const desc = el(prefix + 'descricao').value.trim();
  const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
  const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
@@ -1118,9 +1128,15 @@
  return;
  }
  
+ // Se o usuário cadastrou um item novo manualmente, salva no cache local para agilizar futuras buscas
+ if (code && code !== 'S/C' && !catalogoLocal[code]) {
+ catalogoLocal[code] = desc;
+ localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
+ }
+ 
  const item = {
  id: Date.now(),
- codigo: el(prefix + 'codigo').value.trim() || 'S/C',
+ codigo: code || 'S/C',
  descricao: desc,
  quantidade: qtd,
  unidade: el(prefix + 'unidade').value || 'und',
