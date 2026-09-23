@@ -81,7 +81,7 @@
  color: #ffffff;
  font-size: 20px;
  font-weight: 800;
- margin-bottom: 24px;
+ margin-bottom: 20px;
  text-shadow: 0 2px 4px rgba(0,0,0,0.4);
  letter-spacing: 0.5px;
  }
@@ -89,14 +89,14 @@
  .btn-row {
  display: flex;
  flex-direction: column;
- gap: 16px;
+ gap: 12px;
  width: 100%;
  }
  
  .glass-btn {
  width: 100%;
  position: relative;
- padding: 20px;
+ padding: 16px 20px;
  border: 2px solid rgba(255, 255, 255, 0.4);
  border-radius: 16px;
  color: #ffffff;
@@ -109,7 +109,7 @@
  align-items: center;
  justify-content: flex-start;
  gap: 20px;
- min-height: 80px;
+ min-height: 70px;
  text-decoration: none;
  touch-action: manipulation;
  }
@@ -135,16 +135,16 @@
  }
  
  .btn-svg {
- width: 32px; 
- height: 32px;
+ width: 30px; 
+ height: 30px;
  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
  flex-shrink: 0;
  }
  
  .btn-text {
- font-size: 18px;
+ font-size: 17px;
  font-weight: 800;
- letter-spacing: 1.5px;
+ letter-spacing: 1.2px;
  color: #ffffff;
  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
  text-align: left;
@@ -161,6 +161,10 @@
  .glass-3 {
  background: linear-gradient(145deg, rgba(124,58,237,0.9) 0%, rgba(147,51,234,0.9) 100%);
  box-shadow: 0 8px 24px rgba(139,92,246,0.4);
+ }
+ .glass-4 {
+ background: linear-gradient(145deg, rgba(16,185,129,0.9) 0%, rgba(4,120,87,0.9) 100%);
+ box-shadow: 0 8px 24px rgba(16,185,129,0.4);
  }
  
  /* --- TELA DE LOGIN --- */
@@ -203,7 +207,7 @@
  
  .hidden { display: none !important; }
  
- /* --- CABEÇALHO --- */
+ /* --- CABEÇALHO REESTRUTURADO E PROFISSIONAL --- */
  .top {
  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
  color: #fff; 
@@ -267,12 +271,6 @@
  color: #94a3b8; 
  font-size: 11px; 
  margin-top: 2px; 
- }
-
- .header-right-actions {
- display: flex;
- align-items: center;
- gap: 8px;
  }
 
  .btn-menu-top {
@@ -345,7 +343,7 @@
  }
  .input-codigo { font-family: 'Courier New', monospace; font-size: 18px !important; letter-spacing: 1px; font-weight: 700; }
  
- /* --- FOTO DO PRODUTO --- */
+ /* --- ÁREA DE VISUALIZAÇÃO DA FOTO --- */
  .preview-container {
  display: flex;
  align-items: center;
@@ -399,7 +397,7 @@
  
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
- /* --- SCANNER OTIMIZADO PARA BIPAL --- */
+ /* --- SCANNER --- */
  #beep-scanner-overlay {
  position: fixed; inset: 0; background: #000; z-index: 999999;
  display: flex; flex-direction: column; justify-content: space-between;
@@ -527,8 +525,18 @@
  <span class="btn-text">PERDAS</span>
  </div>
  </button>
+
+ <a href="https://rmarket.cartazfacil.pro" target="_blank" class="glass-btn glass-4">
+ <div class="glass-shine"></div>
+ <div class="glass-content">
+ <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+ <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h10"/><path d="M7 12h10"/><path d="M7 17h6"/>
+ </svg>
+ <span class="btn-text">CARTAZ FÁCIL PRO</span>
  </div>
- <div style="margin-top: 24px;">
+ </a>
+ </div>
+ <div style="margin-top: 20px;">
  <button type="button" class="danger" onclick="fazerLogout()" style="width: auto; padding: 10px 18px; font-size: 13px;">Sair do Sistema</button>
  </div>
  </div>
@@ -877,7 +885,6 @@
  setTimeout(() => flash.classList.remove('active'), 350);
  }
  
- // SCANNER CORRIGIDO E OTIMIZADO PARA CAPTURAR CÓDIGOS DE BARRAS IMEDIATAMENTE
  async function abrirScanner(modulo) {
  moduloAtual = modulo;
  el('beep-scanner-overlay').classList.remove('hidden');
@@ -886,28 +893,25 @@
  html5QrCode = new Html5Qrcode("beep-reader");
  }
  
- // Configuração robusta habilitando formatos lineares e QR
  const config = { 
- fps: 25,
- qrbox: { width: 320, height: 160 },
- formatsToSupport: [
- Html5QrcodeSupportedFormats.EAN_13,
- Html5QrcodeSupportedFormats.EAN_8,
- Html5QrcodeSupportedFormats.UPC_A,
- Html5QrcodeSupportedFormats.UPC_E,
- Html5QrcodeSupportedFormats.CODE_128,
- Html5QrcodeSupportedFormats.CODE_39,
- Html5QrcodeSupportedFormats.QR_CODE
- ]
+ fps: 15, 
+ videoConstraints: {
+ facingMode: "environment",
+ width: { min: 640, ideal: 1920, max: 3840 },
+ height: { min: 480, ideal: 1080, max: 2160 },
+ advanced: [{ zoom: 2.0 }]
+ }
  };
  
- const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+ try {
+ await html5QrCode.start(
+ { facingMode: "environment" },
+ config,
+ (decodedText) => {
  tocarBipe();
  dispararFlashScan();
- 
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  el(prefix + 'codigo').value = decodedText;
- 
  pararScanner();
  
  buscarProduto(modulo).then(() => {
@@ -919,44 +923,57 @@
  }
  }, 300);
  });
- };
- 
- try {
- await html5QrCode.start(
- { facingMode: "environment" },
- config,
- qrCodeSuccessCallback,
- (errorMessage) => {
- // Ignora erros de varredura quadro a quadro até achar o código
- }
+ },
+ () => {}
  );
  
- // Aplica zoom inicial de 2.0x para facilitar a leitura de perto
  setTimeout(() => {
  try {
+ const capabilities = html5QrCode.getRunningTrackCapabilities();
  const zoomInput = el('beepZoomRange');
  const zoomValText = el('beepZoomVal');
+ 
+ if (capabilities.zoom) {
+ zoomInput.min = capabilities.zoom.min || 1;
+ zoomInput.max = capabilities.zoom.max || 5;
+ zoomInput.step = capabilities.zoom.step || 0.1;
+ }
+ 
  zoomInput.value = 2.0;
  if (zoomValText) zoomValText.innerText = "2.0";
- html5QrCode.applyVideoConstraints({ advanced: [{ zoom: 2.0 }] });
  
  zoomInput.oninput = (e) => {
  zoomValText.innerText = Number(e.target.value).toFixed(1);
  html5QrCode.applyVideoConstraints({ advanced: [{ zoom: parseFloat(e.target.value) }] });
  };
  } catch(e){}
- }, 400);
+ }, 500);
  
  } catch (e) {
- // Fallback simplificado caso o dispositivo restrinja formatos avançados
  try {
  await html5QrCode.start(
- { facingMode: "environment" },
- { fps: 20 },
- qrCodeSuccessCallback
+ { facingMode: "environment" }, 
+ { fps: 15 }, 
+ (decodedText) => {
+ tocarBipe();
+ dispararFlashScan();
+ const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+ el(prefix + 'codigo').value = decodedText;
+ pararScanner();
+ 
+ buscarProduto(modulo).then(() => {
+ setTimeout(() => {
+ const campoValidade = el(prefix + 'validade');
+ campoValidade.focus();
+ if (campoValidade.showPicker) {
+ try { campoValidade.showPicker(); } catch(err) {}
+ }
+ }, 300);
+ });
+ }
  );
  } catch (err) {
- alert("Erro ao inicializar a câmera: " + err);
+ alert("Erro ao abrir a câmera: " + err);
  pararScanner();
  }
  }
@@ -979,13 +996,13 @@
  lanternaAtiva = !lanternaAtiva;
  await html5QrCode.applyVideoConstraints({ advanced: [{ torch: lanternaAtiva }] });
  } catch (e) {
- alert("Lanterna não suportada neste dispositivo.");
+ alert("Lanterna não disponível.");
  }
  }
  
  function fecharScannerSemCodigo() {
- pararScanner();
  const prefix = moduloAtual === 'proativo' ? 'pro_' : 'trc_';
+ pararScanner();
  el(prefix + 'codigo').value = "";
  el(prefix + 'descricao').focus();
  }
@@ -1255,10 +1272,12 @@
  listaData.forEach((item, index) => {
  const row = 16 + index;
  if (row <= 38) {
+ const motivoNome = item.motivo === 1 ? '1 - Avaria' : (item.motivo === 2 ? '2 - Vencido' : item.motivo);
+ 
  sheet.cell(`A${row}`).value(String(item.codigo)).style({ horizontalAlignment: "center" });
  sheet.cell(`B${row}`).value(item.descricao).style({ horizontalAlignment: "center" });
  sheet.cell(`C${row}`).value(item.quantidade).style({ horizontalAlignment: "center" });
- sheet.cell(`D${row}`).value(item.motivo === 1 ? '1 - Avaria' : '2 - Vencido').style({ horizontalAlignment: "center" });
+ sheet.cell(`D${row}`).value(motivoNome).style({ horizontalAlignment: "center" });
  }
  });
  }
@@ -1274,7 +1293,7 @@
  } catch (e) {
  alert("Erro ao exportar Excel: " + e.message);
  }
- }
+}
  </script>
 </body>
 </html>
