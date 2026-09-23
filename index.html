@@ -3,19 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rede Market - Gestão</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Rede Market - Gestão Integrada</title>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
     <!-- Html5-QRCode Scanner -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <!-- xlsx-populate para exportação de Excel -->
+
+    <!-- xlsx-populate para exportação de Excel com preservação de formatação -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx-populate/browser/xlsx-populate.min.js"></script>
+
     <style>
         .glass-effect {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
+        }
+        #interactive video {
+            width: 100% !important;
+            height: auto !important;
+            border-radius: 0.75rem;
         }
     </style>
 </head>
@@ -102,20 +112,20 @@
                     <p class="text-sm text-slate-500 mt-2">Lançamento e baixa de perdas internas do setor.</p>
                 </button>
 
-                <!-- Botão 4: Cartaz Fácil -->
+                <!-- Botão 4: Cartaz Fácil (NOVO) -->
                 <a href="https://rmarket.cartazfacil.pro" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center p-6 bg-white rounded-2xl shadow-md border border-slate-200 hover:shadow-lg hover:border-red-500 transition duration-200 group text-center">
                     <div class="p-4 bg-red-50 text-red-600 rounded-full mb-4 group-hover:bg-red-600 group-hover:text-white transition duration-200">
                         <i data-lucide="printer" class="w-8 h-8"></i>
                     </div>
                     <h3 class="text-lg font-bold text-slate-800">Cartaz Fácil</h3>
-                    <p class="text-sm text-slate-500 mt-2">Acesse o sistema externo para emissão e impressão de cartazes.</p>
+                    <p class="text-sm text-slate-500 mt-2">Acesse o portal para emissão e impressão de cartazes.</p>
                 </a>
 
             </div>
         </div>
 
         <!-- Módulo de Trabalho -->
-        <div id="moduleScreen" class="hidden max-w-3xl w-full mx-auto bg-white p-6 rounded-2xl shadow-md border border-slate-200">
+        <div id="moduleScreen" class="hidden max-w-4xl w-full mx-auto bg-white p-6 rounded-2xl shadow-md border border-slate-200">
             <div class="flex justify-between items-center pb-4 mb-6 border-b border-slate-200">
                 <button onclick="backToMenu()" class="flex items-center text-slate-600 hover:text-red-600 font-medium transition">
                     <i data-lucide="arrow-left" class="w-5 h-5 mr-1"></i> Voltar ao Menu
@@ -123,14 +133,39 @@
                 <h3 id="moduleTitle" class="text-xl font-bold text-slate-800"></h3>
             </div>
 
-            <!-- Conteúdo dinâmico do módulo -->
-            <div class="space-y-4 text-center py-8">
-                <i data-lucide="wrench" class="w-16 h-16 text-slate-300 mx-auto"></i>
-                <p class="text-slate-600 font-medium">Módulo em execução.</p>
+            <!-- Conteúdo do Módulo -->
+            <div id="moduleContent" class="space-y-6">
+                <!-- Injetado dinamicamente via JS -->
             </div>
         </div>
 
     </main>
+
+    <!-- Modal Scanner Câmera -->
+    <div id="scannerModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                    <i data-lucide="camera" class="w-5 h-5 mr-2 text-red-600"></i> Ler Código de Barras
+                </h3>
+                <button onclick="closeScanner()" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div id="reader" class="overflow-hidden rounded-xl bg-black min-h-[250px]"></div>
+
+            <div class="mt-4 flex flex-wrap gap-2 justify-between items-center">
+                <button id="torchBtn" onclick="toggleTorch()" class="hidden text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium flex items-center">
+                    <i data-lucide="flashlight" class="w-4 h-4 mr-1"></i> Lanterna
+                </button>
+                <div id="zoomContainer" class="hidden items-center space-x-2 text-sm text-slate-600">
+                    <span>Zoom:</span>
+                    <input type="range" id="zoomRange" min="1" max="5" step="0.1" value="1" oninput="changeZoom(this.value)" class="w-24">
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-slate-800 text-slate-400 py-4 text-center text-sm mt-auto">
@@ -138,17 +173,26 @@
     </footer>
 
     <script>
-        // Inicialização dos ícones Lucide
+        // Inicializa ícones Lucide
         lucide.createIcons();
 
-        // Credenciais pré-definidas
+        // Credenciais do sistema
         const users = {
             'felipe': '2026',
             'admin': 'market123',
             'patitiba': 'frios2026'
         };
 
+        // Base local de produtos pré-cadastrados
+        const localProductsDB = {
+            '7891000100103': 'Leite Condensado Moça 395g',
+            '7891000001035': 'Nescau em Pó 370g',
+            '7894900011517': 'Refrigerante Coca-Cola 2L'
+        };
+
         let currentUser = null;
+        let html5QrcodeScanner = null;
+        let activeStreamTrack = null;
 
         // Login
         function handleLogin(event) {
@@ -185,7 +229,7 @@
             document.getElementById('passInput').value = '';
         }
 
-        // Abrir Módulo Interno
+        // Abrir Módulos Internos
         function openModule(moduleName) {
             document.getElementById('menuScreen').classList.add('hidden');
             document.getElementById('moduleScreen').classList.remove('hidden');
@@ -197,12 +241,165 @@
             };
 
             document.getElementById('moduleTitle').textContent = titleMap[moduleName] || 'Módulo';
+            renderModuleUI(moduleName);
         }
 
-        // Voltar ao Menu Principal
+        // Renderiza interface dinâmica do módulo
+        function renderModuleUI(moduleName) {
+            const container = document.getElementById('moduleContent');
+            
+            if (moduleName === 'proativo' || moduleName === 'trocas') {
+                container.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Código de Barras</label>
+                            <div class="flex space-x-2">
+                                <input type="text" id="barcodeInput" onchange="fetchProductInfo(this.value)" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="Escaneie ou digite">
+                                <button onclick="openScanner()" class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition">
+                                    <i data-lucide="scan" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Nome do Produto</label>
+                            <input type="text" id="productNameInput" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="Nome do produto">
+                        </div>
+                    </div>
+                    <div id="productPreview" class="hidden flex items-center space-x-4 p-3 bg-slate-50 border rounded-xl">
+                        <img id="productImg" src="" alt="Produto" class="w-16 h-16 object-cover rounded-lg">
+                        <div>
+                            <h4 id="previewName" class="font-bold text-slate-800"></h4>
+                            <p id="previewCode" class="text-xs text-slate-500"></p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="text-center py-8 space-y-3">
+                        <i data-lucide="wrench" class="w-12 h-12 text-slate-300 mx-auto"></i>
+                        <p class="text-slate-600 font-medium">Módulo de ${moduleName.toUpperCase()} em desenvolvimento.</p>
+                    </div>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        // Consultar produto nas APIs externas (Open Food / Open Products Facts)
+        async function fetchProductInfo(barcode) {
+            if (!barcode) return;
+            const code = barcode.trim();
+            const preview = document.getElementById('productPreview');
+            const nameInput = document.getElementById('productNameInput');
+
+            // 1. Verifica LocalStorage / DB local
+            if (localProductsDB[code]) {
+                nameInput.value = localProductsDB[code];
+                return;
+            }
+
+            try {
+                // 2. Consulta API Open Food Facts
+                let response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+                let data = await response.json();
+
+                if (data.status === 1 && data.product) {
+                    const prodName = data.product.product_name || data.product.product_name_pt || 'Produto sem nome';
+                    nameInput.value = prodName;
+
+                    if (data.product.image_front_small_url) {
+                        document.getElementById('productImg').src = data.product.image_front_small_url;
+                        document.getElementById('previewName').textContent = prodName;
+                        document.getElementById('previewCode').textContent = code;
+                        preview.classList.remove('hidden');
+                    }
+                    return;
+                }
+
+                // 3. Fallback: Open Products Facts
+                response = await fetch(`https://world.openproductsfacts.org/api/v0/product/${code}.json`);
+                data = await response.json();
+
+                if (data.status === 1 && data.product) {
+                    const prodName = data.product.product_name || 'Produto sem nome';
+                    nameInput.value = prodName;
+                }
+            } catch (err) {
+                console.warn('Erro ao consultar API externa:', err);
+            }
+        }
+
+        // Voltar ao menu
         function backToMenu() {
             document.getElementById('moduleScreen').classList.add('hidden');
             document.getElementById('menuScreen').classList.remove('hidden');
+        }
+
+        // Funções da Câmera / Scanner
+        function openScanner() {
+            document.getElementById('scannerModal').classList.remove('hidden');
+            html5QrcodeScanner = new Html5Qrcode("reader");
+
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 150 } },
+                (decodedText) => {
+                    document.getElementById('barcodeInput').value = decodedText;
+                    fetchProductInfo(decodedText);
+                    closeScanner();
+                },
+                (errorMessage) => { /* Silenciar busca contínua */ }
+            ).then(() => {
+                try {
+                    const videoTrack = html5QrcodeScanner.getRunningTrack();
+                    if (videoTrack) {
+                        activeStreamTrack = videoTrack;
+                        const capabilities = videoTrack.getCapabilities();
+
+                        if (capabilities.torch) {
+                            document.getElementById('torchBtn').classList.remove('hidden');
+                        }
+                        if (capabilities.zoom) {
+                            const zoomContainer = document.getElementById('zoomContainer');
+                            const zoomRange = document.getElementById('zoomRange');
+                            zoomRange.min = capabilities.zoom.min;
+                            zoomRange.max = capabilities.zoom.max;
+                            zoomRange.step = capabilities.zoom.step;
+                            zoomContainer.classList.remove('hidden');
+                        }
+                    }
+                } catch (e) {
+                    console.log("Controles de câmera não suportados:", e);
+                }
+            });
+        }
+
+        function closeScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    document.getElementById('scannerModal').classList.add('hidden');
+                    document.getElementById('torchBtn').classList.add('hidden');
+                    document.getElementById('zoomContainer').classList.add('hidden');
+                }).catch(err => console.error(err));
+            } else {
+                document.getElementById('scannerModal').classList.add('hidden');
+            }
+        }
+
+        function toggleTorch() {
+            if (activeStreamTrack) {
+                const currentSetting = activeStreamTrack.getConstraints().advanced?.[0]?.torch || false;
+                activeStreamTrack.applyConstraints({
+                    advanced: [{ torch: !currentSetting }]
+                });
+            }
+        }
+
+        function changeZoom(val) {
+            if (activeStreamTrack) {
+                activeStreamTrack.applyConstraints({
+                    advanced: [{ zoom: parseFloat(val) }]
+                });
+            }
         }
     </script>
 </body>
