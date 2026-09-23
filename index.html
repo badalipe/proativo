@@ -3,41 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>União dos Sites</title>
-    <script src="https://unpkg.com/@zxing/library@latest" type="text/javascript"></script>
+    <title>Seleção de Módulo</title>
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: system-ui, -apple-system, sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        body, html {
-            width: 100%;
-            height: 100%;
-            background-color: #1a1a2e;
+        body {
+            background: radial-gradient(circle at center, #1b204a 0%, #0d1026 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #menuPrincipal {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
             padding: 20px;
         }
 
         h1 {
-            font-size: 1.5rem;
-            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 30px;
             text-align: center;
+            letter-spacing: 0.5px;
         }
 
         .container-botoes {
@@ -45,212 +36,132 @@
             flex-direction: column;
             gap: 15px;
             width: 100%;
-            max-width: 350px;
+            max-width: 400px;
         }
 
         .btn-modulo {
-            background: linear-gradient(135deg, #1e88e5, #0d47a1);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 16px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 12px;
-            cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            justify-content: flex-start;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #ffffff;
             text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .btn-modulo:active {
-            transform: scale(0.98);
+        .btn-modulo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            filter: brightness(1.1);
         }
 
-        /* Botão Flutuante e Arrastável */
-        #btnCamFlutuante {
-            position: fixed !important;
-            bottom: 30px;
-            right: 20px;
-            width: 68px !important;
-            height: 68px !important;
-            z-index: 2147483647 !important;
-            background: linear-gradient(145deg, #1e88e5, #0d47a1) !important;
-            border: 2px solid rgba(255, 255, 255, 0.9) !important;
-            border-radius: 50% !important;
-            box-shadow: 0 8px 18px rgba(0,0,0,0.5) !important;
-            cursor: pointer !important;
-            display: flex;
-            align-items: center !important;
-            justify-content: center !important;
-            touch-action: none;
+        .btn-modulo svg {
+            margin-right: 15px;
+            width: 28px;
+            height: 28px;
         }
 
-        #modalScannerOverlay {
-            position: fixed !important;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000; z-index: 2147483647;
-            display: flex; flex-direction: column; justify-content: space-between;
+        /* Cores individuais dos botões */
+        .btn-proativo {
+            background: linear-gradient(135deg, #1886f3 0%, #0056b3 100%);
+        }
+
+        .btn-trocas {
+            background: linear-gradient(135deg, #3d5afe 0%, #1a237e 100%);
+        }
+
+        .btn-perdas {
+            background: linear-gradient(135deg, #9c27b0 0%, #4a148c 100%);
+        }
+
+        .btn-cartazfacil {
+            background: linear-gradient(135deg, #00b0ff 0%, #006064 100%);
+        }
+
+        .btn-sair {
+            margin-top: 25px;
+            background: #ffffff;
+            color: #1b204a;
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            align-self: center;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .btn-sair:hover {
+            background: #e0e0e0;
+        }
+
+        footer {
+            margin-top: 40px;
+            font-size: 0.8rem;
+            color: #a0a5c0;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <div id="menuPrincipal">
-        <h1>Selecione o Módulo Desejado</h1>
-        <div class="container-botoes">
-            <button class="btn-modulo" onclick="abrirModulo('https://badalipe.github.io/proativo/')">
-                ↑ PRÓATIVO
-            </button>
-            <button class="btn-modulo" onclick="abrirModulo('https://badalipe.github.io/proativo/')">
-                ⇄ TROCAS
-            </button>
-            <button class="btn-modulo" onclick="abrirModulo('https://badalipe.github.io/proativo/')">
-                ↓ PERDAS
-            </button>
-            <button class="btn-modulo" style="background: linear-gradient(135deg, #2e7d32, #1b5e20);" onclick="abrirCartazDirect()">
-                📋 CARTAZ FÁCIL
-            </button>
-        </div>
+    <h1>Selecione o Módulo Desejado</h1>
+
+    <div class="container-botoes">
+        <!-- 1. PRÓATIVO -->
+        <a href="proativo.html" class="btn-modulo btn-proativo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5"></line>
+                <polyline points="5 12 12 5 19 12"></polyline>
+            </svg>
+            PRÓATIVO
+        </a>
+
+        <!-- 2. TROCAS -->
+        <a href="trocas.html" class="btn-modulo btn-trocas">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="17 1 21 5 17 9"></polyline>
+                <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                <polyline points="7 23 3 19 7 15"></polyline>
+                <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+            </svg>
+            TROCAS
+        </a>
+
+        <!-- 3. PERDAS -->
+        <a href="perdas.html" class="btn-modulo btn-perdas">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <polyline points="19 12 12 19 5 12"></polyline>
+            </svg>
+            PERDAS
+        </a>
+
+        <!-- 4. CARTAZ FÁCIL (NOVO BOTÃO) -->
+        <a href="https://rmarket.cartazfacil.pro/index.php" class="btn-modulo btn-cartazfacil">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 7V4h16v3M9 20h6M12 4v16"/>
+            </svg>
+            CARTAZ FÁCIL
+        </a>
+
+        <!-- SAIR DO SISTEMA -->
+        <a href="#" class="btn-sair">Sair do Sistema</a>
     </div>
 
-    <!-- Botão BIPAR (Arrastável) -->
-    <button id="btnCamFlutuante" style="display: none;">
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 7V5C3 3.89543 3.89543 3 5 3H7" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
-                <path d="M17 3H19C20.1046 3 21 3.89543 21 5V7" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
-                <path d="M21 17V19C21 20.1046 20.1046 21 19 21H17" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
-                <path d="M7 21H5C3.89543 21 3 20.1046 3 19V17" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
-                <line x1="7" y1="8" x2="7" y2="16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
-                <line x1="10" y1="8" x2="10" y2="16" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
-                <line x1="14" y1="8" x2="14" y2="16" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
-                <line x1="17" y1="8" x2="17" y2="16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
-                <line x1="2" y1="12" x2="22" y2="12" stroke="#FF3B30" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <span style="font-size: 9px; font-weight: 900; color: #FFFFFF; margin-top: 1px;">BIPAR</span>
-        </div>
-    </button>
+    <footer>
+        By Encarregado Felipe Farizeli - Patitiba
+    </footer>
 
-    <script>
-        var currentStream = null;
-        var codeReader = null;
-        var btn = document.getElementById('btnCamFlutuante');
-
-        function abrirModulo(url) {
-            window.location.href = url;
-        }
-
-        function abrirCartazDirect() {
-            // Abre o Cartaz Fácil em tela cheia corrigindo a URL para fazer o login normalmente
-            window.location.href = "https://rmarket.cartazfacil.pro/index.php";
-        }
-
-        // Configuração de movimento por toque
-        var isDragging = false;
-        var touchStartX, touchStartY, initialLeft, initialTop;
-
-        btn.addEventListener('touchstart', function(e) {
-            isDragging = false;
-            var touch = e.touches[0];
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
-            var rect = btn.getBoundingClientRect();
-            initialLeft = rect.left;
-            initialTop = rect.top;
-        }, { passive: true });
-
-        btn.addEventListener('touchmove', function(e) {
-            var touch = e.touches[0];
-            var deltaX = touch.clientX - touchStartX;
-            var deltaY = touch.clientY - touchStartY;
-
-            if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-                isDragging = true;
-                btn.style.left = (initialLeft + deltaX) + 'px';
-                btn.style.top = (initialTop + deltaY) + 'px';
-                btn.style.bottom = 'auto';
-                btn.style.right = 'auto';
-            }
-        }, { passive: true });
-
-        btn.addEventListener('click', function(e) {
-            if (!isDragging) {
-                abrirScanner();
-            }
-        });
-
-        function tocarBeep() {
-            try {
-                var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                var osc = audioCtx.createOscillator();
-                var gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.15);
-            } catch(e) {}
-        }
-
-        function abrirScanner() {
-            if (document.getElementById('modalScannerOverlay')) return;
-
-            var overlay = document.createElement('div');
-            overlay.id = 'modalScannerOverlay';
-            overlay.innerHTML = `
-                <video id="videoScanner" playsinline autoplay muted style="position: absolute; width: 100%; height: 100%; object-fit: cover;"></video>
-                <div style="position: relative; z-index: 10; padding: 20px; color: #fff; text-align: center; font-weight: bold;">Escanear código de barras...</div>
-                <div style="position: relative; z-index: 10; padding: 25px; text-align: center;">
-                    <button id="btnFecharScanner" style="padding: 14px 30px; background: rgba(0,0,0,0.8); color: #fff; border: 1px solid #fff; border-radius: 25px; font-weight: bold;">Fechar Câmera</button>
-                </div>
-            `;
-
-            document.body.appendChild(overlay);
-            document.getElementById('btnFecharScanner').onclick = function() { fecharEPreencher(null); };
-
-            iniciarCamera();
-        }
-
-        function iniciarCamera() {
-            var videoElem = document.getElementById('videoScanner');
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } } }).then(function(stream) {
-                currentStream = stream;
-                videoElem.srcObject = stream;
-                codeReader = new ZXing.BrowserMultiFormatReader();
-                codeReader.decodeFromConstraints({ video: { facingMode: { ideal: "environment" } } }, 'videoScanner', function(result) {
-                    if (result) {
-                        tocarBeep();
-                        fecharEPreencher(result.getText());
-                    }
-                });
-            }).catch(function(err) {
-                alert("Erro na câmera. Verifique as permissões do Chrome.");
-            });
-        }
-
-        function fecharEPreencher(codigo) {
-            if (codeReader) { try { codeReader.reset(); } catch(e){} }
-            if (currentStream) { currentStream.getTracks().forEach(track => track.stop()); }
-            var overlay = document.getElementById('modalScannerOverlay');
-            if (overlay) overlay.parentNode.removeChild(overlay);
-            
-            if (codigo) {
-                var inputs = Array.from(document.querySelectorAll('input'));
-                var inputAlvo = inputs.find(i => i.type === 'text' || i.type === 'search');
-                if (inputAlvo) {
-                    inputAlvo.value = codigo;
-                    inputAlvo.dispatchEvent(new Event('input', { bubbles: true }));
-                    inputAlvo.dispatchEvent(new Event('change', { bubbles: true }));
-                } else {
-                    alert("Código bipado: " + codigo);
-                }
-            }
-        }
-    </script>
 </body>
 </html>
