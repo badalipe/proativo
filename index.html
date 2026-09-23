@@ -267,7 +267,7 @@
  
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
- /* --- SCANNER EM TELA CHEIA (ESTILO DA SUA IMAGEM) --- */
+ /* --- SCANNER EM TELA CHEIA (EXATAMENTE COMO NA SUA FOTO) --- */
  #beep-scanner-overlay {
  position: fixed; inset: 0; background: #000; z-index: 999999;
  display: flex; flex-direction: column; justify-content: space-between;
@@ -380,7 +380,6 @@
  <div id="menu-screen" class="hidden">
  <div class="menu-title">Selecione o Módulo Desejado</div>
  <div class="btn-row">
- <!-- Botão 1: Próativo -->
  <button type="button" onclick="abrirModulo('proativo')" class="glass-btn glass-1">
  <div class="glass-shine"></div>
  <div class="glass-content">
@@ -391,7 +390,6 @@
  </div>
  </button>
  
- <!-- Botão 2: Trocas -->
  <button type="button" onclick="abrirModulo('trocas')" class="glass-btn glass-2">
  <div class="glass-shine"></div>
  <div class="glass-content">
@@ -402,7 +400,6 @@
  </div>
  </button>
  
- <!-- Botão 3: Perdas -->
  <button type="button" onclick="abrirModulo('perdas')" class="glass-btn glass-3">
  <div class="glass-shine"></div>
  <div class="glass-content">
@@ -413,7 +410,6 @@
  </div>
  </button>
 
- <!-- Botão 4: Cartaz (rmarket.cartaz) -->
  <button type="button" onclick="abrirModulo('cartaz')" class="glass-btn glass-4">
  <div class="glass-shine"></div>
  <div class="glass-content">
@@ -587,7 +583,7 @@
  </div>
  </div>
  
- <!-- LEITOR BEEP EM TELA CHEIA (IDÊNTICO À SUA IMAGEM) -->
+ <!-- LEITOR BEEP EM TELA CHEIA (IDÊNTICO À SUA FOTO) -->
  <div id="beep-scanner-overlay" class="hidden">
  <div class="beep-top-bar">
  <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
@@ -744,21 +740,36 @@
  html5QrCode = new Html5Qrcode("beep-reader");
  }
  
+ // Motor de alta performance e resolução máxima com suporte a múltiplos formatos industriais
  const config = { 
- fps: 20, 
- qrbox: { width: 280, height: 160 },
+ fps: 30, // Motor acelerado para máxima velocidade de leitura
+ qrbox: function(viewfinderWidth, viewfinderHeight) {
+ const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+ return { width: Math.floor(minEdge * 0.85), height: Math.floor(minEdge * 0.5) };
+ },
  formatsToSupport: [ 
  Html5QrcodeSupportedFormats.EAN_13,
  Html5QrcodeSupportedFormats.EAN_8,
  Html5QrcodeSupportedFormats.CODE_128,
+ Html5QrcodeSupportedFormats.CODE_39,
  Html5QrcodeSupportedFormats.UPC_A,
+ Html5QrcodeSupportedFormats.UPC_E,
  Html5QrcodeSupportedFormats.QR_CODE
- ]
+ ],
+ experimentalFeatures: {
+ useBarCodeDetectorIfSupported: true
+ }
+ };
+ 
+ const constraints = {
+ facingMode: "environment",
+ width: { ideal: 1920 },
+ height: { ideal: 1080 }
  };
  
  try {
  await html5QrCode.start(
- { facingMode: "environment" },
+ constraints,
  config,
  (decodedText) => {
  tocarBipe();
@@ -776,7 +787,9 @@
  pararScanner();
  buscarProduto(modulo);
  },
- () => {}
+ (errorMessage) => {
+ // Erros de frame ignorados silenciosamente para manter alta performance
+ }
  );
  
  try {
@@ -788,14 +801,35 @@
  zoomInput.step = capabilities.zoom.step || 0.1;
  zoomInput.oninput = (e) => {
  el('beepZoomVal').innerText = e.target.value;
- html5QrCode.applyVideoConstraints({ advanced: [{ zoom: e.target.value }] });
+ html5QrCode.applyVideoConstraints({ advanced: [{ zoom: parseFloat(e.target.value) }] });
  };
  }
  } catch(e){}
  
  } catch (e) {
- alert("Erro ao abrir a câmera: " + e);
+ // Fallback automático se a resolução máxima falhar
+ try {
+ await html5QrCode.start(
+ { facingMode: "environment" },
+ config,
+ (decodedText) => {
+ tocarBipe();
+ dispararFlashScan();
+ const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+ const campoInput = el(prefix + 'codigo');
+ if (campoInput) {
+ campoInput.value = decodedText;
+ campoInput.dispatchEvent(new Event('input', { bubbles: true }));
+ }
  pararScanner();
+ buscarProduto(modulo);
+ },
+ () => {}
+ );
+ } catch (err2) {
+ alert("Erro ao abrir a câmera: " + err2);
+ pararScanner();
+ }
  }
  }
  
@@ -816,7 +850,7 @@
  lanternaAtiva = !lanternaAtiva;
  await html5QrCode.applyVideoConstraints({ advanced: [{ torch: lanternaAtiva }] });
  } catch (e) {
- alert("Lanterna não disponível.");
+ alert("Lanterna não disponível neste aparelho.");
  }
  }
  
@@ -1036,7 +1070,7 @@
  sheet.cell(`B${row}`).value(item.descricao);
  sheet.cell(`C${row}`).value(item.quantidade);
  sheet.cell(`D${row}`).value(item.unidade);
- sheet.cell(`E${row}`).value(dataFmt);
+ sheet.cell(`E${row}`).value(dataFln || dataFmt);
  sheet.cell(`F${row}`).value(item.motivo);
  sheet.cell(`G${row}`).value(item.valor);
  sheet.cell(`H${row}`).value(item.total);
