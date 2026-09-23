@@ -1,167 +1,41 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seleção de Módulo</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+<div class="container-botoes">
+    <!-- 1. PRÓATIVO (URL Completa) -->
+    <a href="https://badalipe.github.io/proativo/proativo.html" class="btn-modulo btn-proativo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+            <polyline points="5 12 12 5 19 12"></polyline>
+        </svg>
+        PRÓATIVO
+    </a>
 
-        body {
-            background: radial-gradient(circle at center, #1b204a 0%, #0d1026 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #ffffff;
-            padding: 20px;
-        }
+    <!-- 2. TROCAS (URL Completa) -->
+    <a href="https://badalipe.github.io/proativo/trocas.html" class="btn-modulo btn-trocas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="17 1 21 5 17 9"></polyline>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+            <polyline points="7 23 3 19 7 15"></polyline>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+        </svg>
+        TROCAS
+    </a>
 
-        h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 30px;
-            text-align: center;
-            letter-spacing: 0.5px;
-        }
+    <!-- 3. PERDAS -->
+    <a href="https://badalipe.github.io/proativo/perdas.html" class="btn-modulo btn-perdas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <polyline points="19 12 12 19 5 12"></polyline>
+        </svg>
+        PERDAS
+    </a>
 
-        .container-botoes {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 100%;
-            max-width: 400px;
-        }
+    <!-- 4. CARTAZ FÁCIL -->
+    <a href="https://rmarket.cartazfacil.pro/index.php" class="btn-modulo btn-cartazfacil">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 7V4h16v3M9 20h6M12 4v16"/>
+        </svg>
+        CARTAZ FÁCIL
+    </a>
 
-        .btn-modulo {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 16px 24px;
-            border-radius: 12px;
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: #ffffff;
-            text-decoration: none;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-modulo:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-            filter: brightness(1.1);
-        }
-
-        .btn-modulo svg {
-            margin-right: 15px;
-            width: 28px;
-            height: 28px;
-        }
-
-        /* Cores individuais dos botões */
-        .btn-proativo {
-            background: linear-gradient(135deg, #1886f3 0%, #0056b3 100%);
-        }
-
-        .btn-trocas {
-            background: linear-gradient(135deg, #3d5afe 0%, #1a237e 100%);
-        }
-
-        .btn-perdas {
-            background: linear-gradient(135deg, #9c27b0 0%, #4a148c 100%);
-        }
-
-        .btn-cartazfacil {
-            background: linear-gradient(135deg, #00b0ff 0%, #006064 100%);
-        }
-
-        .btn-sair {
-            margin-top: 25px;
-            background: #ffffff;
-            color: #1b204a;
-            font-weight: 700;
-            font-size: 0.95rem;
-            padding: 10px 20px;
-            border-radius: 20px;
-            border: none;
-            cursor: pointer;
-            align-self: center;
-            text-decoration: none;
-            transition: background 0.3s ease;
-        }
-
-        .btn-sair:hover {
-            background: #e0e0e0;
-        }
-
-        footer {
-            margin-top: 40px;
-            font-size: 0.8rem;
-            color: #a0a5c0;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-
-    <h1>Selecione o Módulo Desejado</h1>
-
-    <div class="container-botoes">
-        <!-- 1. PRÓATIVO -->
-        <a href="proativo.html" class="btn-modulo btn-proativo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="19" x2="12" y2="5"></line>
-                <polyline points="5 12 12 5 19 12"></polyline>
-            </svg>
-            PRÓATIVO
-        </a>
-
-        <!-- 2. TROCAS -->
-        <a href="trocas.html" class="btn-modulo btn-trocas">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="17 1 21 5 17 9"></polyline>
-                <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
-                <polyline points="7 23 3 19 7 15"></polyline>
-                <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
-            </svg>
-            TROCAS
-        </a>
-
-        <!-- 3. PERDAS -->
-        <a href="perdas.html" class="btn-modulo btn-perdas">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <polyline points="19 12 12 19 5 12"></polyline>
-            </svg>
-            PERDAS
-        </a>
-
-        <!-- 4. CARTAZ FÁCIL (NOVO BOTÃO) -->
-        <a href="https://rmarket.cartazfacil.pro/index.php" class="btn-modulo btn-cartazfacil">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 7V4h16v3M9 20h6M12 4v16"/>
-            </svg>
-            CARTAZ FÁCIL
-        </a>
-
-        <!-- SAIR DO SISTEMA -->
-        <a href="#" class="btn-sair">Sair do Sistema</a>
-    </div>
-
-    <footer>
-        By Encarregado Felipe Farizeli - Patitiba
-    </footer>
-
-</body>
-</html>
+    <!-- SAIR DO SISTEMA -->
+    <a href="#" class="btn-sair">Sair do Sistema</a>
+</div>
