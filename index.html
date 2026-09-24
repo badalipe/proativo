@@ -228,9 +228,6 @@
  }
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
- /* ------------------------------------------------------------- */
- /* LAYOUT CLEAN DA CÂMERA EM TELA CHEIA (SOBREPOSIÇÃO) */
- /* ------------------------------------------------------------- */
  #beep-scanner-overlay {
  position: fixed; inset: 0; background: #000; z-index: 999999;
  width: 100vw; height: 100vh; display: flex; flex-direction: column;
@@ -241,7 +238,6 @@
  #beep-reader { width: 100% !important; height: 100% !important; border: none !important; }
  #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
  
- /* Oculta elementos padrões da biblioteca html5-qrcode */
  #qr-shaded-region, #beep-reader__scan_region img, #beep-reader img, #beep-reader__header_message, #beep-reader__dashboard {
  display: none !important;
  }
@@ -437,7 +433,7 @@
  <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
  <div class="scan-zone"><button class="primary" onclick="abrirScanner('proativo')">📷 Abrir câmera para escanear</button></div>
  <label>Código de barras</label>
- <input id="pro_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
+ <input id="pro_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789..." oninput="buscarProdutoAutomatico('proativo')">
  <div class="actions"><button class="primary" onclick="buscarProduto('proativo')" style="width:auto">🔍 Buscar produto</button></div>
  <div id="pro_status" class="notice" style="margin-top:8px"></div>
  </section>
@@ -519,7 +515,7 @@
  <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
  <div class="scan-zone"><button class="primary" onclick="abrirScanner('trocas')">📷 Abrir câmera para escanear</button></div>
  <label>Código de barras</label>
- <input id="trc_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
+ <input id="trc_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789..." oninput="buscarProdutoAutomatico('trocas')">
  <div class="actions"><button class="primary" onclick="buscarProduto('trocas')" style="width:auto">🔍 Buscar produto</button></div>
  <div id="trc_status" class="notice" style="margin-top:8px"></div>
  </section>
@@ -553,7 +549,6 @@
  </div>
  </div>
  
- <!-- OVERLAY DA CÂMERA FULLSCREEN CLEAN -->
  <div id="beep-scanner-overlay" class="hidden">
  <div class="beep-viewport"><div id="beep-reader"></div></div>
  
@@ -587,10 +582,16 @@
  "patitiba": "frios2026"
  };
  
+ // Base ultra rápida pré-carregada (Instantânea / 0ms)
  const produtosPreCadastrados = {
  "7896045112098": "Refresco em Pó Frisco Abacaxi 18g",
  "7896183210120": "Leite Glória",
- "7908077452537": "Caderno Universitário 80 Fls Foroni"
+ "7908077452537": "Caderno Universitário 80 Fls Foroni",
+ "7891000241615": "iog nest grego mor light 360g 4 unidades",
+ "7898755200041": "Chambinho 165g Mor.",
+ "7891097107153": "Iog. Pense Zero Morango Batavo 510g",
+ "7891000261002": "Nestlé Ninho maçã banana 850gr",
+ "7891000000000": "tirolez Creme de Ricota 370g"
  };
  
  let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
@@ -599,6 +600,7 @@
  
  let moduloAtual = null;
  let html5QrCode = null;
+ let searchTimeout = null;
  
  const el = id => document.getElementById(id);
  
@@ -699,7 +701,7 @@
  }
  
  const config = { 
- fps: 15, 
+ fps: 20, 
  aspectRatio: window.innerWidth / window.innerHeight
  };
  
@@ -754,6 +756,17 @@
  el(prefix + 'codigo').value = "";
  el(prefix + 'descricao').focus();
  }
+
+ function buscarProdutoAutomatico(modulo) {
+ clearTimeout(searchTimeout);
+ const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+ const code = el(prefix + 'codigo').value.trim();
+ if (code.length >= 8) {
+ searchTimeout = setTimeout(() => {
+ buscarProduto(modulo);
+ }, 150);
+ }
+ }
  
  async function buscarProduto(modulo) {
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
@@ -765,37 +778,63 @@
  return;
  }
  
- statusEl.innerHTML = '🔍 Buscando...';
- 
+ // ⚡ PASSO 1: Busca Instantânea Local (0ms)
  if (catalogoLocal[code]) {
  el(prefix + 'descricao').value = catalogoLocal[code];
- statusEl.innerHTML = '<span class="ok">Localizado no catálogo local!</span>';
+ statusEl.innerHTML = '<span class="ok">⚡ Encontrado (Cache Local)!</span>';
+ el(prefix + 'quantidade').focus();
  return;
  }
  
  if (produtosPreCadastrados[code]) {
  el(prefix + 'descricao').value = produtosPreCadastrados[code];
- statusEl.innerHTML = '<span class="ok">Localizado na base do sistema!</span>';
+ statusEl.innerHTML = '<span class="ok">⚡ Encontrado no Sistema!</span>';
+ el(prefix + 'quantidade').focus();
  return;
  }
  
+ statusEl.innerHTML = '⚡ Consultando APIs em paralelo...';
+ 
+ // ⚡ PASSO 2: Consultas Simultâneas Ultra Rápidas com Timeout (Max 1.2s)
+ const controller = new AbortController();
+ const timeoutId = setTimeout(() => controller.abort(), 1200);
+
+ const fetchOFF = fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, { signal: controller.signal })
+ .then(r => r.json())
+ .then(d => {
+ if (d.status === 1 && d.product.product_name) return d.product.product_name;
+ throw new Error('OFF indisponível');
+ });
+
+ const fetchCosmos = fetch(`https://corsproxy.io/?https://api.cosmos.bluesoft.com.br/gtins/${code}.json`, { signal: controller.signal })
+ .then(r => r.json())
+ .then(d => {
+ if (d.description) return d.description;
+ throw new Error('Cosmos indisponível');
+ });
+
  try {
- const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
- const data = await res.json();
- if (data.status === 1 && data.product.product_name) {
- el(prefix + 'descricao').value = data.product.product_name;
- statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
- } else {
- statusEl.innerHTML = '<span class="warn">Não encontrado. Digite a descrição.</span>';
- el(prefix + 'descricao').focus();
- }
+ const nomeEncontrado = await Promise.any([fetchOFF, fetchCosmos]);
+ clearTimeout(timeoutId);
+ 
+ el(prefix + 'descricao').value = nomeEncontrado;
+ statusEl.innerHTML = '<span class="ok">⚡ Encontrado online!</span>';
+ 
+ // Salva no banco local para a próxima ser instantânea (0ms)
+ catalogoLocal[code] = nomeEncontrado;
+ localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
+ el(prefix + 'quantidade').focus();
+
  } catch (e) {
- statusEl.innerHTML = '<span class="warn">Erro de consulta. Digite manualmente.</span>';
+ clearTimeout(timeoutId);
+ statusEl.innerHTML = '<span class="warn">Não cadastrado. Digite o nome para salvar localmente.</span>';
+ el(prefix + 'descricao').focus();
  }
  }
  
  function adicionarItem(modulo) {
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+ const code = el(prefix + 'codigo').value.trim();
  const desc = el(prefix + 'descricao').value.trim();
  const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
  const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
@@ -805,10 +844,16 @@
  alert("Preencha descrição, quantidade e validade.");
  return;
  }
+
+ // Guarda automaticamente o nome digitado na base local para os próximos escaneamentos
+ if (code && code !== 'S/C' && !catalogoLocal[code]) {
+ catalogoLocal[code] = desc;
+ localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
+ }
  
  const item = {
  id: Date.now(),
- codigo: el(prefix + 'codigo').value.trim() || 'S/C',
+ codigo: code || 'S/C',
  descricao: desc,
  quantidade: qtd,
  unidade: el(prefix + 'unidade').value || 'und',
@@ -981,4 +1026,3 @@
  </script>
 </body>
 </html>
-
