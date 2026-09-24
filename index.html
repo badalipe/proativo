@@ -277,7 +277,7 @@
  .nav-tab-clean.active { opacity: 1; border-bottom: 2px solid #fff; padding-bottom: 2px; }
 
  .scan-area-clean {
- position: relative; width: 80vw; height: 50vh; margin: auto;
+ position: relative; width: 80vw; height: 40vh; margin: auto;
  }
 
  .corner-clean {
@@ -720,9 +720,16 @@
  html5QrCode = new Html5Qrcode("beep-reader");
  }
  
+ // Configuração otimizada para alta resolução (Full HD) e Foco Automático Contínuo
  const config = { 
- fps: 15, 
- aspectRatio: window.innerWidth / window.innerHeight
+ fps: 25, 
+ qrbox: { width: 280, height: 180 },
+ videoConstraints: {
+ facingMode: { exact: "environment" },
+ width: { min: 1280, ideal: 1920, max: 3840 },
+ height: { min: 720, ideal: 1080, max: 2160 },
+ focusMode: "continuous"
+ }
  };
  
  try {
@@ -739,10 +746,11 @@
  () => {}
  );
  } catch (e) {
+ // Fallback simples caso o aparelho não suporte as restrições Full HD
  try {
  await html5QrCode.start(
- { facingMode: "user" },
- config,
+ { facingMode: "environment" },
+ { fps: 15 },
  (decodedText) => {
  tocarBipe();
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
@@ -813,7 +821,7 @@
  
  statusEl.innerHTML = '🔍 Buscando...';
  
- // 1. Tenta buscar via API Beep App com Timeout otimizado de 1.2 segundos
+ // 1. Tenta buscar via API Beep App (Timeout de 1.2s)
  try {
  const controller = new AbortController();
  const timeoutId = setTimeout(() => controller.abort(), 1200);
@@ -836,10 +844,10 @@
  }
  }
  } catch (e) {
- console.warn("Beep API demorou ou falhou. Passando para as alternativas locais/reserva.");
+ console.warn("Beep API demorou ou falhou. Passando para alternativas.");
  }
 
- // 2. Tenta buscar no Catálogo Local
+ // 2. Catálogo Local
  if (catalogoLocal[code]) {
  const item = typeof catalogoLocal[code] === 'object' ? catalogoLocal[code] : { nome: catalogoLocal[code], imagem: '' };
  el(prefix + 'descricao').value = item.nome;
@@ -848,7 +856,7 @@
  return;
  }
  
- // 3. Tenta buscar na Base Pré-cadastrada
+ // 3. Base Pré-cadastrada
  if (produtosPreCadastrados[code]) {
  const item = produtosPreCadastrados[code];
  el(prefix + 'descricao').value = item.nome;
@@ -857,7 +865,7 @@
  return;
  }
  
- // 4. Tenta buscar na API Open Food Facts com Timeout de 1.5 segundos
+ // 4. Open Food Facts (Timeout de 1.5s)
  try {
  const controllerOFF = new AbortController();
  const timeoutOFF = setTimeout(() => controllerOFF.abort(), 1500);
