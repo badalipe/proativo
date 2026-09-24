@@ -1,1033 +1,390 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
- <meta name="theme-color" content="#0f172a">
- <title>Sistema de Gestão - Rede Market</title>
- 
- <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
- <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
- 
- <style>
- :root {
- --primary: #0066b2;
- --primary-hover: #004d87;
- --accent-red: #e30613;
- --bg-main: #f8fafc;
- --card-bg: #ffffff;
- --text-main: #0f172a;
- --text-muted: #64748b;
- --border-color: #cbd5e1;
- --accent-green: #10b981;
- --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
- --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
- }
- 
- * { 
- margin: 0; 
- padding: 0; 
- box-sizing: border-box; 
- -webkit-tap-highlight-color: transparent;
- }
- 
- body {
- font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
- display: flex;
- justify-content: center;
- align-items: center;
- min-height: 100vh;
- width: 100vw;
- overflow-x: hidden;
- padding: 12px;
- background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
- color: var(--text-main);
- }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Trocas - Rede Market</title>
+  <style>
+    :root {
+      --primary: #0066b2;
+      --primary-dark: #004d88;
+      --bg-color: #f4f6f9;
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border-color: #e5e7eb;
+      --warning-color: #d97706;
+      --success-color: #059669;
+    }
 
- #menu-screen {
- display: flex;
- flex-direction: column;
- align-items: center;
- justify-content: center;
- width: 100%;
- max-width: 400px;
- text-align: center;
- padding: 10px;
- margin: auto;
- }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
- .menu-title {
- color: #ffffff;
- font-size: 20px;
- font-weight: 800;
- margin-bottom: 24px;
- text-shadow: 0 2px 4px rgba(0,0,0,0.4);
- }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding-bottom: 40px;
+    }
 
- .btn-row {
- display: flex;
- flex-direction: column;
- gap: 16px;
- width: 100%;
- }
- 
- .glass-btn {
- width: 100%;
- position: relative;
- padding: 20px;
- border: 2px solid rgba(255, 255, 255, 0.4);
- border-radius: 16px;
- color: #ffffff;
- cursor: pointer;
- overflow: hidden;
- display: flex;
- align-items: center;
- justify-content: flex-start;
- gap: 20px;
- min-height: 80px;
- text-decoration: none;
- }
- 
- .glass-shine {
- position: absolute;
- top: -35%; left: -35%;
- width: 70%; height: 70%;
- background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 65%);
- pointer-events: none; z-index: 1;
- }
- 
- .glass-content {
- position: relative; z-index: 2;
- display: flex; align-items: center;
- gap: 16px; width: 100%;
- }
- 
- .btn-svg {
- width: 32px; height: 32px;
- filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
- flex-shrink: 0;
- }
- 
- .btn-text {
- font-size: 18px; font-weight: 800;
- letter-spacing: 1.5px; color: #ffffff;
- text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
- text-align: left;
- }
- 
- .glass-1 {
- background: linear-gradient(145deg, rgba(6,182,212,0.9) 0%, rgba(29,78,216,0.9) 100%);
- box-shadow: 0 8px 24px rgba(6,182,212,0.4);
- }
- .glass-2 {
- background: linear-gradient(145deg, rgba(37,99,235,0.9) 0%, rgba(79,70,229,0.9) 100%);
- box-shadow: 0 8px 24px rgba(99,102,241,0.4);
- }
- .glass-3 {
- background: linear-gradient(145deg, rgba(124,58,237,0.9) 0%, rgba(147,51,234,0.9) 100%);
- box-shadow: 0 8px 24px rgba(139,92,246,0.4);
- }
- .glass-4 {
- background: linear-gradient(145deg, rgba(217,119,6,0.9) 0%, rgba(180,83,9,0.9) 100%);
- box-shadow: 0 8px 24px rgba(217,119,6,0.4);
- }
- 
- #login-screen {
- position: fixed; inset: 0;
- background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
- display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 16px;
- }
- .login-card {
- background: rgba(255, 255, 255, 0.96); width: 100%; max-width: 380px;
- padding: 28px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); text-align: center;
- }
- .login-logo { height: 48px; margin-bottom: 16px; }
- .login-card h2 { margin: 0 0 6px; font-size: 20px; font-weight: 700; color: var(--text-main); }
- .login-card p { color: var(--text-muted); font-size: 12px; margin-bottom: 20px; }
- .login-error {
- background: #fef2f2; color: var(--accent-red); padding: 8px;
- border-radius: 6px; font-size: 12px; margin-bottom: 14px; font-weight: 600;
- }
- 
- .system-modal {
- position: fixed; inset: 0; z-index: 99999;
- background: var(--bg-main); overflow-y: auto; -webkit-overflow-scrolling: touch;
- }
- .hidden { display: none !important; }
- 
- .top {
- background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
- color: #fff; padding: 14px 12px; position: sticky; top: 0; z-index: 100;
- box-shadow: 0 2px 10px rgba(0,0,0,0.15);
- }
- .header-title-container { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 600px; margin: 0 auto; }
- .header-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
- .logo-container {
- background: #ffffff; padding: 4px 8px; border-radius: 8px;
- display: flex; align-items: center; justify-content: center; flex-shrink: 0;
- }
- .header-logo { height: 28px; width: auto; object-fit: contain; }
- .header-text h1 { font-size: 15px; font-weight: 700; margin: 0; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
- .header-text .sub { color: #94a3b8; font-size: 10px; margin-top: 2px; }
- 
- .wrap { width: 100%; max-width: 600px; margin: auto; padding: 12px 10px 80px; }
- 
- .card {
- background: var(--card-bg); border-radius: 14px; padding: 16px 14px;
- margin-bottom: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
- }
- .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
- .card-header h3 { margin: 0; font-size: 15px; font-weight: 700; color: var(--text-main); }
- .card-icon {
- width: 28px; height: 28px; border-radius: 8px; display: inline-flex;
- align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
- }
- .icon-scan { background: #e0f0ff; }
- .icon-conf { background: #ede9fe; }
- .icon-list { background: #d1fae5; }
- 
- label { display: block; font-size: 12px; font-weight: 700; margin: 10px 0 4px; color: var(--text-muted); }
- input, select {
- font: inherit; width: 100%; padding: 11px 12px; border: 1px solid var(--border-color);
- border-radius: 10px; background: #f8fafc; color: var(--text-main); font-size: 15px;
- }
- input:focus, select:focus {
- outline: none; border-color: var(--primary); background: #fff;
- box-shadow: 0 0 0 3px rgba(0, 102, 178, 0.15);
- }
- .input-codigo { font-family: 'Courier New', monospace; font-size: 18px !important; letter-spacing: 1px; font-weight: 700; }
- 
- .campo label { margin: 0 0 3px; }
- .campo .caixa {
- display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px;
- border: 1px solid var(--border-color); border-radius: 10px; background: #f8fafc;
- }
- .campo .caixa input, .campo .caixa select { border: 0; background: transparent; padding: 0; height: 100%; font-size: 14px; }
- 
- .header-right { display: flex; align-items: center; gap: 6px; }
- .chip-loja {
- display: flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.15);
- border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 11px; font-weight: 600;
- padding: 5px 8px; border-radius: 999px;
- }
- 
- .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
- 
- button {
- font: inherit; border: 0; border-radius: 10px; padding: 12px 14px; font-weight: 600;
- font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
- }
- .primary { background: var(--primary); color: #fff; width: 100%; }
- .secondary { background: #f0f7ff; color: var(--primary); }
- .danger { background: #fef2f2; color: var(--accent-red); }
- 
- .row { display: grid; grid-template-columns: 1fr; gap: 8px; }
- @media(min-width: 480px) {
- .row { grid-template-columns: 1fr 1fr; }
- .row-ident { grid-template-columns: 1fr 1fr; }
- }
- .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
- 
- #beep-scanner-overlay {
- position: fixed; inset: 0; background: #000; z-index: 999999;
- width: 100vw; height: 100vh; display: flex; flex-direction: column;
- justify-content: space-between;
- }
- 
- .beep-viewport { position: absolute; inset: 0; background: #000; z-index: 1; }
- #beep-reader { width: 100% !important; height: 100% !important; border: none !important; }
- #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
- 
- #qr-shaded-region, #beep-reader__scan_region img, #beep-reader img, #beep-reader__header_message, #beep-reader__dashboard {
- display: none !important;
- }
+    header {
+      background-color: #111827;
+      color: #ffffff;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
 
- .overlay-clean {
- position: absolute; inset: 0; z-index: 10; display: flex;
- flex-direction: column; justify-content: space-between; pointer-events: none;
- }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
- .header-clean {
- display: flex; align-items: center; padding: 16px;
- background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent); pointer-events: auto;
- }
+    .logo-box {
+      background: #fff;
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-align: center;
+      line-height: 1;
+    }
 
- .btn-back-clean {
- background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; margin-right: 14px;
- }
+    .logo-box .r-letter {
+      color: #0066b2;
+      font-weight: 800;
+      font-size: 18px;
+    }
 
- .nav-tabs-clean { display: flex; gap: 16px; }
- .nav-tab-clean {
- color: #fff; font-size: 14px; font-weight: 600; text-transform: uppercase; opacity: 0.8; cursor: pointer;
- }
- .nav-tab-clean.active { opacity: 1; border-bottom: 2px solid #fff; padding-bottom: 2px; }
+    .logo-box .market-text {
+      color: #ef4444;
+      font-weight: 700;
+      font-size: 10px;
+      display: block;
+    }
 
- .scan-area-clean {
- position: relative; width: 80vw; height: 50vh; margin: auto;
- }
+    .header-title h1 {
+      font-size: 15px;
+      font-weight: 700;
+    }
 
- .corner-clean {
- position: absolute; width: 30px; height: 30px; border-color: #ffffff; border-style: solid;
- }
+    .header-title p {
+      font-size: 11px;
+      color: #9ca3af;
+    }
 
- .top-left { top: 0; left: 0; border-width: 4px 0 0 4px; border-top-left-radius: 12px; }
- .top-right { top: 0; right: 0; border-width: 4px 4px 0 0; border-top-right-radius: 12px; }
- .bottom-left { bottom: 0; left: 0; border-width: 0 0 4px 4px; border-bottom-left-radius: 12px; }
- .bottom-right { bottom: 0; right: 0; border-width: 0 4px 4px 0; border-bottom-right-radius: 12px; }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
- .beep-indicator-clean {
- position: absolute; right: 15px; bottom: 25px; color: #ffffff; font-weight: bold;
- font-size: 14px; letter-spacing: 1px; display: flex; align-items: center;
- }
+    .badge-filial {
+      background: #1f2937;
+      border: 1px solid #374151;
+      color: #d1d5db;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
 
- .beep-indicator-clean::after {
- content: ''; display: inline-block; width: 12px; height: 2px; background-color: #ff3b30; margin-left: 4px;
- }
+    .btn-menu {
+      background: #0066b2;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
 
- .footer-clean {
- padding: 24px 16px calc(24px + env(safe-area-inset-bottom, 0px));
- background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
- display: flex; justify-content: center; pointer-events: auto;
- }
+    .container {
+      max-width: 500px;
+      margin: 16px auto;
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
 
- .btn-action-clean {
- background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.6);
- color: #ffffff; padding: 12px 24px; border-radius: 24px; font-size: 14px; font-weight: 500;
- backdrop-filter: blur(4px); cursor: pointer;
- }
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
 
- .notice { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
- .ok { color: var(--accent-green); font-weight: 700; }
- .warn { color: #d97706; }
- 
- .item {
- border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1;
- border-radius: 10px; padding: 10px 12px; margin-top: 8px; display: flex; justify-content: space-between;
- align-items: center; gap: 8px; background: #fff;
- }
- .item-info { min-width: 0; }
- .item strong { display: block; font-size: 13px; }
- .item small { color: var(--text-muted); font-size: 11px; display: block; margin-top: 2px; }
- .item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
- .item-total { font-weight: 700; font-size: 13px; color: var(--text-main); white-space: nowrap; }
- .empty { text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px; }
- .pill { display: inline-block; padding: 2px 8px; border-radius: 99px; background: #e2e8f0; font-size: 11px; font-weight: 700; }
- </style>
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #4b5563;
+      margin-bottom: 6px;
+    }
+
+    select, input[type="text"], input[type="date"], input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      background-color: #fafafa;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--primary);
+      background-color: #fff;
+      box-shadow: 0 0 0 3px rgba(0, 102, 178, 0.1);
+    }
+
+    .card-section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #111827;
+    }
+
+    .scan-area {
+      border: 2px dashed #d1d5db;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .btn-action {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.2s;
+    }
+
+    .btn-action:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-search {
+      width: auto;
+      margin-top: 8px;
+    }
+
+    .barcode-input {
+      letter-spacing: 2px;
+      font-family: monospace;
+      font-size: 15px;
+    }
+
+    .status-message {
+      font-size: 12px;
+      margin-top: 10px;
+      line-height: 1.4;
+      font-weight: 500;
+    }
+
+    .status-warning {
+      color: var(--warning-color);
+    }
+
+    .status-success {
+      color: var(--success-color);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+  </style>
 </head>
 <body>
 
- <div id="login-screen" class="hidden">
- <div class="login-card">
- <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
- <path d="M 30,120 L 30,55 C 30,35 45,20 65,20 L 115,20 C 145,20 165,40 165,70 C 165,95 145,115 120,120 L 155,160 L 125,160 L 95,120 L 65,120 L 65,160 L 30,160 Z M 65,50 L 65,95 L 110,95 C 125,95 135,85 135,72 C 135,60 125,50 110,50 Z" fill="#0066b2"/>
- <circle cx="30" cy="35" r="14" fill="#0066b2"/>
- <circle cx="30" cy="145" r="14" fill="#0066b2"/>
- <text x="175" y="68" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#0066b2" letter-spacing="-1">rede</text>
- <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
- </svg>
- <h2>Acesso ao Sistema</h2>
- <p>Insira suas credenciais para continuar</p>
- 
- <div id="loginError" class="login-error hidden">Usuário ou senha incorretos!</div>
- 
- <form id="loginForm" onsubmit="realizarLogin(event)">
- <div style="text-align: left;">
- <label>Usuário</label>
- <input id="usuarioInput" type="text" placeholder="Digite seu usuário" required autocomplete="username">
- 
- <label>Senha</label>
- <input id="senhaInput" type="password" placeholder="••••••••" required autocomplete="current-password">
- </div>
- <div style="margin-top: 20px;">
- <button type="submit" class="primary">Entrar no Sistema</button>
- </div>
- </form>
- </div>
- </div>
+  <!-- Cabeçalho Principal -->
+  <header>
+    <div class="header-brand">
+      <div class="logo-box">
+        <span class="r-letter">R</span>
+        <span class="market-text">market</span>
+      </div>
+      <div class="header-title">
+        <h1>Gestão de Trocas</h1>
+        <p>Devoluções</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span class="badge-filial">PATITIBA</span>
+      <button class="btn-menu">Menu</button>
+    </div>
+  </header>
 
- <div id="menu-screen" class="hidden">
- <div class="menu-title">Selecione o Módulo Desejado</div>
- <div class="btn-row">
- <button type="button" onclick="abrirModulo('proativo')" class="glass-btn glass-1">
- <div class="glass-shine"></div>
- <div class="glass-content">
- <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
- <path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>
- </svg>
- <span class="btn-text">PRÓATIVO</span>
- </div>
- </button>
- 
- <button type="button" onclick="abrirModulo('trocas')" class="glass-btn glass-2">
- <div class="glass-shine"></div>
- <div class="glass-content">
- <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
- <path d="M7 10h14l-4-4"/><path d="M17 14H3l4 4"/>
- </svg>
- <span class="btn-text">TROCAS</span>
- </div>
- </button>
- 
- <button type="button" onclick="abrirModulo('perdas')" class="glass-btn glass-3">
- <div class="glass-shine"></div>
- <div class="glass-content">
- <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
- <path d="M12 5v14"/><path d="m5 12 7 7 7-7"/>
- </svg>
- <span class="btn-text">PERDAS</span>
- </div>
- </button>
+  <!-- Conteúdo Central -->
+  <div class="container">
 
- <button type="button" onclick="abrirModulo('cartaz')" class="glass-btn glass-4">
- <div class="glass-shine"></div>
- <div class="glass-content">
- <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
- <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
- </svg>
- <span class="btn-text">CARTAZ</span>
- </div>
- </button>
- </div>
- <div style="margin-top: 24px;">
- <button type="button" class="danger" onclick="fazerLogout()" style="width: auto; padding: 10px 18px; font-size: 13px;">Sair do Sistema</button>
- </div>
- </div>
- 
- <div id="proativo-modal" class="system-modal hidden">
- <div id="app-proativo">
- <header class="top">
- <div class="header-title-container">
- <div class="header-left">
- <div class="logo-container">
- <svg class="header-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
- <path d="M 30,120 L 30,55 C 30,35 45,20 65,20 L 115,20 C 145,20 165,40 165,70 C 165,95 145,115 120,120 L 155,160 L 125,160 L 95,120 L 65,120 L 65,160 L 30,160 Z M 65,50 L 65,95 L 110,95 C 125,95 135,85 135,72 C 135,60 125,50 110,50 Z" fill="#0066b2"/>
- <circle cx="30" cy="35" r="14" fill="#0066b2"/>
- <circle cx="30" cy="145" r="14" fill="#0066b2"/>
- <text x="175" y="68" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#0066b2" letter-spacing="-1">rede</text>
- <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
- </svg>
- </div>
- <div class="header-text">
- <h1>Pró Ativos • Frios</h1>
- <div class="sub"><span>Validades e Estoque</span></div>
- </div>
- </div>
- <div class="header-right">
- <button type="button" class="chip-loja"><span>PATITIBA</span></button>
- <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 10px; font-size: 11px;">Menu</button>
- </div>
- </div>
- </header>
- 
- <main class="wrap">
- <section class="card">
- <div class="row row-ident">
- <div class="campo"><label>Quem digitou?</label><div class="caixa"><input id="pro_digitou" placeholder="Seu nome"></div></div>
- <div class="campo"><label>Gerente / avaliação</label><div class="caixa"><input id="pro_gerente"></div></div>
- <div class="campo"><label>Comprador</label><div class="caixa"><input id="pro_comprador"></div></div>
- <div class="campo"><label>Data do levantamento</label><div class="caixa"><input id="pro_data" type="date"></div></div>
- </div>
- </section>
- 
- <section class="card">
- <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
- <div class="scan-zone"><button class="primary" onclick="abrirScanner('proativo')">📷 Abrir câmera para escanear</button></div>
- <label>Código de barras</label>
- <input id="pro_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789..." oninput="buscarProdutoAutomatico('proativo')">
- <div class="actions"><button class="primary" onclick="buscarProduto('proativo')" style="width:auto">🔍 Buscar produto</button></div>
- <div id="pro_status" class="notice" style="margin-top:8px"></div>
- </section>
- 
- <section class="card">
- <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
- <label>Descrição do produto</label><input id="pro_descricao" placeholder="Descrição do produto">
- <div class="row">
- <div><label>Quantidade *</label><input id="pro_quantidade" inputmode="decimal" placeholder="Ex.: 12"></div>
- <div><label>Unidade</label><input id="pro_unidade" value="und"></div>
- </div>
- <div class="row">
- <div><label>Data de validade *</label><input id="pro_validade" type="date"></div>
- <div><label>Valor unitário (R$)</label><input id="pro_valor" inputmode="decimal" value="0.00"></div>
- </div>
- <div class="actions"><button class="primary" onclick="adicionarItem('proativo')" style="width:auto">➕ Adicionar à lista</button></div>
- </section>
- 
- <section class="card">
- <div class="card-header" style="justify-content: space-between;">
- <div style="display:flex;align-items:center;gap:8px;"><span class="card-icon icon-list">📋</span><h3>3. Produtos lançados</h3></div>
- <span id="pro_contador" class="pill">0</span>
- </div>
- <div id="pro_lista" class="empty"></div>
- <div class="actions" style="margin-top: 14px;">
- <button class="primary" onclick="gerarExcel('proativo')" style="width:auto">📊 Gerar Excel Pró Ativo</button>
- <button class="danger" onclick="limparLista('proativo')" style="width:auto">Limpar</button>
- </div>
- </section>
- </main>
- </div>
- </div>
- 
- <div id="trocas-modal" class="system-modal hidden">
- <div id="app-trocas">
- <header class="top">
- <div class="header-title-container">
- <div class="header-left">
- <div class="logo-container">
- <svg class="header-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
- <path d="M 30,120 L 30,55 C 30,35 45,20 65,20 L 115,20 C 145,20 165,40 165,70 C 165,95 145,115 120,120 L 155,160 L 125,160 L 95,120 L 65,120 L 65,160 L 30,160 Z M 65,50 L 65,95 L 110,95 C 125,95 135,85 135,72 C 135,60 125,50 110,50 Z" fill="#0066b2"/>
- <circle cx="30" cy="35" r="14" fill="#0066b2"/>
- <circle cx="30" cy="145" r="14" fill="#0066b2"/>
- <text x="175" y="68" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#0066b2" letter-spacing="-1">rede</text>
- <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
- </svg>
- </div>
- <div class="header-text">
- <h1>Gestão de Trocas</h1>
- <div class="sub"><span>Devoluções</span></div>
- </div>
- </div>
- <div class="header-right">
- <button type="button" class="chip-loja"><span>PATITIBA</span></button>
- <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 10px; font-size: 11px;">Menu</button>
- </div>
- </div>
- </header>
- 
- <main class="wrap">
- <section class="card">
- <div class="row row-ident">
- <div class="campo"><label>Conferente / Responsável</label><div class="caixa"><input id="trc_digitou" placeholder="Seu nome"></div></div>
- <div class="campo"><label>Fornecedor</label><div class="caixa"><input id="trc_fornecedor" placeholder="Ex: Ambev, Nestlé"></div></div>
- <div class="campo">
- <label>Motivo da Troca *</label>
- <div class="caixa">
- <select id="trc_motivo">
- <option value="1">1 - Avaria</option>
- <option value="2">2 - Descarte</option>
- </select>
- </div>
- </div>
- <div class="campo"><label>Data da Troca</label><div class="caixa"><input id="trc_data" type="date"></div></div>
- </div>
- </section>
- 
- <section class="card">
- <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
- <div class="scan-zone"><button class="primary" onclick="abrirScanner('trocas')">📷 Abrir câmera para escanear</button></div>
- <label>Código de barras</label>
- <input id="trc_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789..." oninput="buscarProdutoAutomatico('trocas')">
- <div class="actions"><button class="primary" onclick="buscarProduto('trocas')" style="width:auto">🔍 Buscar produto</button></div>
- <div id="trc_status" class="notice" style="margin-top:8px"></div>
- </section>
- 
- <section class="card">
- <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Dados da Troca</h3></div>
- <label>Descrição do produto</label><input id="trc_descricao" placeholder="Descrição do produto">
- <div class="row">
- <div><label>Quantidade a trocar *</label><input id="trc_quantidade" inputmode="decimal" placeholder="Ex.: 5"></div>
- <div><label>Unidade</label><input id="trc_unidade" value="und"></div>
- </div>
- <div class="row">
- <div><label>Data de Validade *</label><input id="trc_validade" type="date"></div>
- <div><label>Custo Unitário (R$)</label><input id="trc_valor" inputmode="decimal" value="0.00"></div>
- </div>
- <div class="actions"><button class="primary" onclick="adicionarItem('trocas')" style="width:auto">➕ Registrar para Troca</button></div>
- </section>
- 
- <section class="card">
- <div class="card-header" style="justify-content: space-between;">
- <div style="display:flex;align-items:center;gap:8px;"><span class="card-icon icon-list">📋</span><h3>3. Itens na Lista</h3></div>
- <span id="trc_contador" class="pill">0</span>
- </div>
- <div id="trc_lista" class="empty"></div>
- <div class="actions" style="margin-top: 14px;">
- <button class="primary" onclick="gerarExcel('trocas')" style="width:auto">📊 Exportar Planilha de Trocas</button>
- <button class="danger" onclick="limparLista('trocas')" style="width:auto">Limpar</button>
- </div>
- </section>
- </main>
- </div>
- </div>
- 
- <div id="beep-scanner-overlay" class="hidden">
- <div class="beep-viewport"><div id="beep-reader"></div></div>
- 
- <div class="overlay-clean">
- <header class="header-clean">
- <button type="button" class="btn-back-clean" onclick="pararScanner()">←</button>
- <nav class="nav-tabs-clean">
- <span class="nav-tab-clean active">Escanear...</span>
- <span class="nav-tab-clean" onclick="fecharScannerSemCodigo()">DIGITAR MANUALMENTE</span>
- </nav>
- </header>
+    <!-- Seção de Motivo e Data -->
+    <div class="card">
+      <div class="form-group">
+        <label for="motivoTroca">Motivo da Troca</label>
+        <select id="motivoTroca">
+          <option value="1">1 - Avaria</option>
+          <option value="2">2 - Vencimento</option>
+          <option value="3">3 - Defeito de Fabricação</option>
+          <option value="4">4 - Outros</option>
+        </select>
+      </div>
 
- <div class="scan-area-clean">
- <div class="corner-clean top-left"></div>
- <div class="corner-clean top-right"></div>
- <div class="corner-clean bottom-left"></div>
- <div class="corner-clean bottom-right"></div>
- <div class="beep-indicator-clean">BEEP</div>
- </div>
+      <div class="form-group">
+        <label for="dataTroca">Data da Troca</label>
+        <input type="text" id="dataTroca" value="24/09/2026">
+      </div>
+    </div>
 
- <footer class="footer-clean">
- <button type="button" class="btn-action-clean" onclick="fecharScannerSemCodigo()">Adicionar sem código de barras</button>
- </footer>
- </div>
- </div>
- 
- <script>
- const usuariosPermitidos = {
- "felipe": "2026",
- "admin": "market123",
- "patitiba": "frios2026"
- };
- 
- // Base Pré-carregada para resposta instantânea (0ms)
- const produtosPreCadastrados = {
- "7896045112098": "Refresco em Pó Frisco Abacaxi 18g",
- "7896183210120": "Leite Glória",
- "7908077452537": "Caderno Universitário 80 Fls Foroni",
- "7891000241615": "iog nest grego mor light 360g 4 unidades",
- "7898755200041": "Chambinho 165g Mor.",
- "7891097107153": "Iog. Pense Zero Morango Batavo 510g",
- "7891000261002": "Nestlé Ninho maçã banana 850gr",
- "7891000000000": "tirolez Creme de Ricota 370g"
- };
- 
- let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
- let itensProAtivo = JSON.parse(localStorage.getItem('sys_proative_itens') || '[]');
- let itensTrocas = JSON.parse(localStorage.getItem('sys_trocas_itens') || '[]');
- 
- let moduloAtual = null;
- let html5QrCode = null;
- let searchTimeout = null;
- 
- const el = id => document.getElementById(id);
- 
- window.addEventListener('DOMContentLoaded', () => {
- const estaLogado = sessionStorage.getItem('sys_logado') === 'true';
- 
- if (!estaLogado) {
- el('login-screen').classList.remove('hidden');
- el('menu-screen').classList.add('hidden');
- } else {
- el('login-screen').classList.add('hidden');
- el('menu-screen').classList.remove('hidden');
- }
- 
- const hoje = new Date().toISOString().split('T')[0];
- if (el('pro_data')) el('pro_data').value = hoje;
- if (el('trc_data')) el('trc_data').value = hoje;
- });
- 
- function realizarLogin(e) {
- e.preventDefault();
- const user = el('usuarioInput').value.trim().toLowerCase();
- const pass = el('senhaInput').value;
- 
- if (usuariosPermitidos[user] && usuariosPermitidos[user] === pass) {
- sessionStorage.setItem('sys_logado', 'true');
- sessionStorage.setItem('sys_user', user);
- el('loginError').classList.add('hidden');
- el('login-screen').classList.add('hidden');
- el('menu-screen').classList.remove('hidden');
- } else {
- el('loginError').classList.remove('hidden');
- }
- }
- 
- function fazerLogout() {
- sessionStorage.removeItem('sys_logado');
- el('proativo-modal').classList.add('hidden');
- el('trocas-modal').classList.add('hidden');
- el('menu-screen').classList.add('hidden');
- el('login-screen').classList.remove('hidden');
- el('usuarioInput').value = '';
- el('senhaInput').value = '';
- }
- 
- function abrirModulo(modulo) {
- if (modulo === 'perdas') {
- alert("⚠️ Área em desenvolvimento! Em breve esta funcionalidade estará disponível.");
- return;
- }
- 
- if (modulo === 'cartaz') {
- window.location.href = "https://rmarket.cartazfacil.pro/";
- return;
- }
- 
- moduloAtual = modulo;
- el('menu-screen').classList.add('hidden');
- 
- if (modulo === 'proativo') {
- el('proativo-modal').classList.remove('hidden');
- renderizarLista('proativo');
- } else if (modulo === 'trocas') {
- el('trocas-modal').classList.remove('hidden');
- renderizarLista('trocas');
- }
- }
- 
- function voltarAoMenu() {
- pararScanner();
- el('proativo-modal').classList.add('hidden');
- el('trocas-modal').classList.add('hidden');
- el('menu-screen').classList.remove('hidden');
- }
- 
- function tocarBipe() {
- try {
- const ctx = new (window.AudioContext || window.webkitAudioContext)();
- const osc = ctx.createOscillator();
- const gain = ctx.createGain();
- osc.type = "square";
- osc.frequency.setValueAtTime(1200, ctx.currentTime);
- gain.gain.setValueAtTime(0.3, ctx.currentTime);
- gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
- osc.connect(gain);
- gain.connect(ctx.destination);
- osc.start();
- osc.stop(ctx.currentTime + 0.12);
- } catch (e) {}
- }
- 
- async function abrirScanner(modulo) {
- moduloAtual = modulo;
- el('beep-scanner-overlay').classList.remove('hidden');
- 
- if (!html5QrCode) {
- html5QrCode = new Html5Qrcode("beep-reader");
- }
- 
- const config = { 
- fps: 20, 
- aspectRatio: window.innerWidth / window.innerHeight
- };
- 
- try {
- await html5QrCode.start(
- { facingMode: "environment" },
- config,
- (decodedText) => {
- tocarBipe();
- const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- el(prefix + 'codigo').value = decodedText;
- pararScanner();
- buscarProduto(modulo);
- },
- () => {}
- );
- } catch (e) {
- try {
- await html5QrCode.start(
- { facingMode: "user" },
- config,
- (decodedText) => {
- tocarBipe();
- const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- el(prefix + 'codigo').value = decodedText;
- pararScanner();
- buscarProduto(modulo);
- }
- );
- } catch(err) {
- alert("Erro ao abrir a câmera: " + err);
- pararScanner();
- }
- }
- }
- 
- function pararScanner() {
- if (html5QrCode && html5QrCode.isScanning) {
- html5QrCode.stop().then(() => {
- el('beep-scanner-overlay').classList.add('hidden');
- }).catch(() => {
- el('beep-scanner-overlay').classList.add('hidden');
- });
- } else {
- el('beep-scanner-overlay').classList.add('hidden');
- }
- }
- 
- function fecharScannerSemCodigo() {
- const prefix = moduloAtual === 'proativo' ? 'pro_' : 'trc_';
- pararScanner();
- el(prefix + 'codigo').value = "";
- el(prefix + 'descricao').focus();
- }
+    <!-- Seção 1: Escanear Produto -->
+    <div class="card">
+      <div class="card-section-title">
+        <span>📷</span> 1. Escanear produto
+      </div>
 
- function buscarProdutoAutomatico(modulo) {
- clearTimeout(searchTimeout);
- const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- const code = el(prefix + 'codigo').value.trim();
- if (code.length >= 8) {
- searchTimeout = setTimeout(() => {
- buscarProduto(modulo);
- }, 100);
- }
- }
- 
- async function buscarProduto(modulo) {
- const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- const code = el(prefix + 'codigo').value.trim();
- const statusEl = el(prefix + 'status');
- 
- if (!code) {
- statusEl.innerHTML = '<span class="warn">Informe um código.</span>';
- return;
- }
- 
- // ⚡ 1. Busca Local Instantânea (0ms)
- if (catalogoLocal[code]) {
- el(prefix + 'descricao').value = catalogoLocal[code];
- statusEl.innerHTML = '<span class="ok">⚡ Encontrado (Cache Local)!</span>';
- el(prefix + 'quantidade').focus();
- return;
- }
- 
- if (produtosPreCadastrados[code]) {
- el(prefix + 'descricao').value = produtosPreCadastrados[code];
- statusEl.innerHTML = '<span class="ok">⚡ Encontrado no Sistema!</span>';
- el(prefix + 'quantidade').focus();
- return;
- }
- 
- statusEl.innerHTML = '⚡ Buscando no banco de dados alimentício...';
- 
- // ⚡ 2. Consulta paralela ultra rápida (Servidor BEEP + OpenFoodBR)
- const controller = new AbortController();
- const timeoutId = setTimeout(() => controller.abort(), 1800);
+      <div class="scan-area">
+        <button type="button" class="btn-action" onclick="abrirCamera()">
+          <span>📷</span> Abrir câmera para escanear
+        </button>
+      </div>
 
- // API 1: Base Pública Ultra Rápida de Produtos Br (Servidor Beep / Cosmos / OpenFood)
- const fetchBeepDb = fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=product_name,product_name_pt,brands`, { signal: controller.signal })
- .then(r => r.json())
- .then(d => {
- if (d.product) {
- const nome = d.product.product_name_pt || d.product.product_name;
- const marca = d.product.brands ? ` ${d.product.brands}` : '';
- if (nome) return `${nome}${marca}`;
- }
- throw new Error('OFF indisponível');
- });
+      <div class="form-group">
+        <label for="codigoBarras">Código de barras</label>
+        <input type="text" id="codigoBarras" class="barcode-input" value="7896584300017" placeholder="Digite ou escaneie o código">
+      </div>
 
- // API 2: Base Secundária Alternativa (Cosmos / UPC)
- const fetchCosmosDb = fetch(`https://corsproxy.io/?https://api.cosmos.bluesoft.com.br/gtins/${code}.json`, { signal: controller.signal })
- .then(r => r.json())
- .then(d => {
- if (d.description) return d.description;
- throw new Error('Cosmos indisponível');
- });
+      <button type="button" class="btn-action btn-search" onclick="buscarProduto()">
+        <span>🔍</span> Buscar produto
+      </button>
 
- try {
- const nomeEncontrado = await Promise.any([fetchBeepDb, fetchCosmosDb]);
- clearTimeout(timeoutId);
- 
- el(prefix + 'descricao').value = nomeEncontrado;
- statusEl.innerHTML = '<span class="ok">⚡ Produto Localizado!</span>';
- 
- // Salva no cache do dispositivo para que na próxima vez abra em 0ms
- catalogoLocal[code] = nomeEncontrado;
- localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
- el(prefix + 'quantidade').focus();
+      <!-- Mensagem dinamicamente alimentada pela busca JS -->
+      <div id="mensagemStatus" class="status-message status-warning" style="display: block;">
+        Produto não encontrado na base pública. Digite a descrição para cadastrar.
+      </div>
+    </div>
 
- } catch (e) {
- clearTimeout(timeoutId);
- statusEl.innerHTML = '<span class="warn">Produto não encontrado na base pública. Digite a descrição para cadastrar.</span>';
- el(prefix + 'descricao').focus();
- }
- }
- 
- function adicionarItem(modulo) {
- const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- const code = el(prefix + 'codigo').value.trim();
- const desc = el(prefix + 'descricao').value.trim();
- const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
- const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
- const validade = el(prefix + 'validade').value;
- 
- if (!desc || isNaN(qtd) || !validade) {
- alert("Preencha descrição, quantidade e validade.");
- return;
- }
+    <!-- Seção 2: Dados da Troca -->
+    <div class="card">
+      <div class="card-section-title">
+        <span>✏️</span> 2. Dados da Troca
+      </div>
 
- if (code && code !== 'S/C' && !catalogoLocal[code]) {
- catalogoLocal[code] = desc;
- localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
- }
- 
- const item = {
- id: Date.now(),
- codigo: code || 'S/C',
- descricao: desc,
- quantidade: qtd,
- unidade: el(prefix + 'unidade').value || 'und',
- validade: validade,
- valor: val,
- total: qtd * val
- };
- 
- if (modulo === 'trocas') {
- item.motivo = parseInt(el('trc_motivo').value);
- itensTrocas.unshift(item);
- localStorage.setItem('sys_trocas_itens', JSON.stringify(itensTrocas));
- } else {
- itensProAtivo.unshift(item);
- localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
- }
- 
- renderizarLista(modulo);
- 
- el(prefix + 'codigo').value = '';
- el(prefix + 'descricao').value = '';
- el(prefix + 'quantidade').value = '';
- el(prefix + 'validade').value = '';
- el(prefix + 'valor').value = '0.00';
- el(prefix + 'status').innerHTML = '';
- }
- 
- function renderizarLista(modulo) {
- const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- const listContainer = el(prefix + 'lista');
- const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
- 
- el(prefix + 'contador').innerText = listaData.length;
- 
- if (listaData.length === 0) {
- listContainer.className = 'empty';
- listContainer.innerHTML = 'Nenhum item registrado.';
- return;
- }
- 
- listContainer.className = '';
- listContainer.innerHTML = '';
- 
- listaData.forEach(item => {
- const itemEl = document.createElement('div');
- itemEl.className = 'item';
- const dataFmt = item.validade.split('-').reverse().join('/');
- const infoExtra = item.motivo ? ` | Motivo: ${item.motivo === 1 ? '1-Avaria' : '2-Descarte'}` : '';
- 
- itemEl.innerHTML = `
- <div class="item-info">
- <strong>${item.descricao}</strong>
- <small>Cód: ${item.codigo} | Qtd: ${item.quantidade} ${item.unidade} | Val: ${dataFmt}${infoExtra}</small>
- </div>
- <div class="item-right">
- <span class="item-total">R$ ${item.total.toFixed(2)}</span>
- <button type="button" class="danger" style="padding: 6px 8px; font-size: 11px;" onclick="removerItem('${modulo}', ${item.id})">🗑️</button>
- </div>
- `;
- listContainer.appendChild(itemEl);
- });
- }
- 
- function removerItem(modulo, id) {
- if (modulo === 'proativo') {
- itensProAtivo = itensProAtivo.filter(i => i.id !== id);
- localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
- } else {
- itensTrocas = itensTrocas.filter(i => i.id !== id);
- localStorage.setItem('sys_trocas_itens', JSON.stringify(itensTrocas));
- }
- renderizarLista(modulo);
- }
- 
- function limparLista(modulo) {
- if (confirm("Deseja apagar todos os lançamentos deste módulo?")) {
- if (modulo === 'proativo') {
- itensProAtivo = [];
- localStorage.removeItem('sys_proative_itens');
- } else {
- itensTrocas = [];
- localStorage.removeItem('sys_trocas_itens');
- }
- renderizarLista(modulo);
- }
- }
- 
- function getModeloPlanilha(modulo) {
- return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './planilha_padrao_original.xlsx';
- }
- 
- async function gerarExcel(modulo) {
- const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
- if (listaData.length === 0) {
- alert("Adicione itens para exportar.");
- return;
- }
- 
- const urlModelo = getModeloPlanilha(modulo);
- 
- try {
- let workbook;
- try {
- const response = await fetch(urlModelo);
- const arrayBuffer = await response.arrayBuffer();
- workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
- } catch (e) {
- alert("Aviso: Modelo oficial não encontrado. Gerando padrão.");
- workbook = await XlsxPopulate.fromBlankAsync();
- }
- 
- const sheet = workbook.sheet(0);
- const nomeModulo = modulo === 'proativo' ? "Pró Ativo Frios" : "Relatório de Trocas";
- 
- if (modulo === 'proativo') {
- const digitou = el('pro_digitou').value;
- const gerente = el('pro_gerente').value;
- const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
- 
- sheet.cell("H2").value(gerente);
- sheet.cell("H3").value(dataLev);
- sheet.cell("H4").value(digitou);
- 
- listaData.forEach((item, index) => {
- const row = 7 + index;
- const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
- 
- sheet.cell(`A${row}`).value(index + 1);
- sheet.cell(`B${row}`).value("");
- sheet.cell(`C${row}`).value("Patitiba");
- sheet.cell(`D${row}`).value(item.codigo);
- sheet.cell(`E${row}`).value(item.descricao);
- sheet.cell(`F${row}`).value(item.quantidade);
- sheet.cell(`G${row}`).value(item.unidade);
- sheet.cell(`H${row}`).value(dataFmt);
- sheet.cell(`I${row}`).value(item.valor);
- });
- 
- } else {
- const responsavel = el('trc_digitou').value;
- const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
- 
- sheet.cell("B7").value("X");
- sheet.cell("A12").value(dataTroca);
- sheet.cell("A41").value(responsavel);
- 
- listaData.forEach((item, index) => {
- const row = 16 + index;
- if (row <= 38) {
- sheet.cell(`A${row}`).value(String(item.codigo));
- sheet.cell(`B${row}`).value(item.descricao);
- sheet.cell(`C${row}`).value(item.quantidade);
- sheet.cell(`D${row}`).value(item.motivo);
- }
- });
- }
- 
- const blob = await workbook.outputAsync();
- const url = window.URL.createObjectURL(blob);
- const a = document.createElement("a");
- a.href = url;
- a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
- a.click();
- window.URL.revokeObjectURL(url);
- alert("Relatório preenchido com sucesso no modelo oficial!");
- } catch (e) {
- alert("Erro ao exportar Excel: " + e.message);
- }
- }
- </script>
+      <div class="form-group">
+        <label for="descricaoProduto">Descrição do produto</label>
+        <input type="text" id="descricaoProduto" placeholder="Descrição do produto">
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="quantidade">Quantidade a trocar *</label>
+          <input type="number" id="quantidade" value="1" min="1">
+        </div>
+        <div class="form-group">
+          <label for="valorUnitario">Valor Unitário (R$)</label>
+          <input type="number" id="valorUnitario" step="0.01" placeholder="0,00">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function abrirCamera() {
+      alert("Abertura da câmera ativada. Posicione o código de barras no leitor.");
+    }
+
+    async function buscarProduto() {
+      const eanInput = document.getElementById('codigoBarras');
+      const descInput = document.getElementById('descricaoProduto');
+      const statusMsg = document.getElementById('mensagemStatus');
+      
+      const ean = eanInput.value.trim().replace(/\D/g, '');
+
+      if (!ean) {
+        statusMsg.style.display = 'block';
+        statusMsg.className = 'status-message status-warning';
+        statusMsg.textContent = "Informe um código de barras válido.";
+        return;
+      }
+
+      statusMsg.style.display = 'block';
+      statusMsg.className = 'status-message';
+      statusMsg.style.color = '#0066b2';
+      statusMsg.textContent = "Buscando produto nas bases públicas...";
+
+      try {
+        // 1ª Tentativa: Open Food Facts BR (v0 API)
+        let response = await fetch(`https://br.openfoodfacts.org/api/v0/product/${ean}.json`);
+        let data = await response.json();
+
+        let nomeProduto = "";
+
+        if (data && data.status === 1 && data.product) {
+          nomeProduto = data.product.product_name_pt || data.product.product_name || data.product.generic_name;
+        }
+
+        // 2ª Tentativa: Open Food Facts World (v2 API)
+        if (!nomeProduto) {
+          response = await fetch(`https://world.openfoodfacts.org/api/v2/product/${ean}`);
+          data = await response.json();
+
+          if (data && (data.status === 1 || data.product)) {
+            const p = data.product;
+            nomeProduto = p.product_name_pt || p.product_name || p.generic_name;
+          }
+        }
+
+        // Sucesso na localização
+        if (nomeProduto && nomeProduto.trim() !== "") {
+          descInput.value = nomeProduto.toUpperCase();
+          statusMsg.className = 'status-message status-success';
+          statusMsg.textContent = "Produto localizado com sucesso!";
+          return;
+        }
+
+        // Fallback: Não encontrado nas APIs públicas gratuitas
+        descInput.value = "";
+        statusMsg.className = 'status-message status-warning';
+        statusMsg.textContent = "Produto não encontrado na base pública. Digite a descrição para cadastrar.";
+
+      } catch (error) {
+        console.error("Erro durante a consulta de API:", error);
+        descInput.value = "";
+        statusMsg.className = 'status-message status-warning';
+        statusMsg.textContent = "Produto não encontrado na base pública. Digite a descrição para cadastrar.";
+      }
+    }
+  </script>
 </body>
 </html>
