@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Escanear Código de Barras</title>
+  
+  <!-- Biblioteca HTML5 QR Code / Barcode -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -19,50 +23,60 @@
       background-color: #000;
     }
 
-    /* Container principal ocupando 100% da tela */
-    .scanner-container {
+    /* Container global da Câmera em Tela Cheia */
+    #reader {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      border: none !important;
+      background: #000;
+      z-index: 1;
+    }
+
+    /* Força o elemento de vídeo interno da biblioteca a ocupar 100% da tela */
+    #reader video {
+      width: 100vw !important;
+      height: 100vh !important;
+      object-fit: cover !important;
+    }
+
+    /* Esconde elementos e sombreamentos padrão da biblioteca */
+    #reader__scan_region, #reader__dashboard, #reader__header_message {
+      background: transparent !important;
+      border: none !important;
+    }
+
+    #reader img, #reader__scan_region img {
+      display: none !important; /* Esconde a linha vermelha e miras nativas */
+    }
+
+    /* Sombreamento escuro nativo da biblioteca removido */
+    #qr-shaded-region {
+      display: none !important;
+    }
+
+    /* OVERLAY CUSTOMIZADO (Lembrete visual igual do 2º Print) */
+    .custom-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      z-index: 1;
-    }
-
-    /* Elemento da câmera ocupando todo o fundo */
-    .scanner-container video {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: 1;
-    }
-
-    /* Interface sobreposta à câmera */
-    .overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 2;
+      z-index: 10;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       pointer-events: none;
     }
 
-    /* Cabeçalho superior */
-    .header {
+    /* Topo: Navegação */
+    .header-nav {
       display: flex;
       align-items: center;
-      padding: 16px;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+      padding: 20px 16px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
       pointer-events: auto;
     }
 
@@ -70,44 +84,40 @@
       background: none;
       border: none;
       color: #fff;
-      font-size: 20px;
+      font-size: 22px;
       cursor: pointer;
-      margin-right: 12px;
+      margin-right: 15px;
     }
 
-    .nav-tabs {
+    .nav-titles {
       display: flex;
       gap: 16px;
     }
 
-    .nav-tab {
+    .nav-item {
       color: #fff;
       font-size: 14px;
       font-weight: 600;
       text-transform: uppercase;
-      text-decoration: none;
-      opacity: 0.8;
+      opacity: 0.7;
     }
 
-    .nav-tab.active {
+    .nav-item.active {
       opacity: 1;
-      border-bottom: 2px solid #fff;
-      padding-bottom: 2px;
     }
 
-    /* Guia visual / Moldura central do scanner */
+    /* Moldura central (Apenas Cantos Brancos) */
     .scan-area {
       position: relative;
       width: 80vw;
-      height: 50vh;
+      height: 55vh;
       margin: auto;
     }
 
-    /* Cantos brancos arredondados */
     .corner {
       position: absolute;
-      width: 30px;
-      height: 30px;
+      width: 35px;
+      height: 35px;
       border-color: #ffffff;
       border-style: solid;
     }
@@ -115,36 +125,35 @@
     .top-left {
       top: 0;
       left: 0;
-      border-width: 4px 0 0 4px;
+      border-width: 3px 0 0 3px;
       border-top-left-radius: 12px;
     }
 
     .top-right {
       top: 0;
       right: 0;
-      border-width: 4px 4px 0 0;
+      border-width: 3px 3px 0 0;
       border-top-right-radius: 12px;
     }
 
     .bottom-left {
       bottom: 0;
       left: 0;
-      border-width: 0 0 4px 4px;
+      border-width: 0 0 3px 3px;
       border-bottom-left-radius: 12px;
     }
 
     .bottom-right {
       bottom: 0;
       right: 0;
-      border-width: 0 4px 4px 0;
+      border-width: 0 3px 3px 0;
       border-bottom-right-radius: 12px;
     }
 
-    /* Indicador visual BEEP */
     .beep-indicator {
       position: absolute;
-      right: 15px;
-      bottom: 25px;
+      right: 10px;
+      bottom: 20px;
       color: #ffffff;
       font-weight: bold;
       font-size: 14px;
@@ -156,88 +165,91 @@
     .beep-indicator::after {
       content: '';
       display: inline-block;
-      width: 12px;
+      width: 10px;
       height: 2px;
       background-color: #ff3b30;
       margin-left: 4px;
     }
 
-    /* Rodapé com botão */
-    .footer {
-      padding: 24px 16px;
-      background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+    /* Botão inferior */
+    .footer-action {
+      padding: 30px 16px;
+      background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
       display: flex;
       justify-content: center;
       pointer-events: auto;
     }
 
-    .btn-action {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.6);
+    .btn-no-barcode {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.7);
       color: #ffffff;
-      padding: 12px 24px;
-      border-radius: 24px;
+      padding: 12px 28px;
+      border-radius: 30px;
       font-size: 14px;
       font-weight: 500;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(6px);
       cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <div class="scanner-container">
-    <!-- Câmera do dispositivo em tela cheia -->
-    <video id="webcam" autoplay playsinline muted></video>
+  <!-- Container de Leitura do HTML5-QRCode -->
+  <div id="reader"></div>
 
-    <!-- Overlay com os elementos visuais da interface -->
-    <div class="overlay">
-      <header class="header">
-        <button class="btn-back">&#8592;</button>
-        <nav class="nav-tabs">
-          <span class="nav-tab active">Escanear...</span>
-          <span class="nav-tab">DIGITAR MANUALMENTE</span>
-        </nav>
-      </header>
-
-      <!-- Moldura para o código de barras com bordas nos cantos -->
-      <div class="scan-area">
-        <div class="corner top-left"></div>
-        <div class="corner top-right"></div>
-        <div class="corner bottom-left"></div>
-        <div class="corner bottom-right"></div>
-        <div class="beep-indicator">BEEP</div>
+  <!-- Overlay visual por cima da câmera -->
+  <div class="custom-overlay">
+    <header class="header-nav">
+      <button class="btn-back" onclick="history.back()">&#8592;</button>
+      <div class="nav-titles">
+        <span class="nav-item active">Escanear...</span>
+        <span class="nav-item">DIGITAR MANUALMENTE</span>
       </div>
+    </header>
 
-      <footer class="footer">
-        <button class="btn-action">Adicionar sem código de barras</button>
-      </footer>
+    <div class="scan-area">
+      <div class="corner top-left"></div>
+      <div class="corner top-right"></div>
+      <div class="corner bottom-left"></div>
+      <div class="corner bottom-right"></div>
+      <div class="beep-indicator">BEEP</div>
     </div>
+
+    <footer class="footer-action">
+      <button class="btn-no-barcode">Adicionar sem código de barras</button>
+    </footer>
   </div>
 
   <script>
-    // Inicialização da Câmera
-    async function startCamera() {
-      const videoElement = document.getElementById('webcam');
-      
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: "environment" }, // Preferência para câmera traseira
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          },
-          audio: false
-        });
-
-        videoElement.srcObject = stream;
-      } catch (error) {
-        console.error("Erro ao acessar a câmera: ", error);
-      }
+    function onScanSuccess(decodedText, decodedResult) {
+      console.log(`Código Lido: ${decodedText}`, decodedResult);
+      alert(`Código detectado: ${decodedText}`);
     }
 
-    // Inicia a câmera ao carregar a página
-    window.addEventListener('DOMContentLoaded', startCamera);
+    function onScanFailure(error) {
+      // Ignora falhas contínuas de tentativa de leitura
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const html5QrCode = new Html5Qrcode("reader");
+      
+      const config = {
+        fps: 15,
+        // Ao desativar qrbox ou omiti-lo no render direto, removemos a sombra e a máscara central
+        aspectRatio: window.innerWidth / window.innerHeight
+      };
+
+      // Inicia a câmera com preferência pela câmera traseira (environment)
+      html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        onScanSuccess,
+        onScanFailure
+      ).catch(err => {
+        console.error("Erro ao iniciar a câmera:", err);
+      });
+    });
   </script>
 
 </body>
