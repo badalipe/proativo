@@ -228,13 +228,18 @@
  }
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
+ /* Ajuste para imagem perfeitamente quadrada e zoom com corte suave */
  .product-img-box {
  display: flex; justify-content: center; align-items: center;
  background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px;
- padding: 10px; margin-top: 12px; width: 100%; min-height: 140px;
+ padding: 10px; margin-top: 12px; width: 100%;
  }
  .product-img-medium {
- max-height: 160px; max-width: 100%; object-fit: contain; border-radius: 8px;
+ width: 180px;
+ height: 180px;
+ object-fit: cover;
+ border-radius: 12px;
+ box-shadow: 0 2px 8px rgba(0,0,0,0.12);
  }
 
  #beep-scanner-overlay {
@@ -315,7 +320,7 @@
  align-items: center; gap: 8px; background: #fff;
  }
  .item-info-box { display: flex; align-items: center; gap: 10px; min-width: 0; }
- .item-thumb { width: 42px; height: 42px; object-fit: contain; border-radius: 6px; background: #f1f5f9; flex-shrink: 0; }
+ .item-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; background: #f1f5f9; flex-shrink: 0; }
  .item-info { min-width: 0; }
  .item strong { display: block; font-size: 13px; }
  .item small { color: var(--text-muted); font-size: 11px; display: block; margin-top: 2px; }
@@ -808,10 +813,10 @@
  
  statusEl.innerHTML = '🔍 Buscando...';
  
- // 1. Tenta buscar via API Beep App com Timeout de 2 segundos
+ // 1. Tenta buscar via API Beep App com Timeout otimizado de 1.2 segundos
  try {
  const controller = new AbortController();
- const timeoutId = setTimeout(() => controller.abort(), 2000);
+ const timeoutId = setTimeout(() => controller.abort(), 1200);
 
  const resBeep = await fetch(`https://api.beepapp.com/v1/products/${code}`, {
  signal: controller.signal
@@ -852,10 +857,10 @@
  return;
  }
  
- // 4. Tenta buscar na API Open Food Facts com Timeout de 2.5 segundos
+ // 4. Tenta buscar na API Open Food Facts com Timeout de 1.5 segundos
  try {
  const controllerOFF = new AbortController();
- const timeoutOFF = setTimeout(() => controllerOFF.abort(), 2500);
+ const timeoutOFF = setTimeout(() => controllerOFF.abort(), 1500);
 
  const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, {
  signal: controllerOFF.signal
