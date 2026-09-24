@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Escanear Código de Barras</title>
+  <title>Gestão de Trocas e Devoluções</title>
   
   <!-- Biblioteca HTML5 QR Code / Barcode -->
   <script src="https://unpkg.com/html5-qrcode"></script>
@@ -16,15 +16,98 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    body, html {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background-color: #000;
+    body {
+      background-color: #f4f6f8;
+      color: #333;
     }
 
-    /* Container global da Câmera em Tela Cheia */
-    #reader {
+    /* BARRA SUPERIOR / CABEÇALHO DO APP */
+    header.app-header {
+      background-color: #0d2238;
+      color: #fff;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    /* CONTAINER DOS MÓDULOS E FORMULÁRIOS */
+    .container {
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #555;
+    }
+
+    .form-control, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .btn-scan {
+      width: 100%;
+      background-color: #0056b3;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    /* ------------------------------------------------------------- */
+    /* ESTILOS DA CÂMERA FULLSCREEN CLEAN (SÓ QUANDO ATIVADA) */
+    /* ------------------------------------------------------------- */
+    #beep-scanner-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
+      z-index: 99999;
+      display: none; /* Inicia oculto */
+    }
+
+    #beep-scanner-overlay.active {
+      display: block;
+    }
+
+    /* Container interno do HTML5-Qrcode */
+    #beep-reader {
       position: fixed !important;
       top: 0 !important;
       left: 0 !important;
@@ -35,35 +118,29 @@
       z-index: 1;
     }
 
-    /* Força o elemento de vídeo interno da biblioteca a ocupar 100% da tela */
-    #reader video {
+    /* Força o elemento de vídeo interno a preencher a tela inteira */
+    #beep-reader video {
       width: 100vw !important;
       height: 100vh !important;
       object-fit: cover !important;
     }
 
-    /* Esconde elementos e sombreamentos padrão da biblioteca */
-    #reader__scan_region, #reader__dashboard, #reader__header_message {
-      background: transparent !important;
-      border: none !important;
-    }
-
-    #reader img, #reader__scan_region img {
-      display: none !important; /* Esconde a linha vermelha e miras nativas */
-    }
-
-    /* Sombreamento escuro nativo da biblioteca removido */
-    #qr-shaded-region {
+    /* Oculta máscaras escuras, bordas e imagens nativas da biblioteca */
+    #qr-shaded-region,
+    #beep-reader__scan_region img,
+    #beep-reader img,
+    #beep-reader__header_message,
+    #beep-reader__dashboard {
       display: none !important;
     }
 
-    /* OVERLAY CUSTOMIZADO (Lembrete visual igual do 2º Print) */
-    .custom-overlay {
-      position: fixed;
+    /* OVERLAY VISUAL CLEAN (Sobreposição em cima do vídeo da Câmera) */
+    .custom-scanner-ui {
+      position: absolute;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       z-index: 10;
       display: flex;
       flex-direction: column;
@@ -71,30 +148,29 @@
       pointer-events: none;
     }
 
-    /* Topo: Navegação */
-    .header-nav {
+    .scanner-header {
       display: flex;
       align-items: center;
       padding: 20px 16px;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+      background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
       pointer-events: auto;
     }
 
-    .btn-back {
+    .btn-back-camera {
       background: none;
       border: none;
       color: #fff;
       font-size: 22px;
       cursor: pointer;
-      margin-right: 15px;
+      margin-right: 16px;
     }
 
-    .nav-titles {
+    .scanner-tabs {
       display: flex;
       gap: 16px;
     }
 
-    .nav-item {
+    .scanner-tab {
       color: #fff;
       font-size: 14px;
       font-weight: 600;
@@ -102,22 +178,24 @@
       opacity: 0.7;
     }
 
-    .nav-item.active {
+    .scanner-tab.active {
       opacity: 1;
+      border-bottom: 2px solid #fff;
+      padding-bottom: 2px;
     }
 
-    /* Moldura central (Apenas Cantos Brancos) */
-    .scan-area {
+    /* Moldura visual do leitor (apenas os 4 cantos brancos) */
+    .scanner-frame {
       position: relative;
       width: 80vw;
       height: 55vh;
       margin: auto;
     }
 
-    .corner {
+    .corner-mark {
       position: absolute;
-      width: 35px;
-      height: 35px;
+      width: 32px;
+      height: 32px;
       border-color: #ffffff;
       border-style: solid;
     }
@@ -126,34 +204,34 @@
       top: 0;
       left: 0;
       border-width: 3px 0 0 3px;
-      border-top-left-radius: 12px;
+      border-top-left-radius: 10px;
     }
 
     .top-right {
       top: 0;
       right: 0;
       border-width: 3px 3px 0 0;
-      border-top-right-radius: 12px;
+      border-top-right-radius: 10px;
     }
 
     .bottom-left {
       bottom: 0;
       left: 0;
       border-width: 0 0 3px 3px;
-      border-bottom-left-radius: 12px;
+      border-bottom-left-radius: 10px;
     }
 
     .bottom-right {
       bottom: 0;
       right: 0;
       border-width: 0 3px 3px 0;
-      border-bottom-right-radius: 12px;
+      border-bottom-right-radius: 10px;
     }
 
-    .beep-indicator {
+    .beep-logo {
       position: absolute;
-      right: 10px;
-      bottom: 20px;
+      right: 12px;
+      bottom: 18px;
       color: #ffffff;
       font-weight: bold;
       font-size: 14px;
@@ -162,7 +240,7 @@
       align-items: center;
     }
 
-    .beep-indicator::after {
+    .beep-logo::after {
       content: '';
       display: inline-block;
       width: 10px;
@@ -171,86 +249,171 @@
       margin-left: 4px;
     }
 
-    /* Botão inferior */
-    .footer-action {
-      padding: 30px 16px;
-      background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+    .scanner-footer {
+      padding: 24px 16px;
+      background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
       display: flex;
       justify-content: center;
       pointer-events: auto;
     }
 
-    .btn-no-barcode {
+    .btn-manual {
       background: rgba(0, 0, 0, 0.3);
       border: 1px solid rgba(255, 255, 255, 0.7);
       color: #ffffff;
-      padding: 12px 28px;
-      border-radius: 30px;
+      padding: 12px 24px;
+      border-radius: 24px;
       font-size: 14px;
       font-weight: 500;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(4px);
       cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <!-- Container de Leitura do HTML5-QRCode -->
-  <div id="reader"></div>
+  <!-- CABEÇALHO DA PÁGINA -->
+  <header class="app-header">
+    <span class="brand-title">Gestão de Trocas</span>
+    <span style="font-size: 12px; opacity: 0.8;">PATITIBA</span>
+  </header>
 
-  <!-- Overlay visual por cima da câmera -->
-  <div class="custom-overlay">
-    <header class="header-nav">
-      <button class="btn-back" onclick="history.back()">&#8592;</button>
-      <div class="nav-titles">
-        <span class="nav-item active">Escanear...</span>
-        <span class="nav-item">DIGITAR MANUALMENTE</span>
+  <!-- CONTEÚDO DA PÁGINA (SÓ ABRE CÂMERA AO CLICAR) -->
+  <div class="container">
+    <div class="card">
+      <div class="form-group">
+        <label>Conferente / Responsável</label>
+        <input type="text" id="trc_responsavel" class="form-control" placeholder="Seu nome">
       </div>
-    </header>
 
-    <div class="scan-area">
-      <div class="corner top-left"></div>
-      <div class="corner top-right"></div>
-      <div class="corner bottom-left"></div>
-      <div class="corner bottom-right"></div>
-      <div class="beep-indicator">BEEP</div>
+      <div class="form-group">
+        <label>Fornecedor</label>
+        <input type="text" id="trc_fornecedor" class="form-control" placeholder="Ex: Ambev, Nestlé">
+      </div>
+
+      <div class="form-group">
+        <label>Motivo da Troca *</label>
+        <select id="trc_motivo" class="form-control">
+          <option value="avaria">1 - Avaria</option>
+          <option value="vencido">2 - Vencido</option>
+        </select>
+      </div>
     </div>
 
-    <footer class="footer-action">
-      <button class="btn-no-barcode">Adicionar sem código de barras</button>
-    </footer>
+    <!-- SEÇÃO DE ESCANEAR PRODUTO -->
+    <div class="card">
+      <h3 style="font-size: 15px; margin-bottom: 12px;">1. Escanear produto</h3>
+      
+      <!-- BOTÃO QUE ACIONA A CÂMERA -->
+      <button class="btn-scan" onclick="abrirScanner('troca')">
+        📷 Abrir câmera para escanear
+      </button>
+
+      <div class="form-group" style="margin-top: 16px;">
+        <label>Código de barras</label>
+        <input type="text" id="trc_codigo" class="form-control" placeholder="Ex.: 789...">
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTAINER COMPLETO DO SCANNER (OCULTO ATÉ SER CLICADO) -->
+  <div id="beep-scanner-overlay">
+    <div id="beep-reader"></div>
+
+    <div class="custom-scanner-ui">
+      <header class="scanner-header">
+        <button class="btn-back-camera" onclick="pararScanner()">&#8592;</button>
+        <div class="scanner-tabs">
+          <span class="scanner-tab active">Escanear...</span>
+          <span class="scanner-tab">DIGITAR MANUALMENTE</span>
+        </div>
+      </header>
+
+      <div class="scanner-frame">
+        <div class="corner-mark top-left"></div>
+        <div class="corner-mark top-right"></div>
+        <div class="corner-mark bottom-left"></div>
+        <div class="corner-mark bottom-right"></div>
+        <div class="beep-logo">BEEP</div>
+      </div>
+
+      <footer class="scanner-footer">
+        <button class="btn-manual" onclick="pararScanner()">Adicionar sem código de barras</button>
+      </footer>
+    </div>
   </div>
 
   <script>
-    function onScanSuccess(decodedText, decodedResult) {
-      console.log(`Código Lido: ${decodedText}`, decodedResult);
-      alert(`Código detectado: ${decodedText}`);
+    let html5QrCode = null;
+    let moduloAtual = null;
+
+    function el(id) {
+      return document.getElementById(id);
     }
 
-    function onScanFailure(error) {
-      // Ignora falhas contínuas de tentativa de leitura
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-      const html5QrCode = new Html5Qrcode("reader");
+    // FUNÇÃO QUE ABRE A CÂMERA SOMENTE APÓS O CLIQUE DO BOTÃO
+    async function abrirScanner(modulo) {
+      moduloAtual = modulo;
       
-      const config = {
+      // Exibe a tela da câmera
+      const overlay = el('beep-scanner-overlay');
+      overlay.classList.add('active');
+
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("beep-reader");
+      }
+
+      // Configuração limpa para a câmera ocupar a tela toda
+      const config = { 
         fps: 15,
-        // Ao desativar qrbox ou omiti-lo no render direto, removemos a sombra e a máscara central
         aspectRatio: window.innerWidth / window.innerHeight
       };
 
-      // Inicia a câmera com preferência pela câmera traseira (environment)
-      html5QrCode.start(
-        { facingMode: "environment" },
-        config,
-        onScanSuccess,
-        onScanFailure
-      ).catch(err => {
-        console.error("Erro ao iniciar a câmera:", err);
-      });
-    });
-  </script>
+      const aoLerComSucesso = async (decodedText) => {
+        const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+        const campoCodigo = el(prefix + 'codigo');
+        
+        if (campoCodigo) {
+          campoCodigo.value = decodedText;
+        }
 
+        pararScanner();
+      };
+
+      try {
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          config,
+          aoLerComSucesso,
+          () => {} // Ignora erros de varredura contínua
+        );
+      } catch (err) {
+        try {
+          // Tenta câmera frontal caso haja algum problema
+          await html5QrCode.start(
+            { facingMode: "user" },
+            config,
+            aoLerComSucesso
+          );
+        } catch (innerErr) {
+          alert("Não foi possível acessar a câmera: " + innerErr);
+          pararScanner();
+        }
+      }
+    }
+
+    // FECHA A CÂMERA E RETORNA À TELA PRINCIPAL
+    function pararScanner() {
+      if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+          el('beep-scanner-overlay').classList.remove('active');
+        }).catch(err => {
+          el('beep-scanner-overlay').classList.remove('active');
+        });
+      } else {
+        el('beep-scanner-overlay').classList.remove('active');
+      }
+    }
+  </script>
 </body>
 </html>
