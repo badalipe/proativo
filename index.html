@@ -633,6 +633,7 @@
  let imagemAtualCarregada = "";
  let moduloAtual = null;
  let html5QrCode = null;
+ let isScannerInitializing = false;
  
  const el = id => document.getElementById(id);
  
@@ -725,12 +726,24 @@
  }
  
  async function abrirScanner(modulo) {
+ if (isScannerInitializing) return;
+ isScannerInitializing = true;
+
  moduloAtual = modulo;
  el('beep-scanner-overlay').classList.remove('hidden');
  
- if (!html5QrCode) {
- html5QrCode = new Html5Qrcode("beep-reader", { verbose: false });
+ try {
+ if (html5QrCode) {
+   if (html5QrCode.isScanning) {
+     await html5QrCode.stop();
+   }
+   await html5QrCode.clear();
  }
+ } catch(e) {
+ console.warn("Limpando instância anterior:", e);
+ }
+
+ html5QrCode = new Html5Qrcode("beep-reader", { verbose: false });
  
  const screenWidth = window.innerWidth || document.documentElement.clientWidth;
  const qrboxSize = Math.min(Math.floor(screenWidth * 0.8), 280);
@@ -786,18 +799,22 @@
  alert("Erro ao abrir a câmera: " + err);
  pararScanner();
  }
+ } finally {
+ isScannerInitializing = false;
  }
  }
  
- function pararScanner() {
- if (html5QrCode && html5QrCode.isScanning) {
- html5QrCode.stop().then(() => {
+ async function pararScanner() {
  el('beep-scanner-overlay').classList.add('hidden');
- }).catch(() => {
- el('beep-scanner-overlay').classList.add('hidden');
- });
- } else {
- el('beep-scanner-overlay').classList.add('hidden');
+ if (html5QrCode) {
+ try {
+   if (html5QrCode.isScanning) {
+     await html5QrCode.stop();
+   }
+   await html5QrCode.clear();
+ } catch(e) {
+   console.warn("Erro ao parar scanner:", e);
+ }
  }
  }
  
@@ -820,7 +837,7 @@
  const elStatus = el(prefix + 'status');
  if (elStatus) elStatus.innerHTML = '⏳ Processando foto em alta resolução...';
 
- pararScanner();
+ await pararScanner();
 
  const html5QrCodeStatic = new Html5Qrcode("beep-reader");
  
