@@ -233,12 +233,17 @@
  background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px;
  padding: 10px; margin-top: 12px; width: 100%;
  }
+ .product-img-box.hidden {
+ display: none !important;
+ }
  .product-img-medium {
  width: 180px;
  height: 180px;
- object-fit: cover;
+ object-fit: contain;
+ background: #ffffff;
  border-radius: 12px;
  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+ border: 1px solid #e2e8f0;
  }
 
  #beep-scanner-overlay {
@@ -319,7 +324,7 @@
  align-items: center; gap: 8px; background: #fff;
  }
  .item-info-box { display: flex; align-items: center; gap: 10px; min-width: 0; }
- .item-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; background: #f1f5f9; flex-shrink: 0; }
+ .item-thumb { width: 48px; height: 48px; object-fit: contain; border-radius: 8px; background: #f1f5f9; flex-shrink: 0; border: 1px solid #e2e8f0; }
  .item-info { min-width: 0; }
  .item strong { display: block; font-size: 13px; }
  .item small { color: var(--text-muted); font-size: 11px; display: block; margin-top: 2px; }
@@ -834,7 +839,7 @@
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  const container = el(prefix + 'img_container');
  const img = el(prefix + 'img');
- if (url) {
+ if (url && url.trim() !== "") {
  img.src = url;
  container.classList.remove('hidden');
  imagemAtualCarregada = url;
@@ -856,31 +861,6 @@
  }
  
  statusEl.innerHTML = '🔍 Buscando...';
- 
- try {
- const controller = new AbortController();
- const timeoutId = setTimeout(() => controller.abort(), 1200);
-
- const resBeep = await fetch(`https://api.beepapp.com/v1/products/${code}`, {
- signal: controller.signal
- });
- clearTimeout(timeoutId);
-
- if (resBeep.ok) {
- const dataBeep = await resBeep.json();
- const nome = dataBeep.name || dataBeep.description || dataBeep.title || dataBeep.product_name;
- const img = dataBeep.image || dataBeep.image_url || dataBeep.photo || "";
- 
- if (nome) {
- el(prefix + 'descricao').value = nome;
- if (img) exibirImagemProduto(modulo, img);
- statusEl.innerHTML = '<span class="ok">Localizado via Beep API!</span>';
- return;
- }
- }
- } catch (e) {
- console.warn("Beep API demorou ou falhou. Passando para alternativas.");
- }
 
  if (catalogoLocal[code]) {
  const item = typeof catalogoLocal[code] === 'object' ? catalogoLocal[code] : { nome: catalogoLocal[code], imagem: '' };
@@ -900,9 +880,9 @@
  
  try {
  const controllerOFF = new AbortController();
- const timeoutOFF = setTimeout(() => controllerOFF.abort(), 1500);
+ const timeoutOFF = setTimeout(() => controllerOFF.abort(), 2000);
 
- const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, {
+ const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json`, {
  signal: controllerOFF.signal
  });
  clearTimeout(timeoutOFF);
@@ -911,19 +891,21 @@
  if (data.status === 1 && data.product) {
  const p = data.product;
  const nome = p.product_name_pt || p.product_name || p.generic_name || "Produto sem nome";
- const img = p.image_front_url || p.image_url || "";
+ const img = p.image_front_url || p.image_url || p.image_front_small_url || "";
  
  el(prefix + 'descricao').value = nome;
- if (img) exibirImagemProduto(modulo, img);
+ if (img) {
+   exibirImagemProduto(modulo, img);
+ }
  statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
- } else {
- statusEl.innerHTML = '<span class="warn">Não encontrado. Digite a descrição.</span>';
- el(prefix + 'descricao').focus();
+ return;
  }
  } catch (e) {
- statusEl.innerHTML = '<span class="warn">Não encontrado ou rede lenta. Digite a descrição.</span>';
- el(prefix + 'descricao').focus();
+ console.warn("Erro ao buscar no OpenFoodFacts:", e);
  }
+
+ statusEl.innerHTML = '<span class="warn">Não encontrado. Digite a descrição.</span>';
+ el(prefix + 'descricao').focus();
  }
  
  function adicionarItem(modulo) {
