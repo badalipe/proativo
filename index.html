@@ -273,7 +273,6 @@
  width: 85%; max-width: 320px; height: 180px; border: 2px solid rgba(255, 255, 255, 0.6);
  border-radius: 14px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65); position: relative;
  }
- /* Cantos destacados no estilo mira profissional */
  .beep-target-box::before, .beep-target-box::after {
  content: ''; position: absolute; width: 24px; height: 24px; border-color: #fff; border-style: solid;
  }
@@ -702,11 +701,18 @@
  
  async function abrirScanner(modulo) {
  moduloAtual = modulo;
- el('beep-scanner-overlay').classList.remove('hidden');
  
- if (!html5QrCode) {
+ if (html5QrCode) {
+ try {
+ if (html5QrCode.isScanning) {
+ await html5QrCode.stop();
+ }
+ } catch (e) {}
+ } else {
  html5QrCode = new Html5Qrcode("beep-reader");
  }
+
+ el('beep-scanner-overlay').classList.remove('hidden');
  
  const qrboxSize = Math.min(window.innerWidth * 0.85, 320);
  const config = {
@@ -730,18 +736,26 @@
  height: { ideal: 1080 }
  };
  
+ const acaoLeituraSucesso = (decodedText) => {
+ tocarBipe();
+ dispararFlashScan();
+ const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+ 
+ const inputCampo = el(prefix + 'codigo');
+ inputCampo.value = decodedText;
+ 
+ // Força o teclado virtual a fechar e a tela voltar ao normal
+ inputCampo.blur(); 
+ 
+ pararScanner();
+ buscarProduto(modulo); // Dispara a busca automaticamente simulando o "enter"
+ };
+
  try {
  await html5QrCode.start(
  constraints,
  config,
- (decodedText) => {
- tocarBipe();
- dispararFlashScan();
- const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- el(prefix + 'codigo').value = decodedText;
- pararScanner();
- buscarProduto(modulo);
- },
+ acaoLeituraSucesso,
  () => {}
  );
  
@@ -764,33 +778,27 @@
  await html5QrCode.start(
  { facingMode: "environment" },
  config,
- (decodedText) => {
- tocarBipe();
- dispararFlashScan();
- const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- el(prefix + 'codigo').value = decodedText;
- pararScanner();
- buscarProduto(modulo);
- },
+ acaoLeituraSucesso,
  () => {}
  );
  } catch (err) {
- alert("Erro ao abrir a câmera: " + err);
+ alert("Erro ao abrir a câmera: " + err.message || err);
  pararScanner();
  }
  }
  }
  
- function pararScanner() {
- if (html5QrCode && html5QrCode.isScanning) {
- html5QrCode.stop().then(() => {
- el('beep-scanner-overlay').classList.add('hidden');
- }).catch(() => {
- el('beep-scanner-overlay').classList.add('hidden');
- });
- } else {
- el('beep-scanner-overlay').classList.add('hidden');
+ async function pararScanner() {
+ if (html5QrCode) {
+ try {
+ if (html5QrCode.isScanning) {
+ await html5QrCode.stop();
  }
+ } catch (e) {
+ console.error("Erro ao parar o scanner: ", e);
+ }
+ }
+ el('beep-scanner-overlay').classList.add('hidden');
  }
  
  async function alternarLanterna() {
@@ -805,14 +813,20 @@
  function fecharScannerSemCodigo() {
  const prefix = moduloAtual === 'proativo' ? 'pro_' : 'trc_';
  pararScanner();
- el(prefix + 'codigo').value = "";
+ const inputCampo = el(prefix + 'codigo');
+ inputCampo.value = "";
+ inputCampo.blur(); // Garante tela limpa sem teclado
  el(prefix + 'descricao').focus();
  }
  
  async function buscarProduto(modulo) {
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- const code = el(prefix + 'codigo').value.trim();
+ const inputCampo = el(prefix + 'codigo');
+ const code = inputCampo.value.trim();
  const statusEl = el(prefix + 'status');
+ 
+ // Garante que o teclado recolha ao buscar também
+ inputCampo.blur();
  
  if (!code) {
  statusEl.innerHTML = '<span class="warn">Informe um código.</span>';
@@ -824,14 +838,12 @@
  if (catalogoLocal[code]) {
  el(prefix + 'descricao').value = catalogoLocal[code];
  statusEl.innerHTML = '<span class="ok">Localizado no catálogo local!</span>';
- el(prefix + 'quantidade').focus();
  return;
  }
  
  if (produtosPreCadastrados[code]) {
  el(prefix + 'descricao').value = produtosPreCadastrados[code];
  statusEl.innerHTML = '<span class="ok">Localizado na base do sistema!</span>';
- el(prefix + 'quantidade').focus();
  return;
  }
  
@@ -846,14 +858,11 @@
  if (data.status === 1 && data.product.product_name) {
  el(prefix + 'descricao').value = data.product.product_name;
  statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
- el(prefix + 'quantidade').focus();
  } else {
  statusEl.innerHTML = '<span class="warn">Não encontrado online. Digite a descrição.</span>';
- el(prefix + 'descricao').focus();
  }
  } catch (e) {
  statusEl.innerHTML = '<span class="warn">Busca rápida indisponível. Preencha manualmente.</span>';
- el(prefix + 'descricao').focus();
  }
  }
  
@@ -863,6 +872,9 @@
  const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
  const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
  const validade = el(prefix + 'validade').value;
+ 
+ // Recolhe teclados ativos ao adicionar
+ document.activeElement.blur();
  
  if (!desc || isNaN(qtd) || !validade) {
  alert("Preencha descrição, quantidade e validade.");
@@ -964,6 +976,7 @@
  }
  
  async function gerarExcel(modulo) {
+ document.activeElement.blur();
  const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
  if (listaData.length === 0) {
  alert("Adicione itens para exportar.");
