@@ -89,9 +89,9 @@
     }
 
     /* ------------------------------------------------------------- */
-    /* ESTILOS DA CÂMERA FULLSCREEN CLEAN (SÓ QUANDO ATIVADA) */
+    /* LAYOUT CLEAN DA CÂMERA (SÓ É EXIBIDO AO CLICAR NO BOTÃO) */
     /* ------------------------------------------------------------- */
-    #beep-scanner-overlay {
+    #scanner-modal {
       position: fixed;
       top: 0;
       left: 0;
@@ -102,11 +102,11 @@
       display: none; /* Inicia oculto */
     }
 
-    #beep-scanner-overlay.active {
+    #scanner-modal.active {
       display: block;
     }
 
-    /* Container interno do HTML5-Qrcode */
+    /* Elemento do leitor da biblioteca */
     #beep-reader {
       position: fixed !important;
       top: 0 !important;
@@ -118,14 +118,14 @@
       z-index: 1;
     }
 
-    /* Força o elemento de vídeo interno a preencher a tela inteira */
+    /* Força o vídeo a cobrir 100% da tela */
     #beep-reader video {
       width: 100vw !important;
       height: 100vh !important;
       object-fit: cover !important;
     }
 
-    /* Oculta máscaras escuras, bordas e imagens nativas da biblioteca */
+    /* Oculta sombras pretas, bordas e miras padrão da biblioteca */
     #qr-shaded-region,
     #beep-reader__scan_region img,
     #beep-reader img,
@@ -134,13 +134,13 @@
       display: none !important;
     }
 
-    /* OVERLAY VISUAL CLEAN (Sobreposição em cima do vídeo da Câmera) */
-    .custom-scanner-ui {
+    /* INTERFACE OVERLAY SOBREPOSTA À CÂMERA */
+    .overlay {
       position: absolute;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       z-index: 10;
       display: flex;
       flex-direction: column;
@@ -148,54 +148,57 @@
       pointer-events: none;
     }
 
-    .scanner-header {
+    /* Cabeçalho superior da Câmera */
+    .header-camera {
       display: flex;
       align-items: center;
-      padding: 20px 16px;
+      padding: 16px;
       background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
       pointer-events: auto;
     }
 
-    .btn-back-camera {
+    .btn-back {
       background: none;
       border: none;
       color: #fff;
       font-size: 22px;
       cursor: pointer;
-      margin-right: 16px;
+      margin-right: 12px;
     }
 
-    .scanner-tabs {
+    .nav-tabs {
       display: flex;
       gap: 16px;
     }
 
-    .scanner-tab {
+    .nav-tab {
       color: #fff;
       font-size: 14px;
       font-weight: 600;
       text-transform: uppercase;
-      opacity: 0.7;
+      opacity: 0.8;
+      cursor: pointer;
     }
 
-    .scanner-tab.active {
+    .nav-tab.active {
       opacity: 1;
       border-bottom: 2px solid #fff;
       padding-bottom: 2px;
     }
 
-    /* Moldura visual do leitor (apenas os 4 cantos brancos) */
-    .scanner-frame {
+    /* Guia visual / Moldura central do scanner */
+    .scan-area {
       position: relative;
       width: 80vw;
-      height: 55vh;
+      height: 50vh;
       margin: auto;
     }
 
-    .corner-mark {
+    /* Cantos brancos arredondados */
+    .corner {
       position: absolute;
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       border-color: #ffffff;
       border-style: solid;
     }
@@ -203,35 +206,36 @@
     .top-left {
       top: 0;
       left: 0;
-      border-width: 3px 0 0 3px;
-      border-top-left-radius: 10px;
+      border-width: 4px 0 0 4px;
+      border-top-left-radius: 12px;
     }
 
     .top-right {
       top: 0;
       right: 0;
-      border-width: 3px 3px 0 0;
-      border-top-right-radius: 10px;
+      border-width: 4px 4px 0 0;
+      border-top-right-radius: 12px;
     }
 
     .bottom-left {
       bottom: 0;
       left: 0;
-      border-width: 0 0 3px 3px;
-      border-bottom-left-radius: 10px;
+      border-width: 0 0 4px 4px;
+      border-bottom-left-radius: 12px;
     }
 
     .bottom-right {
       bottom: 0;
       right: 0;
-      border-width: 0 3px 3px 0;
-      border-bottom-right-radius: 10px;
+      border-width: 0 4px 4px 0;
+      border-bottom-right-radius: 12px;
     }
 
-    .beep-logo {
+    /* Indicador visual BEEP */
+    .beep-indicator {
       position: absolute;
-      right: 12px;
-      bottom: 18px;
+      right: 15px;
+      bottom: 25px;
       color: #ffffff;
       font-weight: bold;
       font-size: 14px;
@@ -240,16 +244,17 @@
       align-items: center;
     }
 
-    .beep-logo::after {
+    .beep-indicator::after {
       content: '';
       display: inline-block;
-      width: 10px;
+      width: 12px;
       height: 2px;
       background-color: #ff3b30;
       margin-left: 4px;
     }
 
-    .scanner-footer {
+    /* Rodapé com botão */
+    .footer-camera {
       padding: 24px 16px;
       background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
       display: flex;
@@ -257,9 +262,9 @@
       pointer-events: auto;
     }
 
-    .btn-manual {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.7);
+    .btn-action {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.6);
       color: #ffffff;
       padding: 12px 24px;
       border-radius: 24px;
@@ -272,13 +277,13 @@
 </head>
 <body>
 
-  <!-- CABEÇALHO DA PÁGINA -->
+  <!-- CABEÇALHO DO SITE -->
   <header class="app-header">
     <span class="brand-title">Gestão de Trocas</span>
     <span style="font-size: 12px; opacity: 0.8;">PATITIBA</span>
   </header>
 
-  <!-- CONTEÚDO DA PÁGINA (SÓ ABRE CÂMERA AO CLICAR) -->
+  <!-- FORMULÁRIO PRINCIPAL -->
   <div class="container">
     <div class="card">
       <div class="form-group">
@@ -304,7 +309,7 @@
     <div class="card">
       <h3 style="font-size: 15px; margin-bottom: 12px;">1. Escanear produto</h3>
       
-      <!-- BOTÃO QUE ACIONA A CÂMERA -->
+      <!-- BOTÃO QUE ABRE A CÂMERA -->
       <button class="btn-scan" onclick="abrirScanner('troca')">
         📷 Abrir câmera para escanear
       </button>
@@ -316,29 +321,30 @@
     </div>
   </div>
 
-  <!-- CONTAINER COMPLETO DO SCANNER (OCULTO ATÉ SER CLICADO) -->
-  <div id="beep-scanner-overlay">
+  <!-- CONTAINER DA CÂMERA FULLSCREEN CLEAN (SÓ É EXIBIDO AO CLICAR NO BOTÃO) -->
+  <div id="scanner-modal">
     <div id="beep-reader"></div>
 
-    <div class="custom-scanner-ui">
-      <header class="scanner-header">
-        <button class="btn-back-camera" onclick="pararScanner()">&#8592;</button>
-        <div class="scanner-tabs">
-          <span class="scanner-tab active">Escanear...</span>
-          <span class="scanner-tab">DIGITAR MANUALMENTE</span>
-        </div>
+    <div class="overlay">
+      <header class="header-camera">
+        <button class="btn-back" onclick="pararScanner()">&#8592;</button>
+        <nav class="nav-tabs">
+          <span class="nav-tab active">Escanear...</span>
+          <span class="nav-tab" onclick="pararScanner()">DIGITAR MANUALMENTE</span>
+        </nav>
       </header>
 
-      <div class="scanner-frame">
-        <div class="corner-mark top-left"></div>
-        <div class="corner-mark top-right"></div>
-        <div class="corner-mark bottom-left"></div>
-        <div class="corner-mark bottom-right"></div>
-        <div class="beep-logo">BEEP</div>
+      <!-- Moldura com cantos brancos -->
+      <div class="scan-area">
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
+        <div class="beep-indicator">BEEP</div>
       </div>
 
-      <footer class="scanner-footer">
-        <button class="btn-manual" onclick="pararScanner()">Adicionar sem código de barras</button>
+      <footer class="footer-camera">
+        <button class="btn-action" onclick="pararScanner()">Adicionar sem código de barras</button>
       </footer>
     </div>
   </div>
@@ -351,25 +357,24 @@
       return document.getElementById(id);
     }
 
-    // FUNÇÃO QUE ABRE A CÂMERA SOMENTE APÓS O CLIQUE DO BOTÃO
+    // Função que abre o scanner ao clicar no botão
     async function abrirScanner(modulo) {
       moduloAtual = modulo;
       
       // Exibe a tela da câmera
-      const overlay = el('beep-scanner-overlay');
-      overlay.classList.add('active');
+      const modal = el('scanner-modal');
+      modal.classList.add('active');
 
       if (!html5QrCode) {
         html5QrCode = new Html5Qrcode("beep-reader");
       }
 
-      // Configuração limpa para a câmera ocupar a tela toda
       const config = { 
         fps: 15,
         aspectRatio: window.innerWidth / window.innerHeight
       };
 
-      const aoLerComSucesso = async (decodedText) => {
+      const aoLerComSucesso = (decodedText) => {
         const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
         const campoCodigo = el(prefix + 'codigo');
         
@@ -385,35 +390,35 @@
           { facingMode: "environment" },
           config,
           aoLerComSucesso,
-          () => {} // Ignora erros de varredura contínua
+          () => {} // Ignora falhas temporárias de leitura
         );
       } catch (err) {
         try {
-          // Tenta câmera frontal caso haja algum problema
           await html5QrCode.start(
             { facingMode: "user" },
             config,
             aoLerComSucesso
           );
         } catch (innerErr) {
-          alert("Não foi possível acessar a câmera: " + innerErr);
+          alert("Erro ao abrir a câmera: " + innerErr);
           pararScanner();
         }
       }
     }
 
-    // FECHA A CÂMERA E RETORNA À TELA PRINCIPAL
+    // Função que fecha a câmera e volta para o formulário
     function pararScanner() {
       if (html5QrCode) {
         html5QrCode.stop().then(() => {
-          el('beep-scanner-overlay').classList.remove('active');
-        }).catch(err => {
-          el('beep-scanner-overlay').classList.remove('active');
+          el('scanner-modal').classList.remove('active');
+        }).catch(() => {
+          el('scanner-modal').classList.remove('active');
         });
       } else {
-        el('beep-scanner-overlay').classList.remove('active');
+        el('scanner-modal').classList.remove('active');
       }
     }
   </script>
+
 </body>
 </html>
