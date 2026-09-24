@@ -228,10 +228,11 @@
  }
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
- /* Estilo Customizado Inspirado no App Bip para Máxima Fluidez e Clareza */
+ /* Estilo Customizado para Tela Cheia e Máxima Fluidez */
  #beep-scanner-overlay {
  position: fixed; inset: 0; background: #000; z-index: 999999;
  display: flex; flex-direction: column; justify-content: space-between;
+ width: 100vw; height: 100vh; overflow: hidden;
  }
  .beep-top-bar {
  display: flex; align-items: center; justify-content: space-between;
@@ -241,9 +242,31 @@
  .beep-back-btn, .beep-manual-link {
  background: none; border: none; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
  }
- .beep-viewport { position: absolute; inset: 0; background: #000; z-index: 1; }
- #beep-reader { width: 100% !important; height: 100% !important; border: none !important; }
- #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+ 
+ /* Correção estrutural para forçar ocupação total (100vw x 100vh) */
+ .beep-viewport { 
+ position: fixed !important; 
+ inset: 0 !important; 
+ width: 100vw !important; 
+ height: 100vh !important; 
+ background: #000 !important; 
+ z-index: 1 !important; 
+ overflow: hidden !important;
+ }
+ #beep-reader { 
+ width: 100vw !important; 
+ height: 100vh !important; 
+ border: none !important; 
+ position: absolute !important;
+ inset: 0 !important;
+ }
+ #beep-reader video { 
+ width: 100vw !important; 
+ height: 100vh !important; 
+ object-fit: cover !important; 
+ position: absolute !important;
+ inset: 0 !important;
+ }
  
  .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
  .beep-target-box {
@@ -685,7 +708,6 @@
  html5QrCode = new Html5Qrcode("beep-reader");
  }
  
- // Configuração otimizada para alta performance, foco rápido e captura nativa fluida em HD
  const qrboxSize = Math.min(window.innerWidth * 0.85, 320);
  const config = {
  fps: 30,
@@ -738,7 +760,6 @@
  } catch(e){}
  
  } catch (e) {
- // Fallback caso o dispositivo restrinja resolução avançada
  try {
  await html5QrCode.start(
  { facingMode: "environment" },
@@ -814,7 +835,6 @@
  return;
  }
  
- // Timeout rápido para evitar travamentos de conexão lenta
  const controller = new AbortController();
  const timeoutId = setTimeout(() => controller.abort(), 3500);
  
