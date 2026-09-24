@@ -228,7 +228,6 @@
  }
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
- /* Estilos para Imagem do Produto */
  .product-img-box {
  display: flex; justify-content: center; align-items: center;
  background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px;
@@ -238,7 +237,6 @@
  max-height: 160px; max-width: 100%; object-fit: contain; border-radius: 8px;
  }
 
- /* Layout Clean da Câmera */
  #beep-scanner-overlay {
  position: fixed; inset: 0; background: #000; z-index: 999999;
  width: 100vw; height: 100vh; display: flex; flex-direction: column;
@@ -449,7 +447,6 @@
  <input id="pro_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
  <div class="actions"><button class="primary" onclick="buscarProduto('proativo')" style="width:auto">🔍 Buscar produto</button></div>
  
- <!-- Área de Exibição da Imagem (Mediana) -->
  <div id="pro_img_container" class="product-img-box hidden">
    <img id="pro_img" src="" alt="Imagem do Produto" class="product-img-medium">
  </div>
@@ -537,7 +534,6 @@
  <input id="trc_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
  <div class="actions"><button class="primary" onclick="buscarProduto('trocas')" style="width:auto">🔍 Buscar produto</button></div>
  
- <!-- Área de Exibição da Imagem (Mediana) -->
  <div id="trc_img_container" class="product-img-box hidden">
    <img id="trc_img" src="" alt="Imagem do Produto" class="product-img-medium">
  </div>
@@ -574,7 +570,6 @@
  </div>
  </div>
  
- <!-- OVERLAY DA CÂMERA FULLSCREEN CLEAN -->
  <div id="beep-scanner-overlay" class="hidden">
  <div class="beep-viewport"><div id="beep-reader"></div></div>
  
@@ -813,9 +808,16 @@
  
  statusEl.innerHTML = '🔍 Buscando...';
  
- // 1. Tenta buscar via API Beep App (Mais rápida)
+ // 1. Tenta buscar via API Beep App com Timeout de 2 segundos
  try {
- const resBeep = await fetch(`https://api.beepapp.com/v1/products/${code}`);
+ const controller = new AbortController();
+ const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+ const resBeep = await fetch(`https://api.beepapp.com/v1/products/${code}`, {
+ signal: controller.signal
+ });
+ clearTimeout(timeoutId);
+
  if (resBeep.ok) {
  const dataBeep = await resBeep.json();
  const nome = dataBeep.name || dataBeep.description || dataBeep.title || dataBeep.product_name;
@@ -829,7 +831,7 @@
  }
  }
  } catch (e) {
- console.warn("Busca na Beep API falhou ou expirou, tentando alternativas...", e);
+ console.warn("Beep API demorou ou falhou. Passando para as alternativas locais/reserva.");
  }
 
  // 2. Tenta buscar no Catálogo Local
@@ -850,9 +852,16 @@
  return;
  }
  
- // 4. Tenta buscar na API Open Food Facts (Reserva)
+ // 4. Tenta buscar na API Open Food Facts com Timeout de 2.5 segundos
  try {
- const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+ const controllerOFF = new AbortController();
+ const timeoutOFF = setTimeout(() => controllerOFF.abort(), 2500);
+
+ const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, {
+ signal: controllerOFF.signal
+ });
+ clearTimeout(timeoutOFF);
+
  const data = await res.json();
  if (data.status === 1 && data.product) {
  const p = data.product;
@@ -867,7 +876,8 @@
  el(prefix + 'descricao').focus();
  }
  } catch (e) {
- statusEl.innerHTML = '<span class="warn">Erro de consulta. Digite manualmente.</span>';
+ statusEl.innerHTML = '<span class="warn">Não encontrado ou rede lenta. Digite a descrição.</span>';
+ el(prefix + 'descricao').focus();
  }
  }
  
