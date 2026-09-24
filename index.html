@@ -582,7 +582,7 @@
  "patitiba": "frios2026"
  };
  
- // Base ultra rápida pré-carregada (Instantânea / 0ms)
+ // Base Pré-carregada para resposta instantânea (0ms)
  const produtosPreCadastrados = {
  "7896045112098": "Refresco em Pó Frisco Abacaxi 18g",
  "7896183210120": "Leite Glória",
@@ -764,7 +764,7 @@
  if (code.length >= 8) {
  searchTimeout = setTimeout(() => {
  buscarProduto(modulo);
- }, 150);
+ }, 100);
  }
  }
  
@@ -778,7 +778,7 @@
  return;
  }
  
- // ⚡ PASSO 1: Busca Instantânea Local (0ms)
+ // ⚡ 1. Busca Local Instantânea (0ms)
  if (catalogoLocal[code]) {
  el(prefix + 'descricao').value = catalogoLocal[code];
  statusEl.innerHTML = '<span class="ok">⚡ Encontrado (Cache Local)!</span>';
@@ -793,20 +793,26 @@
  return;
  }
  
- statusEl.innerHTML = '⚡ Consultando APIs em paralelo...';
+ statusEl.innerHTML = '⚡ Buscando no banco de dados alimentício...';
  
- // ⚡ PASSO 2: Consultas Simultâneas Ultra Rápidas com Timeout (Max 1.2s)
+ // ⚡ 2. Consulta paralela ultra rápida (Servidor BEEP + OpenFoodBR)
  const controller = new AbortController();
- const timeoutId = setTimeout(() => controller.abort(), 1200);
+ const timeoutId = setTimeout(() => controller.abort(), 1800);
 
- const fetchOFF = fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, { signal: controller.signal })
+ // API 1: Base Pública Ultra Rápida de Produtos Br (Servidor Beep / Cosmos / OpenFood)
+ const fetchBeepDb = fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=product_name,product_name_pt,brands`, { signal: controller.signal })
  .then(r => r.json())
  .then(d => {
- if (d.status === 1 && d.product.product_name) return d.product.product_name;
+ if (d.product) {
+ const nome = d.product.product_name_pt || d.product.product_name;
+ const marca = d.product.brands ? ` ${d.product.brands}` : '';
+ if (nome) return `${nome}${marca}`;
+ }
  throw new Error('OFF indisponível');
  });
 
- const fetchCosmos = fetch(`https://corsproxy.io/?https://api.cosmos.bluesoft.com.br/gtins/${code}.json`, { signal: controller.signal })
+ // API 2: Base Secundária Alternativa (Cosmos / UPC)
+ const fetchCosmosDb = fetch(`https://corsproxy.io/?https://api.cosmos.bluesoft.com.br/gtins/${code}.json`, { signal: controller.signal })
  .then(r => r.json())
  .then(d => {
  if (d.description) return d.description;
@@ -814,20 +820,20 @@
  });
 
  try {
- const nomeEncontrado = await Promise.any([fetchOFF, fetchCosmos]);
+ const nomeEncontrado = await Promise.any([fetchBeepDb, fetchCosmosDb]);
  clearTimeout(timeoutId);
  
  el(prefix + 'descricao').value = nomeEncontrado;
- statusEl.innerHTML = '<span class="ok">⚡ Encontrado online!</span>';
+ statusEl.innerHTML = '<span class="ok">⚡ Produto Localizado!</span>';
  
- // Salva no banco local para a próxima ser instantânea (0ms)
+ // Salva no cache do dispositivo para que na próxima vez abra em 0ms
  catalogoLocal[code] = nomeEncontrado;
  localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
  el(prefix + 'quantidade').focus();
 
  } catch (e) {
  clearTimeout(timeoutId);
- statusEl.innerHTML = '<span class="warn">Não cadastrado. Digite o nome para salvar localmente.</span>';
+ statusEl.innerHTML = '<span class="warn">Produto não encontrado na base pública. Digite a descrição para cadastrar.</span>';
  el(prefix + 'descricao').focus();
  }
  }
@@ -845,7 +851,6 @@
  return;
  }
 
- // Guarda automaticamente o nome digitado na base local para os próximos escaneamentos
  if (code && code !== 'S/C' && !catalogoLocal[code]) {
  catalogoLocal[code] = desc;
  localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
