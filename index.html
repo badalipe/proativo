@@ -157,18 +157,41 @@
  
  .top {
  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
- color: #fff; padding: 14px 12px; position: sticky; top: 0; z-index: 100;
+ color: #fff; padding: 10px 12px; position: sticky; top: 0; z-index: 100;
  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
  }
- .header-title-container { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 600px; margin: 0 auto; }
- .header-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+ .header-title-container { 
+ display: flex; 
+ flex-direction: column; 
+ gap: 8px; 
+ width: 100%; 
+ max-width: 600px; 
+ margin: 0 auto; 
+ }
+ .header-top-row {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ width: 100%;
+ }
+ .header-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
  .logo-container {
- background: #ffffff; padding: 4px 8px; border-radius: 8px;
+ background: #ffffff; padding: 3px 6px; border-radius: 6px;
  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
  }
- .header-logo { height: 28px; width: auto; object-fit: contain; }
- .header-text h1 { font-size: 15px; font-weight: 700; margin: 0; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
- .header-text .sub { color: #94a3b8; font-size: 10px; margin-top: 2px; }
+ .header-logo { height: 24px; width: auto; object-fit: contain; }
+ .header-text h1 { font-size: 14px; font-weight: 700; margin: 0; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ .header-text .sub { color: #94a3b8; font-size: 9px; margin-top: 1px; }
+
+ .header-bottom-row {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 8px;
+ width: 100%;
+ border-top: 1px solid rgba(255, 255, 255, 0.1);
+ padding-top: 6px;
+ }
  
  .wrap { width: 100%; max-width: 600px; margin: auto; padding: 12px 10px 80px; }
  
@@ -204,13 +227,6 @@
  }
  .campo .caixa input, .campo .caixa select { border: 0; background: transparent; padding: 0; height: 100%; font-size: 14px; }
  
- .header-right { display: flex; align-items: center; gap: 6px; }
- .chip-loja {
- display: flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.15);
- border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 11px; font-weight: 600;
- padding: 5px 8px; border-radius: 999px;
- }
- 
  .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
  
  button {
@@ -243,7 +259,6 @@
  background: none; border: none; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
  }
  
- /* Correção estrutural para forçar ocupação total (100vw x 100vh) */
  .beep-viewport { 
  position: fixed !important; 
  inset: 0 !important; 
@@ -410,6 +425,7 @@
  <div id="app-proativo">
  <header class="top">
  <div class="header-title-container">
+ <div class="header-top-row">
  <div class="header-left">
  <div class="logo-container">
  <svg class="header-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -425,9 +441,29 @@
  <div class="sub"><span>Validades e Estoque</span></div>
  </div>
  </div>
- <div class="header-right">
- <button type="button" class="chip-loja"><span>PATITIBA</span></button>
- <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 10px; font-size: 11px;">Menu</button>
+ <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 5px 10px; font-size: 11px; width: auto;">Menu</button>
+ </div>
+ 
+ <div class="header-bottom-row">
+ <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;">Loja Selecionada:</span>
+ <select id="pro_loja" style="flex: 1; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 12px; font-weight: 600; padding: 6px 8px; border-radius: 6px; outline: none;">
+ <optgroup label="Paraty" style="color: #000;">
+ <option value="Patitiba" selected>Patitiba</option>
+ <option value="Bananal">Bananal</option>
+ </optgroup>
+ <optgroup label="Angra dos Reis" style="color: #000;">
+ <option value="Balneário">Balneário</option>
+ <option value="Texaco">Texaco</option>
+ <option value="Nova Angra">Nova Angra</option>
+ <option value="Encruzo da Enseada">Encruzo da Enseada</option>
+ <option value="Lapa">Lapa</option>
+ <option value="Frade">Frade</option>
+ <option value="Ribeira">Ribeira</option>
+ <option value="Cais">Cais</option>
+ <option value="Japuíba">Japuíba</option>
+ <option value="Parque Mambucaba">Parque Mambucaba</option>
+ </optgroup>
+ </select>
  </div>
  </div>
  </header>
@@ -484,6 +520,7 @@
  <div id="app-trocas">
  <header class="top">
  <div class="header-title-container">
+ <div class="header-top-row">
  <div class="header-left">
  <div class="logo-container">
  <svg class="header-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -499,9 +536,29 @@
  <div class="sub"><span>Devoluções</span></div>
  </div>
  </div>
- <div class="header-right">
- <button type="button" class="chip-loja"><span>PATITIBA</span></button>
- <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 10px; font-size: 11px;">Menu</button>
+ <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 5px 10px; font-size: 11px; width: auto;">Menu</button>
+ </div>
+ 
+ <div class="header-bottom-row">
+ <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;">Loja Selecionada:</span>
+ <select id="trc_loja" style="flex: 1; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 12px; font-weight: 600; padding: 6px 8px; border-radius: 6px; outline: none;">
+ <optgroup label="Paraty" style="color: #000;">
+ <option value="Patitiba" selected>Patitiba</option>
+ <option value="Bananal">Bananal</option>
+ </optgroup>
+ <optgroup label="Angra dos Reis" style="color: #000;">
+ <option value="Balneário">Balneário</option>
+ <option value="Texaco">Texaco</option>
+ <option value="Nova Angra">Nova Angra</option>
+ <option value="Encruzo da Enseada">Encruzo da Enseada</option>
+ <option value="Lapa">Lapa</option>
+ <option value="Frade">Frade</option>
+ <option value="Ribeira">Ribeira</option>
+ <option value="Cais">Cais</option>
+ <option value="Japuíba">Japuíba</option>
+ <option value="Parque Mambucaba">Parque Mambucaba</option>
+ </optgroup>
+ </select>
  </div>
  </div>
  </header>
@@ -591,7 +648,8 @@
  const produtosPreCadastrados = {
  "7896045112098": "Refresco em Pó Frisco Abacaxi 18g",
  "7896183210120": "Leite Glória",
- "7908077452537": "Caderno Universitário 80 Fls Foroni"
+ "7908077452537": "Caderno Universitário 80 Fls Foroni",
+ "7622210592781": "Biscoito Oreo Recheado Recheio Baunilha 90g"
  };
  
  let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
@@ -716,7 +774,7 @@
  
  const qrboxSize = Math.min(window.innerWidth * 0.85, 320);
  const config = {
- fps: 30,
+ fps: 25,
  qrbox: { width: qrboxSize, height: 180 },
  aspectRatio: 1.0,
  formatsToSupport: [
@@ -729,13 +787,6 @@
  ]
  };
  
- const constraints = {
- facingMode: "environment",
- focusMode: "continuous",
- width: { ideal: 1920 },
- height: { ideal: 1080 }
- };
- 
  const acaoLeituraSucesso = (decodedText) => {
  tocarBipe();
  dispararFlashScan();
@@ -743,17 +794,15 @@
  
  const inputCampo = el(prefix + 'codigo');
  inputCampo.value = decodedText;
- 
- // Força o teclado virtual a fechar e a tela voltar ao normal
  inputCampo.blur(); 
  
  pararScanner();
- buscarProduto(modulo); // Dispara a busca automaticamente simulando o "enter"
+ buscarProduto(modulo);
  };
 
  try {
  await html5QrCode.start(
- constraints,
+ { facingMode: "environment" },
  config,
  acaoLeituraSucesso,
  () => {}
@@ -773,18 +822,9 @@
  }
  } catch(e){}
  
- } catch (e) {
- try {
- await html5QrCode.start(
- { facingMode: "environment" },
- config,
- acaoLeituraSucesso,
- () => {}
- );
  } catch (err) {
- alert("Erro ao abrir a câmera: " + err.message || err);
+ alert("Erro ao abrir a câmera: " + (err.message || err));
  pararScanner();
- }
  }
  }
  
@@ -815,7 +855,7 @@
  pararScanner();
  const inputCampo = el(prefix + 'codigo');
  inputCampo.value = "";
- inputCampo.blur(); // Garante tela limpa sem teclado
+ inputCampo.blur();
  el(prefix + 'descricao').focus();
  }
  
@@ -825,7 +865,6 @@
  const code = inputCampo.value.trim();
  const statusEl = el(prefix + 'status');
  
- // Garante que o teclado recolha ao buscar também
  inputCampo.blur();
  
  if (!code) {
@@ -856,7 +895,10 @@
  const data = await res.json();
  
  if (data.status === 1 && data.product.product_name) {
- el(prefix + 'descricao').value = data.product.product_name;
+ const nomeProd = data.product.product_name;
+ el(prefix + 'descricao').value = nomeProd;
+ catalogoLocal[code] = nomeProd;
+ localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
  statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
  } else {
  statusEl.innerHTML = '<span class="warn">Não encontrado online. Digite a descrição.</span>';
@@ -868,22 +910,27 @@
  
  function adicionarItem(modulo) {
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+ const code = el(prefix + 'codigo').value.trim();
  const desc = el(prefix + 'descricao').value.trim();
  const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
  const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
  const validade = el(prefix + 'validade').value;
  
- // Recolhe teclados ativos ao adicionar
  document.activeElement.blur();
  
  if (!desc || isNaN(qtd) || !validade) {
  alert("Preencha descrição, quantidade e validade.");
  return;
  }
+
+ if (code && code !== 'S/C') {
+ catalogoLocal[code] = desc;
+ localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
+ }
  
  const item = {
  id: Date.now(),
- codigo: el(prefix + 'codigo').value.trim() || 'S/C',
+ codigo: code || 'S/C',
  descricao: desc,
  quantidade: qtd,
  unidade: el(prefix + 'unidade').value || 'und',
@@ -1002,6 +1049,7 @@
  if (modulo === 'proativo') {
  const digitou = el('pro_digitou').value;
  const gerente = el('pro_gerente').value;
+ const lojaSel = el('pro_loja').value;
  const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
  
  sheet.cell("H2").value(gerente);
@@ -1014,7 +1062,7 @@
  
  sheet.cell(`A${row}`).value(index + 1);
  sheet.cell(`B${row}`).value("");
- sheet.cell(`C${row}`).value("Patitiba");
+ sheet.cell(`C${row}`).value(lojaSel);
  sheet.cell(`D${row}`).value(item.codigo);
  sheet.cell(`E${row}`).value(item.descricao);
  sheet.cell(`F${row}`, item.quantidade);
