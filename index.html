@@ -300,13 +300,13 @@
  .footer-clean {
  padding: 24px 16px calc(24px + env(safe-area-inset-bottom, 0px));
  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
- display: flex; justify-content: center; pointer-events: auto;
+ display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: auto;
  }
 
  .btn-action-clean {
  background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.6);
  color: #ffffff; padding: 12px 24px; border-radius: 24px; font-size: 14px; font-weight: 500;
- backdrop-filter: blur(4px); cursor: pointer;
+ backdrop-filter: blur(4px); cursor: pointer; width: 85%; max-width: 320px; text-align: center;
  }
 
  .notice { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
@@ -330,6 +330,8 @@
  </style>
 </head>
 <body>
+
+ <input type="file" accept="image/*" capture="environment" id="global-input-foto" onchange="processarFotoNativaGlobal(event)" style="display:none">
 
  <div id="login-screen" class="hidden">
  <div class="login-card">
@@ -447,9 +449,7 @@
  <section class="card">
  <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
  <div class="scan-zone">
- <button class="primary" onclick="abrirScanner('proativo')">📷 Abrir Câmera no Navegador</button>
- <input type="file" accept="image/*" capture="environment" id="input-foto-barcode-pro" onchange="processarFotoNativa(event, 'proativo')" style="display:none">
- <button type="button" class="secondary" onclick="document.getElementById('input-foto-barcode-pro').click()">📸 Tirar Foto com Câmera Nativa</button>
+ <button class="primary" onclick="abrirScanner('proativo')">📷 Abrir Câmera</button>
  </div>
  <label>Código de barras</label>
  <input id="pro_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
@@ -538,9 +538,7 @@
  <section class="card">
  <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
  <div class="scan-zone">
- <button class="primary" onclick="abrirScanner('trocas')">📷 Abrir Câmera no Navegador</button>
- <input type="file" accept="image/*" capture="environment" id="input-foto-barcode-trc" onchange="processarFotoNativa(event, 'trocas')" style="display:none">
- <button type="button" class="secondary" onclick="document.getElementById('input-foto-barcode-trc').click()">📸 Tirar Foto com Câmera Nativa</button>
+ <button class="primary" onclick="abrirScanner('trocas')">📷 Abrir Câmera</button>
  </div>
  <label>Código de barras</label>
  <input id="trc_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
@@ -603,6 +601,7 @@
  </div>
 
  <footer class="footer-clean">
+ <button type="button" class="btn-action-clean" onclick="acionarFotoNativaOverlay()">📸 Tirar Foto Nativa (Alta Definição)</button>
  <button type="button" class="btn-action-clean" onclick="fecharScannerSemCodigo()">Adicionar sem código de barras</button>
  </footer>
  </div>
@@ -793,14 +792,20 @@
  el(prefix + 'codigo').value = "";
  el(prefix + 'descricao').focus();
  }
- 
- async function processarFotoNativa(event, modulo) {
+
+ function acionarFotoNativaOverlay() {
+ el('global-input-foto').click();
+ }
+
+ async function processarFotoNativaGlobal(event) {
  const file = event.target.files[0];
  if (!file) return;
 
- const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+ const prefix = moduloAtual === 'proativo' ? 'pro_' : 'trc_';
  const elStatus = el(prefix + 'status');
  if (elStatus) elStatus.innerHTML = '⏳ Processando foto em alta resolução...';
+
+ pararScanner();
 
  const html5QrCodeStatic = new Html5Qrcode("beep-reader");
  
@@ -809,7 +814,7 @@
  tocarBipe();
  el(prefix + 'codigo').value = decodedText;
  if (elStatus) elStatus.innerHTML = '<span class="ok">✓ Código lido com sucesso da foto!</span>';
- buscarProduto(modulo);
+ buscarProduto(moduloAtual);
  } catch (err) {
  alert("Não foi possível ler o código nesta foto. Tente afastar um pouco o celular (30cm) para evitar reflexos e garantir o foco nas barras.");
  if (elStatus) elStatus.innerHTML = '<span class="warn">Falha na leitura da imagem. Tente novamente.</span>';
