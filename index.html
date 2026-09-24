@@ -218,7 +218,7 @@
  font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
  }
  .primary { background: var(--primary); color: #fff; width: 100%; }
- .secondary { background: #f0f7ff; color: var(--primary); }
+ .secondary { background: #f0f7ff; color: var(--primary); width: 100%; }
  .danger { background: #fef2f2; color: var(--accent-red); }
  
  .row { display: grid; grid-template-columns: 1fr; gap: 8px; }
@@ -446,7 +446,11 @@
  
  <section class="card">
  <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
- <div class="scan-zone"><button class="primary" onclick="abrirScanner('proativo')">📷 Abrir câmera para escanear</button></div>
+ <div class="scan-zone">
+ <button class="primary" onclick="abrirScanner('proativo')">📷 Abrir Câmera no Navegador</button>
+ <input type="file" accept="image/*" capture="environment" id="input-foto-barcode-pro" onchange="processarFotoNativa(event, 'proativo')" style="display:none">
+ <button type="button" class="secondary" onclick="document.getElementById('input-foto-barcode-pro').click()">📸 Tirar Foto com Câmera Nativa</button>
+ </div>
  <label>Código de barras</label>
  <input id="pro_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
  <div class="actions"><button class="primary" onclick="buscarProduto('proativo')" style="width:auto">🔍 Buscar produto</button></div>
@@ -533,7 +537,11 @@
  
  <section class="card">
  <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
- <div class="scan-zone"><button class="primary" onclick="abrirScanner('trocas')">📷 Abrir câmera para escanear</button></div>
+ <div class="scan-zone">
+ <button class="primary" onclick="abrirScanner('trocas')">📷 Abrir Câmera no Navegador</button>
+ <input type="file" accept="image/*" capture="environment" id="input-foto-barcode-trc" onchange="processarFotoNativa(event, 'trocas')" style="display:none">
+ <button type="button" class="secondary" onclick="document.getElementById('input-foto-barcode-trc').click()">📸 Tirar Foto com Câmera Nativa</button>
+ </div>
  <label>Código de barras</label>
  <input id="trc_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
  <div class="actions"><button class="primary" onclick="buscarProduto('trocas')" style="width:auto">🔍 Buscar produto</button></div>
@@ -720,7 +728,6 @@
  html5QrCode = new Html5Qrcode("beep-reader");
  }
  
- // Configuração Otimizada para Frascos Curvos, Múltiplos Formatos e Leitor Nativo
  const config = { 
  fps: 20,
  formatsToSupport: [
@@ -787,6 +794,28 @@
  el(prefix + 'descricao').focus();
  }
  
+ async function processarFotoNativa(event, modulo) {
+ const file = event.target.files[0];
+ if (!file) return;
+
+ const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+ const elStatus = el(prefix + 'status');
+ if (elStatus) elStatus.innerHTML = '⏳ Processando foto em alta resolução...';
+
+ const html5QrCodeStatic = new Html5Qrcode("beep-reader");
+ 
+ try {
+ const decodedText = await html5QrCodeStatic.scanFile(file, true);
+ tocarBipe();
+ el(prefix + 'codigo').value = decodedText;
+ if (elStatus) elStatus.innerHTML = '<span class="ok">✓ Código lido com sucesso da foto!</span>';
+ buscarProduto(modulo);
+ } catch (err) {
+ alert("Não foi possível ler o código nesta foto. Tente afastar um pouco o celular (30cm) para evitar reflexos e garantir o foco nas barras.");
+ if (elStatus) elStatus.innerHTML = '<span class="warn">Falha na leitura da imagem. Tente novamente.</span>';
+ }
+ }
+
  function ocultarImagemProduto(modulo) {
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  const container = el(prefix + 'img_container');
@@ -823,7 +852,6 @@
  
  statusEl.innerHTML = '🔍 Buscando...';
  
- // 1. Tenta buscar via API Beep App
  try {
  const controller = new AbortController();
  const timeoutId = setTimeout(() => controller.abort(), 1200);
@@ -849,7 +877,6 @@
  console.warn("Beep API demorou ou falhou. Passando para alternativas.");
  }
 
- // 2. Catálogo Local
  if (catalogoLocal[code]) {
  const item = typeof catalogoLocal[code] === 'object' ? catalogoLocal[code] : { nome: catalogoLocal[code], imagem: '' };
  el(prefix + 'descricao').value = item.nome;
@@ -858,7 +885,6 @@
  return;
  }
  
- // 3. Base Pré-cadastrada
  if (produtosPreCadastrados[code]) {
  const item = produtosPreCadastrados[code];
  el(prefix + 'descricao').value = item.nome;
@@ -867,7 +893,6 @@
  return;
  }
  
- // 4. Open Food Facts
  try {
  const controllerOFF = new AbortController();
  const timeoutOFF = setTimeout(() => controllerOFF.abort(), 1500);
