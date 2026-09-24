@@ -228,9 +228,17 @@
  }
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
- /* ------------------------------------------------------------- */
- /* LAYOUT CLEAN DA CÂMERA EM TELA CHEIA (SOBREPOSIÇÃO) */
- /* ------------------------------------------------------------- */
+ /* Estilos para Imagem do Produto */
+ .product-img-box {
+ display: flex; justify-content: center; align-items: center;
+ background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px;
+ padding: 10px; margin-top: 12px; width: 100%; min-height: 140px;
+ }
+ .product-img-medium {
+ max-height: 160px; max-width: 100%; object-fit: contain; border-radius: 8px;
+ }
+
+ /* Layout Clean da Câmera */
  #beep-scanner-overlay {
  position: fixed; inset: 0; background: #000; z-index: 999999;
  width: 100vw; height: 100vh; display: flex; flex-direction: column;
@@ -241,7 +249,6 @@
  #beep-reader { width: 100% !important; height: 100% !important; border: none !important; }
  #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
  
- /* Oculta elementos padrões da biblioteca html5-qrcode */
  #qr-shaded-region, #beep-reader__scan_region img, #beep-reader img, #beep-reader__header_message, #beep-reader__dashboard {
  display: none !important;
  }
@@ -309,6 +316,8 @@
  border-radius: 10px; padding: 10px 12px; margin-top: 8px; display: flex; justify-content: space-between;
  align-items: center; gap: 8px; background: #fff;
  }
+ .item-info-box { display: flex; align-items: center; gap: 10px; min-width: 0; }
+ .item-thumb { width: 42px; height: 42px; object-fit: contain; border-radius: 6px; background: #f1f5f9; flex-shrink: 0; }
  .item-info { min-width: 0; }
  .item strong { display: block; font-size: 13px; }
  .item small { color: var(--text-muted); font-size: 11px; display: block; margin-top: 2px; }
@@ -439,6 +448,12 @@
  <label>Código de barras</label>
  <input id="pro_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
  <div class="actions"><button class="primary" onclick="buscarProduto('proativo')" style="width:auto">🔍 Buscar produto</button></div>
+ 
+ <!-- Área de Exibição da Imagem (Mediana) -->
+ <div id="pro_img_container" class="product-img-box hidden">
+   <img id="pro_img" src="" alt="Imagem do Produto" class="product-img-medium">
+ </div>
+
  <div id="pro_status" class="notice" style="margin-top:8px"></div>
  </section>
  
@@ -521,6 +536,12 @@
  <label>Código de barras</label>
  <input id="trc_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
  <div class="actions"><button class="primary" onclick="buscarProduto('trocas')" style="width:auto">🔍 Buscar produto</button></div>
+ 
+ <!-- Área de Exibição da Imagem (Mediana) -->
+ <div id="trc_img_container" class="product-img-box hidden">
+   <img id="trc_img" src="" alt="Imagem do Produto" class="product-img-medium">
+ </div>
+
  <div id="trc_status" class="notice" style="margin-top:8px"></div>
  </section>
  
@@ -588,15 +609,16 @@
  };
  
  const produtosPreCadastrados = {
- "7896045112098": "Refresco em Pó Frisco Abacaxi 18g",
- "7896183210120": "Leite Glória",
- "7908077452537": "Caderno Universitário 80 Fls Foroni"
+ "7896045112098": { nome: "Refresco em Pó Frisco Abacaxi 18g", imagem: "" },
+ "7896183210120": { nome: "Leite Glória", imagem: "" },
+ "7908077452537": { nome: "Caderno Universitário 80 Fls Foroni", imagem: "" }
  };
  
  let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
  let itensProAtivo = JSON.parse(localStorage.getItem('sys_proative_itens') || '[]');
  let itensTrocas = JSON.parse(localStorage.getItem('sys_trocas_itens') || '[]');
  
+ let imagemAtualCarregada = "";
  let moduloAtual = null;
  let html5QrCode = null;
  
@@ -755,11 +777,35 @@
  el(prefix + 'descricao').focus();
  }
  
+ function ocultarImagemProduto(modulo) {
+ const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+ const container = el(prefix + 'img_container');
+ const img = el(prefix + 'img');
+ container.classList.add('hidden');
+ img.src = "";
+ imagemAtualCarregada = "";
+ }
+
+ function exibirImagemProduto(modulo, url) {
+ const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+ const container = el(prefix + 'img_container');
+ const img = el(prefix + 'img');
+ if (url) {
+ img.src = url;
+ container.classList.remove('hidden');
+ imagemAtualCarregada = url;
+ } else {
+ ocultarImagemProduto(modulo);
+ }
+ }
+
  async function buscarProduto(modulo) {
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  const code = el(prefix + 'codigo').value.trim();
  const statusEl = el(prefix + 'status');
  
+ ocultarImagemProduto(modulo);
+
  if (!code) {
  statusEl.innerHTML = '<span class="warn">Informe um código.</span>';
  return;
@@ -767,23 +813,54 @@
  
  statusEl.innerHTML = '🔍 Buscando...';
  
+ // 1. Tenta buscar via API Beep App (Mais rápida)
+ try {
+ const resBeep = await fetch(`https://api.beepapp.com/v1/products/${code}`);
+ if (resBeep.ok) {
+ const dataBeep = await resBeep.json();
+ const nome = dataBeep.name || dataBeep.description || dataBeep.title || dataBeep.product_name;
+ const img = dataBeep.image || dataBeep.image_url || dataBeep.photo || "";
+ 
+ if (nome) {
+ el(prefix + 'descricao').value = nome;
+ if (img) exibirImagemProduto(modulo, img);
+ statusEl.innerHTML = '<span class="ok">Localizado via Beep API!</span>';
+ return;
+ }
+ }
+ } catch (e) {
+ console.warn("Busca na Beep API falhou ou expirou, tentando alternativas...", e);
+ }
+
+ // 2. Tenta buscar no Catálogo Local
  if (catalogoLocal[code]) {
- el(prefix + 'descricao').value = catalogoLocal[code];
+ const item = typeof catalogoLocal[code] === 'object' ? catalogoLocal[code] : { nome: catalogoLocal[code], imagem: '' };
+ el(prefix + 'descricao').value = item.nome;
+ if (item.imagem) exibirImagemProduto(modulo, item.imagem);
  statusEl.innerHTML = '<span class="ok">Localizado no catálogo local!</span>';
  return;
  }
  
+ // 3. Tenta buscar na Base Pré-cadastrada
  if (produtosPreCadastrados[code]) {
- el(prefix + 'descricao').value = produtosPreCadastrados[code];
+ const item = produtosPreCadastrados[code];
+ el(prefix + 'descricao').value = item.nome;
+ if (item.imagem) exibirImagemProduto(modulo, item.imagem);
  statusEl.innerHTML = '<span class="ok">Localizado na base do sistema!</span>';
  return;
  }
  
+ // 4. Tenta buscar na API Open Food Facts (Reserva)
  try {
  const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
  const data = await res.json();
- if (data.status === 1 && data.product.product_name) {
- el(prefix + 'descricao').value = data.product.product_name;
+ if (data.status === 1 && data.product) {
+ const p = data.product;
+ const nome = p.product_name_pt || p.product_name || p.generic_name || "Produto sem nome";
+ const img = p.image_front_url || p.image_url || "";
+ 
+ el(prefix + 'descricao').value = nome;
+ if (img) exibirImagemProduto(modulo, img);
  statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
  } else {
  statusEl.innerHTML = '<span class="warn">Não encontrado. Digite a descrição.</span>';
@@ -814,7 +891,8 @@
  unidade: el(prefix + 'unidade').value || 'und',
  validade: validade,
  valor: val,
- total: qtd * val
+ total: qtd * val,
+ imagem: imagemAtualCarregada
  };
  
  if (modulo === 'trocas') {
@@ -834,6 +912,7 @@
  el(prefix + 'validade').value = '';
  el(prefix + 'valor').value = '0.00';
  el(prefix + 'status').innerHTML = '';
+ ocultarImagemProduto(modulo);
  }
  
  function renderizarLista(modulo) {
@@ -857,11 +936,15 @@
  itemEl.className = 'item';
  const dataFmt = item.validade.split('-').reverse().join('/');
  const infoExtra = item.motivo ? ` | Motivo: ${item.motivo === 1 ? '1-Avaria' : '2-Descarte'}` : '';
+ const imgHtml = item.imagem ? `<img src="${item.imagem}" class="item-thumb" alt="Foto">` : '';
  
  itemEl.innerHTML = `
+ <div class="item-info-box">
+ ${imgHtml}
  <div class="item-info">
  <strong>${item.descricao}</strong>
  <small>Cód: ${item.codigo} | Qtd: ${item.quantidade} ${item.unidade} | Val: ${dataFmt}${infoExtra}</small>
+ </div>
  </div>
  <div class="item-right">
  <span class="item-total">R$ ${item.total.toFixed(2)}</span>
@@ -981,4 +1064,3 @@
  </script>
 </body>
 </html>
-
