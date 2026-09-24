@@ -228,85 +228,44 @@
  }
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
- /* Estilo Customizado para Tela Cheia e Máxima Fluidez */
  #beep-scanner-overlay {
  position: fixed; inset: 0; background: #000; z-index: 999999;
  display: flex; flex-direction: column; justify-content: space-between;
- width: 100vw; height: 100vh; overflow: hidden;
  }
- .beep-top-bar {
- display: flex; align-items: center; justify-content: space-between;
- padding: 16px 18px; background: rgba(0, 0, 0, 0.85); color: #fff;
- font-size: 15px; font-weight: 600; z-index: 20; border-bottom: 1px solid rgba(255,255,255,0.1);
- }
- .beep-back-btn, .beep-manual-link {
- background: none; border: none; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
- }
- 
- /* Correção estrutural para forçar ocupação total (100vw x 100vh) */
- .beep-viewport { 
- position: fixed !important; 
- inset: 0 !important; 
- width: 100vw !important; 
- height: 100vh !important; 
- background: #000 !important; 
- z-index: 1 !important; 
- overflow: hidden !important;
- }
- #beep-reader { 
- width: 100vw !important; 
- height: 100vh !important; 
- border: none !important; 
- position: absolute !important;
- inset: 0 !important;
- }
- #beep-reader video { 
- width: 100vw !important; 
- height: 100vh !important; 
- object-fit: cover !important; 
- position: absolute !important;
- inset: 0 !important;
- }
- 
+ .beep-top-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: rgba(0, 0, 0, 0.8); color: #fff; font-size: 15px; font-weight: 600; z-index: 20; }
+ .beep-back-btn, .beep-manual-link { background: none; border: none; color: #fff; font-size: 14px; cursor: pointer; }
+ .beep-viewport { position: absolute; inset: 0; background: #000; z-index: 1; }
+ #beep-reader { width: 100% !important; height: 100% !important; border: none !important; }
+ #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
  .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
  .beep-target-box {
- width: 85%; max-width: 320px; height: 180px; border: 2px solid rgba(255, 255, 255, 0.6);
- border-radius: 14px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65); position: relative;
+ width: 85%; max-width: 320px; height: 180px; border: 2px solid rgba(255, 255, 255, 0.4);
+ border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); position: relative;
  }
- .beep-target-box::before, .beep-target-box::after {
- content: ''; position: absolute; width: 24px; height: 24px; border-color: #fff; border-style: solid;
- }
- .beep-target-box::before { top: -2px; left: -2px; border-width: 4px 0 0 4px; border-top-left-radius: 12px; }
- .beep-target-box::after { top: -2px; right: -2px; border-width: 4px 4px 0 0; border-top-right-radius: 12px; }
- 
  .scan-line {
  position: absolute; left: 8px; right: 8px; height: 2px; top: 8px;
  background: linear-gradient(90deg, transparent, #e30613, transparent);
- box-shadow: 0 0 10px rgba(227, 6, 19, 0.9); animation: scanline 1.8s ease-in-out infinite;
+ box-shadow: 0 0 8px rgba(227, 6, 19, 0.8); animation: scanline 2s ease-in-out infinite;
  }
  @keyframes scanline { 0%, 100% { top: 8px; } 50% { top: calc(100% - 10px); } }
- 
- .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.4); opacity: 0; transition: opacity 0.15s ease; z-index: 15; }
+ .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.35); opacity: 0; transition: opacity 0.15s ease; z-index: 15; }
  .scan-flash.active { opacity: 1; }
- 
  .camera-controls-floating {
- position: absolute; bottom: 95px; left: 0; right: 0; display: flex;
- justify-content: center; align-items: center; gap: 12px; z-index: 20; padding: 0 16px;
+ position: absolute; bottom: 85px; left: 0; right: 0; display: flex;
+ justify-content: center; align-items: center; gap: 10px; z-index: 20; padding: 0 16px;
  }
  .camera-controls-floating button, .camera-controls-floating .zoom-pill {
- background: rgba(0, 0, 0, 0.75); color: #fff; border: 1px solid rgba(255, 255, 255, 0.35);
- padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+ background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255, 255, 255, 0.3);
+ padding: 8px 12px; border-radius: 20px; font-size: 12px;
  }
- 
  .beep-bottom-bar {
  position: absolute; bottom: 0; left: 0; right: 0;
- padding: 18px 16px calc(24px + env(safe-area-inset-bottom, 0px));
- background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); z-index: 20; display: flex; justify-content: center;
+ padding: 16px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+ background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); z-index: 20; display: flex; justify-content: center;
  }
  .beep-btn-bottom-action {
- background: transparent; border: 2px solid rgba(255, 255, 255, 0.95);
- color: #fff; border-radius: 99px; padding: 12px 28px; font-size: 15px; font-weight: 700; cursor: pointer;
- box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+ background: transparent; border: 2px solid rgba(255, 255, 255, 0.9);
+ color: #fff; border-radius: 99px; padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer;
  }
 
  .notice { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
@@ -564,8 +523,8 @@
  
  <div id="beep-scanner-overlay" class="hidden">
  <div class="beep-top-bar">
- <button type="button" class="beep-back-btn" onclick="pararScanner()">← Escanear</button>
- <span style="letter-spacing: 0.5px;">DIGITAR MANUALMENTE</span>
+ <button type="button" class="beep-back-btn" onclick="pararScanner()">← Fechar</button>
+ <span>Escanear Código</span>
  <button type="button" class="beep-manual-link" onclick="fecharScannerSemCodigo()">Manual</button>
  </div>
  <div class="beep-viewport"><div id="beep-reader"></div></div>
@@ -578,7 +537,7 @@
  <div class="zoom-pill">Zoom: <span id="beepZoomVal">1.0</span>x</div>
  <input type="range" id="beepZoomRange" min="1" max="5" step="0.1" value="1" style="width: 70px; accent-color: #fff;">
  </div>
- <div class="beep-bottom-bar"><button type="button" class="beep-btn-bottom-action" onclick="fecharScannerSemCodigo()">Adicionar sem código de barras</button></div>
+ <div class="beep-bottom-bar"><button type="button" class="beep-btn-bottom-action" onclick="fecharScannerSemCodigo()">Inserir sem código</button></div>
  </div>
  
  <script>
@@ -701,61 +660,26 @@
  
  async function abrirScanner(modulo) {
  moduloAtual = modulo;
- 
- if (html5QrCode) {
- try {
- if (html5QrCode.isScanning) {
- await html5QrCode.stop();
- }
- } catch (e) {}
- } else {
- html5QrCode = new Html5Qrcode("beep-reader");
- }
-
  el('beep-scanner-overlay').classList.remove('hidden');
  
- const qrboxSize = Math.min(window.innerWidth * 0.85, 320);
- const config = {
- fps: 30,
- qrbox: { width: qrboxSize, height: 180 },
- aspectRatio: 1.0,
- formatsToSupport: [
- Html5QrcodeSupportedFormats.EAN_13,
- Html5QrcodeSupportedFormats.EAN_8,
- Html5QrcodeSupportedFormats.CODE_128,
- Html5QrcodeSupportedFormats.UPC_A,
- Html5QrcodeSupportedFormats.UPC_E,
- Html5QrcodeSupportedFormats.CODE_39
- ]
- };
+ if (!html5QrCode) {
+ html5QrCode = new Html5Qrcode("beep-reader");
+ }
  
- const constraints = {
- facingMode: "environment",
- focusMode: "continuous",
- width: { ideal: 1920 },
- height: { ideal: 1080 }
- };
+ const config = { fps: 15, qrbox: { width: 260, height: 140 } };
  
- const acaoLeituraSucesso = (decodedText) => {
+ try {
+ await html5QrCode.start(
+ { facingMode: "environment" },
+ config,
+ (decodedText) => {
  tocarBipe();
  dispararFlashScan();
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- 
- const inputCampo = el(prefix + 'codigo');
- inputCampo.value = decodedText;
- 
- // Força o teclado virtual a fechar e a tela voltar ao normal
- inputCampo.blur(); 
- 
+ el(prefix + 'codigo').value = decodedText;
  pararScanner();
- buscarProduto(modulo); // Dispara a busca automaticamente simulando o "enter"
- };
-
- try {
- await html5QrCode.start(
- constraints,
- config,
- acaoLeituraSucesso,
+ buscarProduto(modulo);
+ },
  () => {}
  );
  
@@ -768,37 +692,27 @@
  zoomInput.step = capabilities.zoom.step || 0.1;
  zoomInput.oninput = (e) => {
  el('beepZoomVal').innerText = e.target.value;
- html5QrCode.applyVideoConstraints({ advanced: [{ zoom: parseFloat(e.target.value) }] });
+ html5QrCode.applyVideoConstraints({ advanced: [{ zoom: e.target.value }] });
  };
  }
  } catch(e){}
  
  } catch (e) {
- try {
- await html5QrCode.start(
- { facingMode: "environment" },
- config,
- acaoLeituraSucesso,
- () => {}
- );
- } catch (err) {
- alert("Erro ao abrir a câmera: " + err.message || err);
+ alert("Erro ao abrir a câmera: " + e);
  pararScanner();
  }
  }
- }
  
- async function pararScanner() {
- if (html5QrCode) {
- try {
- if (html5QrCode.isScanning) {
- await html5QrCode.stop();
- }
- } catch (e) {
- console.error("Erro ao parar o scanner: ", e);
- }
- }
+ function pararScanner() {
+ if (html5QrCode && html5QrCode.isScanning) {
+ html5QrCode.stop().then(() => {
  el('beep-scanner-overlay').classList.add('hidden');
+ }).catch(() => {
+ el('beep-scanner-overlay').classList.add('hidden');
+ });
+ } else {
+ el('beep-scanner-overlay').classList.add('hidden');
+ }
  }
  
  async function alternarLanterna() {
@@ -806,27 +720,21 @@
  lanternaAtiva = !lanternaAtiva;
  await html5QrCode.applyVideoConstraints({ advanced: [{ torch: lanternaAtiva }] });
  } catch (e) {
- alert("Lanterna não disponível neste aparelho.");
+ alert("Lanterna não disponível.");
  }
  }
  
  function fecharScannerSemCodigo() {
  const prefix = moduloAtual === 'proativo' ? 'pro_' : 'trc_';
  pararScanner();
- const inputCampo = el(prefix + 'codigo');
- inputCampo.value = "";
- inputCampo.blur(); // Garante tela limpa sem teclado
+ el(prefix + 'codigo').value = "";
  el(prefix + 'descricao').focus();
  }
  
  async function buscarProduto(modulo) {
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- const inputCampo = el(prefix + 'codigo');
- const code = inputCampo.value.trim();
+ const code = el(prefix + 'codigo').value.trim();
  const statusEl = el(prefix + 'status');
- 
- // Garante que o teclado recolha ao buscar também
- inputCampo.blur();
  
  if (!code) {
  statusEl.innerHTML = '<span class="warn">Informe um código.</span>';
@@ -847,22 +755,18 @@
  return;
  }
  
- const controller = new AbortController();
- const timeoutId = setTimeout(() => controller.abort(), 3500);
- 
  try {
- const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, { signal: controller.signal });
- clearTimeout(timeoutId);
+ const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
  const data = await res.json();
- 
  if (data.status === 1 && data.product.product_name) {
  el(prefix + 'descricao').value = data.product.product_name;
  statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
  } else {
- statusEl.innerHTML = '<span class="warn">Não encontrado online. Digite a descrição.</span>';
+ statusEl.innerHTML = '<span class="warn">Não encontrado. Digite a descrição.</span>';
+ el(prefix + 'descricao').focus();
  }
  } catch (e) {
- statusEl.innerHTML = '<span class="warn">Busca rápida indisponível. Preencha manualmente.</span>';
+ statusEl.innerHTML = '<span class="warn">Erro de consulta. Digite manualmente.</span>';
  }
  }
  
@@ -872,9 +776,6 @@
  const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
  const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
  const validade = el(prefix + 'validade').value;
- 
- // Recolhe teclados ativos ao adicionar
- document.activeElement.blur();
  
  if (!desc || isNaN(qtd) || !validade) {
  alert("Preencha descrição, quantidade e validade.");
@@ -976,7 +877,6 @@
  }
  
  async function gerarExcel(modulo) {
- document.activeElement.blur();
  const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
  if (listaData.length === 0) {
  alert("Adicione itens para exportar.");
@@ -1017,7 +917,7 @@
  sheet.cell(`C${row}`).value("Patitiba");
  sheet.cell(`D${row}`).value(item.codigo);
  sheet.cell(`E${row}`).value(item.descricao);
- sheet.cell(`F${row}`, item.quantidade);
+ sheet.cell(`F${row}`).value(item.quantidade);
  sheet.cell(`G${row}`).value(item.unidade);
  sheet.cell(`H${row}`).value(dataFmt);
  sheet.cell(`I${row}`).value(item.valor);
