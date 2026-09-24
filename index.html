@@ -586,7 +586,7 @@
  </div>
  
  <div id="beep-scanner-overlay" class="hidden">
- <div class="beep-viewport"><div id="beep-reader"></div></div>
+ <div class="beep-viewport"><div id="beep-reader-container"></div></div>
  
  <div class="overlay-clean">
  <header class="header-clean">
@@ -730,18 +730,15 @@
  isScannerInitializing = true;
 
  moduloAtual = modulo;
- el('beep-scanner-overlay').classList.remove('hidden');
  
- try {
- if (html5QrCode) {
-   if (html5QrCode.isScanning) {
-     await html5QrCode.stop();
-   }
-   await html5QrCode.clear();
- }
- } catch(e) {
- console.warn("Limpando instância anterior:", e);
- }
+ // Fecha e limpa qualquer scanner em execução
+ await pararScannerSilencioso();
+
+ // Recria o nó HTML do leitor para garantir um estado totalmente limpo
+ const container = el('beep-reader-container');
+ container.innerHTML = '<div id="beep-reader"></div>';
+ 
+ el('beep-scanner-overlay').classList.remove('hidden');
 
  html5QrCode = new Html5Qrcode("beep-reader", { verbose: false });
  
@@ -749,7 +746,7 @@
  const qrboxSize = Math.min(Math.floor(screenWidth * 0.8), 280);
 
  const config = { 
- fps: 25,
+ fps: 20,
  qrbox: { width: qrboxSize, height: Math.floor(qrboxSize * 0.65) },
  formatsToSupport: [
    Html5QrcodeSupportedFormats.EAN_13,
@@ -757,21 +754,12 @@
    Html5QrcodeSupportedFormats.CODE_128,
    Html5QrcodeSupportedFormats.UPC_A,
    Html5QrcodeSupportedFormats.UPC_E
- ],
- experimentalFeatures: {
-   useBarCodeDetectorIfSupported: true
- }
+ ]
  };
 
- const cameraConfig = { 
- facingMode: "environment",
- width: { min: 640, ideal: 1280, max: 1920 },
- height: { min: 480, ideal: 720, max: 1080 }
- };
- 
  try {
  await html5QrCode.start(
- cameraConfig,
+ { facingMode: "environment" },
  config,
  (decodedText) => {
  tocarBipe();
@@ -783,29 +771,14 @@
  () => {}
  );
  } catch (e) {
- try {
- await html5QrCode.start(
- { facingMode: "environment" },
- { fps: 15 },
- (decodedText) => {
- tocarBipe();
- const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- el(prefix + 'codigo').value = decodedText;
+ alert("Não foi possível acessar a câmera: " + e);
  pararScanner();
- buscarProduto(modulo);
- }
- );
- } catch(err) {
- alert("Erro ao abrir a câmera: " + err);
- pararScanner();
- }
  } finally {
  isScannerInitializing = false;
  }
  }
  
- async function pararScanner() {
- el('beep-scanner-overlay').classList.add('hidden');
+ async function pararScannerSilencioso() {
  if (html5QrCode) {
  try {
    if (html5QrCode.isScanning) {
@@ -813,9 +786,17 @@
    }
    await html5QrCode.clear();
  } catch(e) {
-   console.warn("Erro ao parar scanner:", e);
+   console.warn(e);
+ }
+ html5QrCode = null;
  }
  }
+
+ async function pararScanner() {
+ el('beep-scanner-overlay').classList.add('hidden');
+ await pararScannerSilencioso();
+ const container = el('beep-reader-container');
+ if (container) container.innerHTML = '';
  }
  
  function fecharScannerSemCodigo() {
@@ -839,7 +820,7 @@
 
  await pararScanner();
 
- const html5QrCodeStatic = new Html5Qrcode("beep-reader");
+ const html5QrCodeStatic = new Html5Qrcode("beep-reader-container");
  
  try {
  const decodedText = await html5QrCodeStatic.scanFile(file, true);
@@ -850,6 +831,8 @@
  } catch (err) {
  alert("Não foi possível ler o código nesta foto. Tente afastar um pouco o celular (30cm) para evitar reflexos e garantir o foco nas barras.");
  if (elStatus) elStatus.innerHTML = '<span class="warn">Falha na leitura da imagem. Tente novamente.</span>';
+ } finally {
+ try { await html5QrCodeStatic.clear(); } catch(e){}
  }
  }
 
