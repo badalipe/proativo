@@ -228,7 +228,6 @@
  }
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
- /* Ajuste para imagem perfeitamente quadrada e zoom com corte suave */
  .product-img-box {
  display: flex; justify-content: center; align-items: center;
  background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px;
@@ -277,7 +276,7 @@
  .nav-tab-clean.active { opacity: 1; border-bottom: 2px solid #fff; padding-bottom: 2px; }
 
  .scan-area-clean {
- position: relative; width: 80vw; height: 40vh; margin: auto;
+ position: relative; width: 85vw; height: 45vh; margin: auto;
  }
 
  .corner-clean {
@@ -611,7 +610,8 @@
  const produtosPreCadastrados = {
  "7896045112098": { nome: "Refresco em Pó Frisco Abacaxi 18g", imagem: "" },
  "7896183210120": { nome: "Leite Glória", imagem: "" },
- "7908077452537": { nome: "Caderno Universitário 80 Fls Foroni", imagem: "" }
+ "7908077452537": { nome: "Caderno Universitário 80 Fls Foroni", imagem: "" },
+ "7898773920358": { nome: "Protetor / Cosmético Roll On", imagem: "" }
  };
  
  let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
@@ -720,15 +720,18 @@
  html5QrCode = new Html5Qrcode("beep-reader");
  }
  
- // Configuração otimizada para alta resolução (Full HD) e Foco Automático Contínuo
+ // Configuração Otimizada para Frascos Curvos, Múltiplos Formatos e Leitor Nativo
  const config = { 
- fps: 25, 
- qrbox: { width: 280, height: 180 },
- videoConstraints: {
- facingMode: { exact: "environment" },
- width: { min: 1280, ideal: 1920, max: 3840 },
- height: { min: 720, ideal: 1080, max: 2160 },
- focusMode: "continuous"
+ fps: 20,
+ formatsToSupport: [
+   Html5QrcodeSupportedFormats.EAN_13,
+   Html5QrcodeSupportedFormats.EAN_8,
+   Html5QrcodeSupportedFormats.CODE_128,
+   Html5QrcodeSupportedFormats.UPC_A,
+   Html5QrcodeSupportedFormats.UPC_E
+ ],
+ experimentalFeatures: {
+   useBarCodeDetectorIfSupported: true
  }
  };
  
@@ -746,7 +749,6 @@
  () => {}
  );
  } catch (e) {
- // Fallback simples caso o aparelho não suporte as restrições Full HD
  try {
  await html5QrCode.start(
  { facingMode: "environment" },
@@ -821,7 +823,7 @@
  
  statusEl.innerHTML = '🔍 Buscando...';
  
- // 1. Tenta buscar via API Beep App (Timeout de 1.2s)
+ // 1. Tenta buscar via API Beep App
  try {
  const controller = new AbortController();
  const timeoutId = setTimeout(() => controller.abort(), 1200);
@@ -865,7 +867,7 @@
  return;
  }
  
- // 4. Open Food Facts (Timeout de 1.5s)
+ // 4. Open Food Facts
  try {
  const controllerOFF = new AbortController();
  const timeoutOFF = setTimeout(() => controllerOFF.abort(), 1500);
