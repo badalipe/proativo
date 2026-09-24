@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Leitor de Código de Barras</title>
+  <title>Gestão de Trocas - Rede Market</title>
 
-  <!-- Biblioteca ZXing para leitura rápida de código de barras via câmera -->
   <script src="https://unpkg.com/@zxing/library@latest"></script>
 
   <style>
@@ -17,251 +16,248 @@
     }
 
     body {
-      background-color: #121212;
-      color: #ffffff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      background-color: #f4f6f9;
+      color: #333333;
+      padding-bottom: 30px;
     }
 
-    /* BARRA SUPERIOR */
-    .app-bar {
+    /* BARRA SUPERIOR ORIGINAL */
+    .header-bar {
+      background-color: #0d2238;
+      color: #ffffff;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 16px;
-      background-color: #1e1e1e;
-      border-bottom: 1px solid #2d2d2d;
     }
 
-    .app-bar h1 {
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    /* ÁREA PRINCIPAL */
-    .container {
-      padding: 16px;
-      flex: 1;
+    .brand-logo {
       display: flex;
-      flex-direction: column;
-      gap: 16px;
-      max-width: 500px;
-      margin: 0 auto;
-      width: 100%;
+      align-items: center;
+      gap: 10px;
     }
 
-    /* CAMPO DE FORMULÁRIO DE ENTRADA DO CÓDIGO */
-    .input-group {
+    .brand-logo img {
+      height: 32px;
+      background: #fff;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: #a0aec0;
+    }
+
+    .header-right {
       display: flex;
       gap: 8px;
     }
 
-    .input-group input {
-      flex: 1;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #3d3d3d;
-      background-color: #242424;
-      color: #fff;
-      font-size: 16px;
-      outline: none;
+    .badge-loja {
+      background: rgba(255,255,255,0.15);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
     }
 
-    .btn {
-      background-color: #007aff;
-      color: white;
+    .btn-menu {
+      background: #ffffff;
+      color: #0d2238;
       border: none;
-      padding: 12px 16px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* CONTAINER PRINCIPAL DO FORMULÁRIO */
+    .container {
+      max-width: 500px;
+      margin: 16px auto;
+      padding: 0 12px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e0;
       border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      background-color: #fff;
+    }
+
+    .form-control:focus {
+      border-color: #0066cc;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      color: #1a202c;
+    }
+
+    /* BOTOES DA CÂMERA */
+    .btn-action {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background-color: #0066cc;
+      color: white;
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-    }
-
-    .btn:active {
-      opacity: 0.8;
-    }
-
-    /* CARTÃO DE DETALHES DO PRODUTO */
-    .product-card {
-      background-color: #1e1e1e;
-      border-radius: 12px;
-      padding: 16px;
-      border: 1px solid #2d2d2d;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .product-header {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-    }
-
-    .product-img {
-      width: 90px;
-      height: 90px;
-      border-radius: 8px;
-      object-fit: cover;
-      background-color: #2a2a2a;
-      border: 1px solid #3a3a3a;
-    }
-
-    .product-info {
-      flex: 1;
-    }
-
-    .product-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 6px;
-      line-height: 1.3;
-    }
-
-    .product-code {
-      font-size: 13px;
-      color: #8e8e93;
-    }
-
-    /* SEÇÃO DO CALENDÁRIO / VALIDADE */
-    .date-section {
-      background-color: #262626;
-      padding: 12px;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
       gap: 8px;
+      margin-bottom: 8px;
     }
 
-    .date-section label {
-      font-size: 13px;
-      color: #aaaaaa;
-      font-weight: 500;
+    .btn-secondary {
+      background-color: #edf2f7;
+      color: #2b6cb0;
+      border: 1px solid #cbd5e0;
     }
 
-    .date-section input[type="date"] {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #3d3d3d;
-      background-color: #1a1a1a;
-      color: #ffffff;
-      font-size: 16px;
-      color-scheme: dark;
+    .box-scanner-area {
+      border: 2px dashed #cbd5e0;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      background: #f7fafc;
     }
 
-    /* TELA DO SCANNER DA CÂMERA (ESTILO BEEP) */
-    .scanner-overlay {
+    /* ÁREA DO PRODUTO ENCONTRADO */
+    .product-preview {
+      margin-top: 16px;
+      text-align: center;
+      display: none;
+    }
+
+    .product-preview img {
+      max-width: 180px;
+      max-height: 180px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      margin-top: 8px;
+    }
+
+    /* OVERLAY DA CÂMERA CLEAN (SEM EMBAÇADO/TINTA ESCURA) */
+    .camera-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: #000;
+      background: #000000;
       z-index: 9999;
       display: none;
       flex-direction: column;
     }
 
-    .scanner-header {
+    .camera-header {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      height: 60px;
+      height: 55px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 16px;
       z-index: 10;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+      background: rgba(0, 0, 0, 0.4);
     }
 
-    .scanner-header .btn-back {
+    .camera-header button {
       background: none;
       border: none;
-      color: white;
-      font-size: 24px;
+      color: #fff;
+      font-size: 22px;
       cursor: pointer;
     }
 
-    .scanner-tabs {
-      display: flex;
-      gap: 16px;
-      font-size: 14px;
-      font-weight: 600;
+    .camera-tabs {
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
       letter-spacing: 0.5px;
     }
 
-    .scanner-tabs .active {
-      color: #ffffff;
-      border-bottom: 2px solid #ffffff;
-      padding-bottom: 2px;
-    }
-
-    .scanner-tabs .inactive {
-      color: #8e8e93;
-    }
-
-    .scanner-viewport {
+    .camera-viewport {
       position: relative;
       width: 100%;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
     }
 
-    .scanner-viewport video {
+    .camera-viewport video {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
-    /* MOLDURA CENTRAL ESTILO BEEP */
-    .scan-box {
+    /* QUADRADINHO / MOLDURA CLEAN DE LEITURA */
+    .scan-target {
       position: absolute;
-      width: 260px;
+      width: 280px;
       height: 160px;
-      border-radius: 12px;
-      box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.55);
       z-index: 5;
+      pointer-events: none;
     }
 
-    .scan-corner {
+    .corner {
       position: absolute;
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       border-color: #ffffff;
       border-style: solid;
     }
 
-    .top-left { top: -2px; left: -2px; border-width: 3px 0 0 3px; border-top-left-radius: 12px; }
-    .top-right { top: -2px; right: -2px; border-width: 3px 3px 0 0; border-top-right-radius: 12px; }
-    .bottom-left { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; border-bottom-left-radius: 12px; }
-    .bottom-right { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-bottom-right-radius: 12px; }
+    .c-top-left { top: 0; left: 0; border-width: 3px 0 0 3px; border-top-left-radius: 8px; }
+    .c-top-right { top: 0; right: 0; border-width: 3px 3px 0 0; border-top-right-radius: 8px; }
+    .c-bottom-left { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-bottom-left-radius: 8px; }
+    .c-bottom-right { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-bottom-right-radius: 8px; }
 
-    .watermark-beep {
+    .camera-footer {
       position: absolute;
-      bottom: 8px;
-      right: 12px;
-      font-size: 12px;
-      font-weight: bold;
-      color: rgba(255, 255, 255, 0.8);
-      letter-spacing: 1px;
-    }
-
-    /* BOTÃO INFERIOR CÂMERA */
-    .scanner-footer {
-      position: absolute;
-      bottom: 30px;
+      bottom: 25px;
       left: 0;
       right: 0;
       display: flex;
@@ -269,122 +265,167 @@
       z-index: 10;
     }
 
-    .btn-no-barcode {
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.4);
+    .btn-close-cam {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.5);
       color: white;
-      padding: 10px 20px;
+      padding: 10px 24px;
       border-radius: 20px;
       font-size: 14px;
-      backdrop-filter: blur(5px);
     }
   </style>
 </head>
 <body>
 
-  <div class="app-bar">
-    <h1>Coletor de Estoque</h1>
-    <button class="btn" onclick="abrirCamera()">📷 Câmera</button>
+  <div class="header-bar">
+    <div class="brand-logo">
+      <div class="brand-title">Gestão de Trocas</div>
+      <div class="brand-sub">Devoluções</div>
+    </div>
+    <div class="header-right">
+      <span class="badge-loja">PATITIBA</span>
+      <button class="btn-menu">Menu</button>
+    </div>
   </div>
 
   <div class="container">
-    <!-- Entrada manual / Leitura -->
-    <form id="barcodeForm" onsubmit="processarCodigoBarra(event)">
-      <div class="input-group">
-        <input type="number" id="barcodeInput" placeholder="Código de barras..." pattern="[0-9]*">
-        <button type="submit" class="btn">Buscar</button>
+    <div class="card">
+      <div class="form-group">
+        <label for="conferente">Conferente / Responsável</label>
+        <input type="text" id="conferente" class="form-control" placeholder="Seu nome">
       </div>
-    </form>
 
-    <!-- Detalhes do Produto (Aparece logo abaixo) -->
-    <div id="productCard" class="product-card" style="display: none;">
-      <div class="product-header">
-        <img id="productImage" class="product-img" src="" alt="Produto">
-        <div class="product-info">
-          <div id="productTitle" class="product-title">Nome do Produto</div>
-          <div id="productEan" class="product-code">EAN: -</div>
+      <div class="form-group">
+        <label for="fornecedor">Fornecedor</label>
+        <input type="text" id="fornecedor" class="form-control" placeholder="Ex: Ambev, Nestlé">
+      </div>
+
+      <div class="form-group">
+        <label for="motivo">Motivo da Troca *</label>
+        <select id="motivo" class="form-control">
+          <option value="1">1 - Avaria</option>
+          <option value="2">2 - Vencimento</option>
+          <option value="3">3 - Defeito de Fabricação</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="dataTroca">Data da Troca</label>
+        <input type="date" id="dataTroca" class="form-control">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">📷 1. Escanear produto</div>
+      
+      <div class="box-scanner-area">
+        <button class="btn-action" onclick="abrirCameraUltraHD()">📷 Abrir Câmera no Navegador</button>
+      </div>
+
+      <div class="form-group" style="margin-top: 14px;">
+        <label for="barcodeInput">Código de barras</label>
+        <input type="number" id="barcodeInput" class="form-control" placeholder="Ex.: 789..." pattern="[0-9]*">
+      </div>
+
+      <button class="btn-action" onclick="executarBuscaManual()">🔍 Buscar produto</button>
+
+      <div id="productResult" class="product-preview">
+        <h4 id="productTitle">Nome do Produto</h4>
+        <img id="productImage" src="" alt="Foto do Produto">
+
+        <div class="form-group" style="margin-top: 12px; text-align: left;">
+          <label for="validadeProduto">Data de Validade / Vencimento:</label>
+          <input type="date" id="validadeProduto" class="form-control">
         </div>
       </div>
-
-      <!-- Calendário automático para Vencimento/Validade -->
-      <div class="date-section">
-        <label for="expiryDate">Data de Vencimento / Validade:</label>
-        <input type="date" id="expiryDate">
-      </div>
-
-      <button class="btn" style="background-color: #34c759;" onclick="salvarItem()">Confirmar e Salvar</button>
     </div>
   </div>
 
-  <!-- OVERLAY DA CÂMERA ESTILO BEEP -->
-  <div id="scannerOverlay" class="scanner-overlay">
-    <div class="scanner-header">
-      <button class="btn-back" onclick="fecharCamera()">←</button>
-      <div class="scanner-tabs">
-        <span class="active">Escanear...</span>
-        <span class="inactive" onclick="focarEntradaManual()">DIGITAR MANUALMENTE</span>
-      </div>
+  <div id="cameraOverlay" class="camera-overlay">
+    <div class="camera-header">
+      <button onclick="fecharCamera()">←</button>
+      <span class="camera-tabs">ESCANEAR CÓDIGO</span>
       <div style="width: 24px;"></div>
     </div>
 
-    <div class="scanner-viewport">
-      <video id="videoPreview"></video>
-      <div class="scan-box">
-        <div class="scan-corner top-left"></div>
-        <div class="scan-corner top-right"></div>
-        <div class="scan-corner bottom-left"></div>
-        <div class="scan-corner bottom-right"></div>
-        <div class="watermark-beep">BEEP</div>
+    <div class="camera-viewport">
+      <video id="videoElement" autoplay playsinline muted></video>
+      <div class="scan-target">
+        <div class="corner c-top-left"></div>
+        <div class="corner c-top-right"></div>
+        <div class="corner c-bottom-left"></div>
+        <div class="corner c-bottom-right"></div>
       </div>
     </div>
 
-    <div class="scanner-footer">
-      <button class="btn-no-barcode" onclick="fecharCamera()">Adicionar sem código de barras</button>
+    <div class="camera-footer">
+      <button class="btn-close-cam" onclick="fecharCamera()">Adicionar sem código de barras</button>
     </div>
   </div>
 
   <script>
     let codeReader = null;
+    let currentStream = null;
 
-    // Inicialização da leitura automática
     window.addEventListener('DOMContentLoaded', () => {
       codeReader = new ZXing.BrowserMultiFormatReader();
+      // Define a data de hoje por padrão
+      document.getElementById('dataTroca').valueAsDate = new Date();
     });
 
-    // Abrir câmera com layout BEEP
-    async function abrirCamera() {
-      document.getElementById('scannerOverlay').style.display = 'flex';
+    async function abrirCameraUltraHD() {
+      document.getElementById('cameraOverlay').style.display = 'flex';
+
+      // Configurações de alta resolução (Full HD / 4K)
+      const constraints = {
+        video: {
+          facingMode: { exact: "environment" },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        }
+      };
 
       try {
-        const videoInputDevices = await codeReader.listVideoInputDevices();
-        // Seleciona a câmera traseira preferencialmente
-        const rearCamera = videoInputDevices.find(device => 
-          device.label.toLowerCase().includes('back') || 
-          device.label.toLowerCase().includes('traseira') ||
-          device.label.toLowerCase().includes('environment')
-        ) || videoInputDevices[0];
+        const videoElement = document.getElementById('videoElement');
+        
+        // Tenta pegar acesso direto com parâmetros de alta qualidade
+        try {
+          currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        } catch(e) {
+          // Fallback caso a traseira estrita falhe
+          currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        }
 
-        codeReader.decodeFromVideoDevice(rearCamera.deviceId, 'videoPreview', (result, err) => {
+        videoElement.srcObject = currentStream;
+
+        // Aplica o Zoom de 2.5x na câmera se o dispositivo/navegador suportar
+        const track = currentStream.getVideoTracks()[0];
+        if (track && 'applyConstraints' in track) {
+          const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+          if (capabilities.zoom) {
+            const targetZoom = Math.min(2.5, capabilities.zoom.max || 2.5);
+            track.applyConstraints({ advanced: [{ zoom: targetZoom }] }).catch(() => {});
+          }
+        }
+
+        // Inicia decodificação contínua do vídeo
+        codeReader.decodeFromStream(currentStream, 'videoElement', (result, err) => {
           if (result) {
-            // Vibração ao ler
             if (navigator.vibrate) navigator.vibrate(100);
 
-            const eanLido = result.text;
+            const ean = result.text;
             fecharCamera();
 
-            // Preenche o campo de texto
-            const inputField = document.getElementById('barcodeInput');
-            inputField.value = eanLido;
+            const input = document.getElementById('barcodeInput');
+            input.value = ean;
+            input.blur(); // Recolhe o teclado suspenso imediatamente
 
-            // Recua o teclado ocultando o foco do campo
-            inputField.blur();
-
-            // Executa a busca imediatamente (Simulando o Enter)
-            buscarProduto(eanLido);
+            buscarProduto(ean);
           }
         });
+
       } catch (err) {
-        alert('Erro ao acessar a câmera: ' + err);
+        alert("Erro ao acessar câmera: " + err.message);
         fecharCamera();
       }
     }
@@ -393,73 +434,49 @@
       if (codeReader) {
         codeReader.reset();
       }
-      document.getElementById('scannerOverlay').style.display = 'none';
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+      document.getElementById('cameraOverlay').style.display = 'none';
     }
 
-    function focarEntradaManual() {
-      fecharCamera();
+    function executarBuscaManual() {
       const input = document.getElementById('barcodeInput');
-      input.focus();
-    }
-
-    function processarCodigoBarra(e) {
-      e.preventDefault();
-      const inputField = document.getElementById('barcodeInput');
-      inputField.blur(); // Recolhe o teclado suspenso
-      if (inputField.value) {
-        buscarProduto(inputField.value);
+      input.blur(); // Recua o teclado
+      if (input.value) {
+        buscarProduto(input.value);
       }
     }
 
-    // Consulta de produto na base (exemplo Open Food Facts + Callback)
     async function buscarProduto(codigo) {
-      document.getElementById('productCard').style.display = 'block';
-      document.getElementById('productTitle').innerText = "Carregando...";
-      document.getElementById('productEan').innerText = "EAN: " + codigo;
-      document.getElementById('productImage').src = "";
+      const resultArea = document.getElementById('productResult');
+      const titleElem = document.getElementById('productTitle');
+      const imgElem = document.getElementById('productImage');
+      const validadeInput = document.getElementById('validadeProduto');
+
+      resultArea.style.display = 'block';
+      titleElem.innerText = "Buscando produto...";
+      imgElem.src = "";
 
       try {
-        const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${codigo}.json`);
-        const data = await res.json();
+        const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${codigo}.json`);
+        const data = await response.json();
 
         if (data.status === 1 && data.product) {
-          const produto = data.product;
-          document.getElementById('productTitle').innerText = produto.product_name || "Produto Encontrado";
-          document.getElementById('productImage').src = produto.image_front_url || "https://via.placeholder.com/90?text=Sem+Foto";
+          titleElem.innerText = data.product.product_name || "Produto Localizado";
+          imgElem.src = data.product.image_front_url || "https://via.placeholder.com/150?text=Sem+Foto";
         } else {
-          document.getElementById('productTitle').innerText = "Produto Não Cadastrado";
-          document.getElementById('productImage').src = "https://via.placeholder.com/90?text=Sem+Foto";
+          titleElem.innerText = "Produto não cadastrado na base";
+          imgElem.src = "https://via.placeholder.com/150?text=Sem+Foto";
         }
-      } catch (err) {
-        document.getElementById('productTitle').innerText = "Produto Registrado (Off-line)";
-        document.getElementById('productImage').src = "https://via.placeholder.com/90?text=Erro";
+      } catch (e) {
+        titleElem.innerText = "Código capturado: " + codigo;
+        imgElem.src = "https://via.placeholder.com/150?text=Sem+Foto";
       }
 
-      // Preenche o calendário com a data padrão de hoje para facilitar
-      const dateInput = document.getElementById('expiryDate');
-      if (!dateInput.value) {
-        dateInput.valueAsDate = new Date();
-      }
-      
-      // Abre/Foca a data automaticamente caso o navegador suporte
-      dateInput.focus();
-    }
-
-    function salvarItem() {
-      const ean = document.getElementById('barcodeInput').value;
-      const nome = document.getElementById('productTitle').innerText;
-      const dataValidade = document.getElementById('expiryDate').value;
-
-      if (!dataValidade) {
-        alert('Por favor, informe a data de vencimento.');
-        return;
-      }
-
-      alert(`Produto salvo!\nEAN: ${ean}\nNome: ${nome}\nValidade: ${dataValidade}`);
-      
-      // Limpa a tela para o próximo
-      document.getElementById('productCard').style.display = 'none';
-      document.getElementById('barcodeInput').value = '';
+      // Preenche/Abre calendário de validade
+      validadeInput.valueAsDate = new Date();
+      validadeInput.focus();
     }
   </script>
 </body>
