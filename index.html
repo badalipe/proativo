@@ -316,6 +316,34 @@
  .item-total { font-weight: 700; font-size: 13px; color: var(--text-main); white-space: nowrap; }
  .empty { text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px; }
  .pill { display: inline-block; padding: 2px 8px; border-radius: 99px; background: #e2e8f0; font-size: 11px; font-weight: 700; }
+
+ /* CONTAINER DA IMAGEM QUADRADA E MEDIANA DO PRODUTO */
+ .product-img-box {
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ margin: 12px 0 6px 0;
+ width: 100%;
+ }
+ .product-img-square {
+ width: 150px;
+ height: 150px;
+ object-fit: contain;
+ border-radius: 12px;
+ border: 1px solid var(--border-color);
+ background: #ffffff;
+ padding: 6px;
+ box-shadow: var(--shadow-sm);
+ }
+ .list-item-img {
+ width: 44px;
+ height: 44px;
+ object-fit: contain;
+ border-radius: 6px;
+ border: 1px solid var(--border-color);
+ background: #fff;
+ flex-shrink: 0;
+ }
  </style>
 </head>
 <body>
@@ -444,6 +472,13 @@
  
  <section class="card">
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
+ 
+ <!-- ÁREA DA IMAGEM DO PRODUTO BUSCADO -->
+ <div id="pro_img_container" class="product-img-box hidden">
+   <img id="pro_img_preview" class="product-img-square" src="" alt="Foto do Produto">
+ </div>
+ <input type="hidden" id="pro_imagem_url" value="">
+
  <label>Descrição do produto</label><input id="pro_descricao" placeholder="Descrição do produto">
  <div class="row">
  <div><label>Quantidade *</label><input id="pro_quantidade" inputmode="decimal" placeholder="Ex.: 12"></div>
@@ -526,6 +561,13 @@
  
  <section class="card">
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Dados da Troca</h3></div>
+ 
+ <!-- ÁREA DA IMAGEM DO PRODUTO BUSCADO -->
+ <div id="trc_img_container" class="product-img-box hidden">
+   <img id="trc_img_preview" class="product-img-square" src="" alt="Foto do Produto">
+ </div>
+ <input type="hidden" id="trc_imagem_url" value="">
+
  <label>Descrição do produto</label><input id="trc_descricao" placeholder="Descrição do produto">
  <div class="row">
  <div><label>Quantidade a trocar *</label><input id="trc_quantidade" inputmode="decimal" placeholder="Ex.: 5"></div>
@@ -588,9 +630,9 @@
  };
  
  const produtosPreCadastrados = {
- "7896045112098": "Refresco em Pó Frisco Abacaxi 18g",
- "7896183210120": "Leite Glória",
- "7908077452537": "Caderno Universitário 80 Fls Foroni"
+ "7896045112098": { nome: "Refresco em Pó Frisco Abacaxi 18g", img: "" },
+ "7896183210120": { nome: "Leite Glória", img: "" },
+ "7908077452537": { nome: "Caderno Universitário 80 Fls Foroni", img: "" }
  };
  
  let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
@@ -755,11 +797,29 @@
  el(prefix + 'descricao').focus();
  }
  
+ function ocultarImagemProduto(prefix) {
+ el(prefix + 'img_container').classList.add('hidden');
+ el(prefix + 'img_preview').src = '';
+ el(prefix + 'imagem_url').value = '';
+ }
+
+ function exibirImagemProduto(prefix, imgUrl) {
+ if (imgUrl) {
+ el(prefix + 'img_preview').src = imgUrl;
+ el(prefix + 'imagem_url').value = imgUrl;
+ el(prefix + 'img_container').classList.remove('hidden');
+ } else {
+ ocultarImagemProduto(prefix);
+ }
+ }
+
  async function buscarProduto(modulo) {
  const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
  const code = el(prefix + 'codigo').value.trim();
  const statusEl = el(prefix + 'status');
  
+ ocultarImagemProduto(prefix);
+
  if (!code) {
  statusEl.innerHTML = '<span class="warn">Informe um código.</span>';
  return;
@@ -768,13 +828,17 @@
  statusEl.innerHTML = '🔍 Buscando...';
  
  if (catalogoLocal[code]) {
- el(prefix + 'descricao').value = catalogoLocal[code];
+ const p = typeof catalogoLocal[code] === 'object' ? catalogoLocal[code] : { nome: catalogoLocal[code], img: '' };
+ el(prefix + 'descricao').value = p.nome;
+ exibirImagemProduto(prefix, p.img);
  statusEl.innerHTML = '<span class="ok">Localizado no catálogo local!</span>';
  return;
  }
  
  if (produtosPreCadastrados[code]) {
- el(prefix + 'descricao').value = produtosPreCadastrados[code];
+ const p = produtosPreCadastrados[code];
+ el(prefix + 'descricao').value = p.nome;
+ exibirImagemProduto(prefix, p.img);
  statusEl.innerHTML = '<span class="ok">Localizado na base do sistema!</span>';
  return;
  }
@@ -783,7 +847,10 @@
  const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
  const data = await res.json();
  if (data.status === 1 && data.product.product_name) {
- el(prefix + 'descricao').value = data.product.product_name;
+ const nome = data.product.product_name;
+ const imgUrl = data.product.image_front_url || data.product.image_url || '';
+ el(prefix + 'descricao').value = nome;
+ exibirImagemProduto(prefix, imgUrl);
  statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
  } else {
  statusEl.innerHTML = '<span class="warn">Não encontrado. Digite a descrição.</span>';
@@ -800,6 +867,7 @@
  const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
  const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
  const validade = el(prefix + 'validade').value;
+ const imagem = el(prefix + 'imagem_url').value;
  
  if (!desc || isNaN(qtd) || !validade) {
  alert("Preencha descrição, quantidade e validade.");
@@ -814,7 +882,8 @@
  unidade: el(prefix + 'unidade').value || 'und',
  validade: validade,
  valor: val,
- total: qtd * val
+ total: qtd * val,
+ imagem: imagem
  };
  
  if (modulo === 'trocas') {
@@ -834,6 +903,7 @@
  el(prefix + 'validade').value = '';
  el(prefix + 'valor').value = '0.00';
  el(prefix + 'status').innerHTML = '';
+ ocultarImagemProduto(prefix);
  }
  
  function renderizarLista(modulo) {
@@ -857,11 +927,15 @@
  itemEl.className = 'item';
  const dataFmt = item.validade.split('-').reverse().join('/');
  const infoExtra = item.motivo ? ` | Motivo: ${item.motivo === 1 ? '1-Avaria' : '2-Descarte'}` : '';
+ const imgHtml = item.imagem ? `<img src="${item.imagem}" class="list-item-img" alt="Foto">` : '';
  
  itemEl.innerHTML = `
+ <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+ ${imgHtml}
  <div class="item-info">
  <strong>${item.descricao}</strong>
  <small>Cód: ${item.codigo} | Qtd: ${item.quantidade} ${item.unidade} | Val: ${dataFmt}${infoExtra}</small>
+ </div>
  </div>
  <div class="item-right">
  <span class="item-total">R$ ${item.total.toFixed(2)}</span>
