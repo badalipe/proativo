@@ -228,34 +228,34 @@
  }
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 
- /* CONTAINER DA FOTO DO PRODUTO */
+ /* CONTAINER DA FOTO DO PRODUTO (PERFEITAMENTE QUADRADO) */
  .product-img-box {
    display: flex;
    justify-content: center;
    align-items: center;
-   margin: 12px 0;
-   width: 100%;
- }
- .product-img-square {
+   margin: 12px auto;
    width: 180px;
    height: 180px;
-   aspect-ratio: 1 / 1;
-   object-fit: contain;
-   border-radius: 12px;
+   border-radius: 14px;
    border: 1px solid var(--border-color);
    background: #ffffff;
-   padding: 6px;
+   padding: 4px;
    box-shadow: var(--shadow-sm);
+   overflow: hidden;
+ }
+ .product-img-square {
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+   border-radius: 10px;
  }
  .list-item-img {
    width: 44px;
    height: 44px;
-   aspect-ratio: 1 / 1;
-   object-fit: contain;
+   object-fit: cover;
    border-radius: 8px;
    border: 1px solid var(--border-color);
    background: #fff;
-   padding: 2px;
    flex-shrink: 0;
  }
 
@@ -907,7 +907,6 @@
      imagem: imagem
    };
 
-   // Salva no catálogo local para futuras buscas
    if (codigo !== 'S/C') {
      catalogoLocal[codigo] = { nome: desc, img: imagem };
      localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
