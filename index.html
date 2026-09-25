@@ -141,7 +141,7 @@
       <select id="trc_loja">
         <option value="1">1. PATITIBA</option>
         <option value="2">2. CENTRO</option>
-        <option value="3">3. LOJA 03</option>
+        <option value="3">3. BANANAL</option>
       </select>
     </div>
   </div>
@@ -195,8 +195,10 @@
   // Bases de Dados Locais e Pré-cadastradas
   window.catalogoLocal = window.catalogoLocal || {};
   window.produtosPreCadastrados = window.produtosPreCadastrados || {
-    "7894000010014": { nome: "Maizena", img: "" },
-    "7896275980061": { nome: "IOG FRIMESA LIGHT 850G AMEIXA", img: "" }
+    "7898279710910": { nome: "LeitinhoTrufado", img: "" },
+    "7894000050034": { nome: "hellmann's maionese", img: "" },
+    "7893000079296": { nome: "Margarina Cremosa Com Sal Qualy Pote 1kg Ed", img: "" },
+    "7891097000270": { nome: "Iogurte Grego Tradicional Batavo Pote 100g", img: "" }
   };
 
   function el(id) {
@@ -214,7 +216,6 @@
       return;
     }
 
-    // Força HTTPS para evitar erro de Mixed Content
     let urlSegura = urlImagem.replace(/^http:\/\//i, 'https://');
 
     spinnerEl.style.display = 'block';
@@ -316,30 +317,31 @@
     }
   }
 
-  // --- FUNÇÃO PARA GERAR A PLANILHA EXCEL SEM DESALINHAMENTO ---
+  // --- GERADOR DA PLANILHA EXCEL (ExcelJS) ---
   function preencherPlanilhaExcel(workbook, itensTroca) {
     const sheet = workbook.getWorksheet(1);
 
+    // Começa EXATAMENTE na linha 16 para não sobrescrever o cabeçalho (linha 15)
     itensTroca.forEach((item, index) => {
-      const rowNumber = 16 + index; // Começa na linha 16 da planilha
+      const rowNumber = 16 + index; 
       const row = sheet.getRow(rowNumber);
 
-      // CÓDIGO DE BARRAS (Coluna A) - Centralização alinhada
+      // CÓDIGO DE BARRAS (Coluna A) - Centralizado
       const cellA = row.getCell(1);
       cellA.value = String(item.codigo || '');
       cellA.alignment = { horizontal: 'center', vertical: 'middle' };
 
-      // DESCRIÇÃO DO PRODUTO (Coluna B) - Remove espaços duplicados
+      // DESCRIÇÃO DO PRODUTO (Coluna B) - Alinhado à esquerda e sem espaços duplos
       const cellB = row.getCell(2);
       cellB.value = (item.descricao || '').replace(/\s+/g, ' ').trim();
       cellB.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
 
-      // QUANTIDADE (Coluna C)
+      // QUANTIDADE (Coluna C) - Centralizado
       const cellC = row.getCell(3);
       cellC.value = Number(item.quantidade) || 0;
       cellC.alignment = { horizontal: 'center', vertical: 'middle' };
 
-      // MOTIVO (Coluna D)
+      // MOTIVO (Coluna D) - Centralizado
       const cellD = row.getCell(4);
       cellD.value = Number(item.motivo) || 1;
       cellD.alignment = { horizontal: 'center', vertical: 'middle' };
