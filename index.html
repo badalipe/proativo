@@ -940,7 +940,8 @@
    const validade = el(prefix + 'validade').value;
    const imagem = el(prefix + 'imagem_url').value;
    const codigo = el(prefix + 'codigo').value.trim() || 'S/C';
-   const lojaSelecionada = el(prefix + 'select_loja').value;
+   const selectLoja = el(prefix + 'select_loja');
+   const lojaSelecionada = selectLoja ? selectLoja.value : 'Patitiba';
    
    if (!desc || isNaN(qtd) || !validade) {
      alert("Preencha descrição, quantidade e validade.");
@@ -1013,7 +1014,7 @@
          ${imgHtml}
          <div class="item-info">
            <strong>${item.descricao}</strong>
-           <small>Loja: ${item.loja} | Cód: ${item.codigo} | Qtd: ${item.quantidade} ${item.unidade} | Val: ${dataFmt}${infoExtra}</small>
+           <small>Loja: ${item.loja || 'Patitiba'} | Cód: ${item.codigo} | Qtd: ${item.quantidade} ${item.unidade} | Val: ${dataFmt}${infoExtra}</small>
          </div>
        </div>
        <div class="item-right">
@@ -1078,19 +1079,24 @@
      if (modulo === 'proativo') {
        const digitou = el('pro_digitou').value;
        const gerente = el('pro_gerente').value;
+       const comprador = el('pro_comprador').value;
        const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
+       const lojaAtualHeader = el('pro_select_loja') ? el('pro_select_loja').value : 'Patitiba';
        
+       sheet.cell("H1").value(lojaAtualHeader);
        sheet.cell("H2").value(gerente);
        sheet.cell("H3").value(dataLev);
        sheet.cell("H4").value(digitou);
+       if (sheet.cell("B2")) sheet.cell("B2").value(comprador);
        
        listaData.forEach((item, index) => {
          const row = 7 + index;
          const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
+         const lojaItem = item.loja || lojaAtualHeader;
          
          sheet.cell(`A${row}`).value(index + 1);
          sheet.cell(`B${row}`).value("");
-         sheet.cell(`C${row}`).value(item.loja || "Patitiba");
+         sheet.cell(`C${row}`).value(lojaItem);
          sheet.cell(`D${row}`).value(item.codigo);
          sheet.cell(`E${row}`).value(item.descricao);
          sheet.cell(`F${row}`).value(item.quantidade);
@@ -1111,7 +1117,7 @@
          const row = 16 + index;
          if (row <= 38) {
            sheet.cell(`A${row}`).value(String(item.codigo));
-           sheet.cell(`B${row}`).value(`[${item.loja}] ${item.descricao}`);
+           sheet.cell(`B${row}`).value(item.descricao);
            sheet.cell(`C${row}`).value(item.quantidade);
            sheet.cell(`D${row}`).value(item.motivo);
          }
