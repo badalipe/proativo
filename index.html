@@ -215,24 +215,25 @@
   }
   .input-codigo { font-family: 'Courier New', monospace; font-size: 18px !important; letter-spacing: 1px; font-weight: 700; }
   
-  /* ESTILO DA FOTO QUADRADA DO PRODUTO */
+  /* Bloco da foto do produto */
   .product-img-container {
-    width: 90px;
-    height: 90px;
-    border: 2px dashed var(--border-color);
-    border-radius: 12px;
+    width: 120px;
+    height: 120px;
+    border: 2px solid var(--border-color);
+    border-radius: 14px;
     background: #f8fafc;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    margin: 10px auto;
+    margin: 12px auto;
     flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
   }
   .product-img-container img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
   }
   .product-img-placeholder {
     font-size: 11px;
@@ -272,6 +273,7 @@
   }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   
+  /* Câmera em Tela Cheia e sem restrições de caixinha */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 999999;
     display: flex; flex-direction: column; justify-content: space-between;
@@ -281,19 +283,11 @@
   .beep-viewport { position: absolute; inset: 0; background: #000; z-index: 1; }
   #beep-reader { width: 100% !important; height: 100% !important; border: none !important; }
   #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+  
   .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
-  .beep-target-box {
-    width: 85%; max-width: 320px; height: 180px; border: 2px solid rgba(255, 255, 255, 0.4);
-    border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); position: relative;
-  }
-  .scan-line {
-    position: absolute; left: 8px; right: 8px; height: 2px; top: 8px;
-    background: linear-gradient(90deg, transparent, #e30613, transparent);
-    box-shadow: 0 0 8px rgba(227, 6, 19, 0.8); animation: scanline 2s ease-in-out infinite;
-  }
-  @keyframes scanline { 0%, 100% { top: 8px; } 50% { top: calc(100% - 10px); } }
   .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.35); opacity: 0; transition: opacity 0.15s ease; z-index: 15; }
   .scan-flash.active { opacity: 1; }
+  
   .camera-controls-floating {
     position: absolute; bottom: 85px; left: 0; right: 0; display: flex;
     justify-content: center; align-items: center; gap: 10px; z-index: 20; padding: 0 16px;
@@ -332,6 +326,7 @@
 </head>
 <body>
 
+  <!-- TELA DE LOGIN -->
   <div id="login-screen">
     <div class="login-card">
       <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -361,6 +356,7 @@
     </div>
   </div>
 
+  <!-- MENU PRINCIPAL -->
   <div id="menu-screen" class="hidden">
     <div class="menu-title">Selecione o Módulo Desejado</div>
     <div class="btn-row">
@@ -409,6 +405,7 @@
     </div>
   </div>
   
+  <!-- MÓDULO PRÓATIVO -->
   <div id="proativo-modal" class="system-modal hidden">
     <div id="app-proativo">
       <header class="top">
@@ -488,6 +485,7 @@
     </div>
   </div>
   
+  <!-- MÓDULO TROCAS -->
   <div id="trocas-modal" class="system-modal hidden">
     <div id="app-trocas">
       <header class="top">
@@ -575,6 +573,7 @@
     </div>
   </div>
   
+  <!-- SCANNER DE CÓDIGO DE BARRAS (TELA CHEIA E RESOLUÇÃO MÁXIMA) -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">← Fechar</button>
@@ -584,7 +583,6 @@
     <div class="beep-viewport"><div id="beep-reader"></div></div>
     <div class="beep-target-container">
       <div class="scan-flash" id="scanFlash"></div>
-      <div class="beep-target-box"><div class="scan-line"></div></div>
     </div>
     <div class="camera-controls-floating">
       <button type="button" onclick="alternarLanterna()">🔦 Lanterna</button>
@@ -734,11 +732,22 @@
       html5QrCode = new Html5Qrcode("beep-reader");
     }
     
-    const config = { fps: 15, qrbox: { width: 260, height: 140 } };
+    // Configuração para usar máxima resolução nativa da câmera do celular
+    const config = {
+      fps: 20,
+      qrbox: false, // Sem restrição de caixinha: usa o visor completo para leitura em qualquer ângulo/distância
+      aspectRatio: 16/9
+    };
+    
+    const constraints = {
+      facingMode: "environment",
+      width: { ideal: 1920 },
+      height: { ideal: 1080 }
+    };
     
     try {
       await html5QrCode.start(
-        { facingMode: "environment" },
+        constraints,
         config,
         (decodedText) => {
           tocarBipe();
@@ -788,7 +797,7 @@
       lanternaAtiva = !lanternaAtiva;
       await html5QrCode.applyVideoConstraints({ advanced: [{ torch: lanternaAtiva }] });
     } catch (e) {
-      alert("Lanterna não disponível.");
+      alert("Lanterna não disponível neste aparelho.");
     }
   }
   
@@ -804,8 +813,8 @@
     const box = el(boxId);
     if (!box) return;
 
-    if (imageUrl) {
-      box.innerHTML = `<img src="${imageUrl}" alt="Produto">`;
+    if (imageUrl && imageUrl.startsWith('http')) {
+      box.innerHTML = `<img src="${imageUrl}" alt="Produto" onerror="this.onerror=null; this.parentNode.innerHTML='<span class=\'product-img-placeholder\'>Sem foto</span>';">`;
     } else {
       box.innerHTML = `<span class="product-img-placeholder">Sem foto</span>`;
     }
@@ -1042,7 +1051,7 @@
         });
       }
       
-      const blob = await workbook.outputAsync();
+      const blob = workbook.outputAsync ? await workbook.outputAsync() : await workbook.outputAsync();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
