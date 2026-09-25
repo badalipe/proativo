@@ -272,7 +272,7 @@
   }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   
-  /* SCANNER LIMPO E CORRIGIDO PARA EVITAR TELA PRETA */
+  /* SCANNER TOTALMENTE LIMPO E ESTABILIZADO */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 999999;
     display: flex; flex-direction: column; justify-content: space-between;
@@ -572,7 +572,7 @@
     </div>
   </div>
   
-  <!-- SCANNER DE CÓDIGO DE BARRAS -->
+  <!-- SCANNER DE CÓDIGO DE BARRAS LIMPO -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">← Fechar</button>
@@ -750,8 +750,7 @@
     html5QrCode = new Html5Qrcode("beep-reader");
     
     const config = {
-      fps: 15,
-      qrbox: { width: 280, height: 140 },
+      fps: 20,
       aspectRatio: 1.0,
       formatsToSupport: [
         Html5QrcodeSupportedFormats.EAN_13,
@@ -764,7 +763,6 @@
       ]
     };
     
-    // ESTRATÉGIA CORRIGIDA: Uso limpo de facingMode direto para garantir compatibilidade total e evitar tela preta
     const constraints = {
       facingMode: "environment"
     };
@@ -785,7 +783,7 @@
         () => {}
       );
       
-      // Aplicar zoom inicial de 3.0x com segurança após a câmera ligar
+      // Aplicar zoom inicial de 3.0x com segurança
       setTimeout(() => {
         try {
           if (html5QrCode && typeof html5QrCode.applyVideoConstraints === 'function') {
@@ -810,7 +808,7 @@
             }
           }
         } catch(err) {}
-      }, 600);
+      }, 500);
       
     } catch (e) {
       alert("Não foi possível iniciar a câmera: " + (e.message || e));
