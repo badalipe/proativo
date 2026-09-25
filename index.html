@@ -637,6 +637,7 @@
  
  let moduloAtual = null;
  let html5QrCode = null;
+ let audioCtx = null;
  
  const el = id => document.getElementById(id);
  
@@ -712,19 +713,31 @@
  el('menu-screen').classList.remove('hidden');
  }
  
+ function inicializarAudio() {
+ try {
+ if (!audioCtx) {
+ audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+ }
+ if (audioCtx.state === 'suspended') {
+ audioCtx.resume();
+ }
+ } catch(e){}
+ }
+
  function tocarBipe() {
  try {
- const ctx = new (window.AudioContext || window.webkitAudioContext)();
- const osc = ctx.createOscillator();
- const gain = ctx.createGain();
+ inicializarAudio();
+ if (!audioCtx) return;
+ const osc = audioCtx.createOscillator();
+ const gain = audioCtx.createGain();
  osc.type = "square";
- osc.frequency.setValueAtTime(1200, ctx.currentTime);
- gain.gain.setValueAtTime(0.3, ctx.currentTime);
- gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+ osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+ gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+ gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
  osc.connect(gain);
- gain.connect(ctx.destination);
+ gain.connect(audioCtx.destination);
  osc.start();
- osc.stop(ctx.currentTime + 0.12);
+ osc.stop(audioCtx.currentTime + 0.12);
  } catch (e) {}
  }
 
@@ -737,11 +750,12 @@
  try { campoValidade.showPicker(); } catch(err) {}
  }
  }
- }, 300);
+ }, 350);
  }
  
  async function abrirScanner(modulo) {
  moduloAtual = modulo;
+ inicializarAudio();
  el('beep-scanner-overlay').classList.remove('hidden');
  
  if (!html5QrCode) {
@@ -758,37 +772,40 @@
    Html5QrcodeSupportedFormats.UPC_A
  ]
  };
+
+ const onScanSuccess = (decodedText) => {
+ tocarBipe();
+ const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+ el(prefix + 'codigo').value = decodedText;
+ pararScanner();
+ buscarProduto(modulo);
+ acionarCalendarioAutomatico(prefix);
+ };
  
  try {
- await html5QrCode.start(
- { facingMode: "environment" },
- config,
- (decodedText) => {
- tocarBipe();
- const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- el(prefix + 'codigo').value = decodedText;
- pararScanner();
- buscarProduto(modulo);
- acionarCalendarioAutomatico(prefix);
- },
- () => {}
+ const devices = await Html5Qrcode.getCameras();
+ let selectedCameraId = null;
+
+ if (devices && devices.length > 0) {
+ const backCamera = devices.find(d => 
+ d.label.toLowerCase().includes('back') || 
+ d.label.toLowerCase().includes('traseira') || 
+ d.label.toLowerCase().includes('rear') ||
+ d.label.toLowerCase().includes('environment')
  );
+ selectedCameraId = backCamera ? backCamera.id : devices[devices.length - 1].id;
+ }
+
+ if (selectedCameraId) {
+ await html5QrCode.start(selectedCameraId, config, onScanSuccess, () => {});
+ } else {
+ await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, () => {});
+ }
  } catch (e) {
  try {
- await html5QrCode.start(
- { facingMode: "environment" },
- { fps: 15 },
- (decodedText) => {
- tocarBipe();
- const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
- el(prefix + 'codigo').value = decodedText;
- pararScanner();
- buscarProduto(modulo);
- acionarCalendarioAutomatico(prefix);
- }
- );
+ await html5QrCode.start({ facingMode: "environment" }, { fps: 15 }, onScanSuccess, () => {});
  } catch(err) {
- alert("Erro ao abrir a câmera: " + err);
+ alert("Permissão de câmera negada ou indisponível no Firefox/Kiwi: " + err);
  pararScanner();
  }
  }
@@ -822,7 +839,6 @@
  function formatarUrlImagemProxy(url) {
  if (!url) return '';
  if (url.startsWith('data:')) return url;
- // Utiliza proxy seguro para evitar bloqueio de CORS do navegador nas fotos
  const cleanUrl = url.replace(/^https?:\/\//, '');
  return `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&w=400&h=400&fit=cover`;
  }
@@ -839,7 +855,6 @@
  }
 
  function tratarErroImagem(imgElement, prefix) {
- // Se der erro de carregamento na imagem, oculta o container suavemente em vez de mostrar ícone quebrado
  const container = el(prefix + '_img_container');
  if (container) container.classList.add('hidden');
  }
