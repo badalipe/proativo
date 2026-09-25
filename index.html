@@ -208,7 +208,7 @@
  .chip-loja {
  display: flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.15);
  border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 11px; font-weight: 600;
- padding: 5px 8px; border-radius: 999px;
+ padding: 5px 8px; border-radius: 999px; cursor: pointer;
  }
  
  .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
@@ -385,7 +385,7 @@
  </div>
  </div>
  <div class="header-right">
- <button type="button" class="chip-loja"><span>PATITIBA</span></button>
+ <button type="button" class="chip-loja" onclick="alternarLoja()"><span id="lblLojaPro">PATITIBA</span></button>
  <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 10px; font-size: 11px;">Menu</button>
  </div>
  </div>
@@ -459,7 +459,7 @@
  </div>
  </div>
  <div class="header-right">
- <button type="button" class="chip-loja"><span>PATITIBA</span></button>
+ <button type="button" class="chip-loja" onclick="alternarLoja()"><span id="lblLojaTrc">PATITIBA</span></button>
  <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 10px; font-size: 11px;">Menu</button>
  </div>
  </div>
@@ -557,6 +557,31 @@
  let itensProAtivo = JSON.parse(localStorage.getItem('sys_proative_itens') || '[]');
  let itensTrocas = JSON.parse(localStorage.getItem('sys_trocas_itens') || '[]');
  
+ // LISTA COMPLETA DAS 13 LOJAS REDE MARKET
+ const listaLojas = [
+ "PATITIBA",
+ "BANANAL",
+ "LAPA",
+ "CAIS",
+ "TEXACO",
+ "BALNEÁRIO",
+ "ENSEADA",
+ "JAPUÍBA",
+ "NOVA ANGRA",
+ "RIBEIRA",
+ "FRADE",
+ "PARQUE MAMBUCABA",
+ "CENTRO"
+ ];
+ let lojaAtualIndex = 0;
+
+ function alternarLoja() {
+ lojaAtualIndex = (lojaAtualIndex + 1) % listaLojas.length;
+ const nomeLoja = listaLojas[lojaAtualIndex];
+ if (el('lblLojaPro')) el('lblLojaPro').innerText = nomeLoja;
+ if (el('lblLojaTrc')) el('lblLojaTrc').innerText = nomeLoja;
+ }
+
  let moduloAtual = null;
  let html5QrCode = null;
  let lanternaAtiva = false;
@@ -914,7 +939,7 @@
  
  sheet.cell(`A${row}`).value(index + 1);
  sheet.cell(`B${row}`).value("");
- sheet.cell(`C${row}`).value("Patitiba");
+ sheet.cell(`C${row}`).value(listaLojas[lojaAtualIndex]);
  sheet.cell(`D${row}`).value(item.codigo);
  sheet.cell(`E${row}`).value(item.descricao);
  sheet.cell(`F${row}`).value(item.quantidade);
@@ -928,11 +953,12 @@
  const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
  
  sheet.cell("B7").value("X");
+ sheet.cell("A10").value(listaLojas[lojaAtualIndex]);
  sheet.cell("A12").value(dataTroca);
  sheet.cell("A41").value(responsavel);
  
  listaData.forEach((item, index) => {
- const row = 16 + index; // CORREÇÃO: Inicia na linha 16 (abaixo do cabeçalho)
+ const row = 16 + index;
  if (row <= 38) {
  sheet.cell(`A${row}`).value(String(item.codigo).trim());
  sheet.cell(`B${row}`).value(String(item.descricao).replace(/\s+/g, ' ').trim());
