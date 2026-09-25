@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Gestão de Trocas - Rede Market</title>
 
+  <!-- Biblioteca ZXing para leitura de código de barras -->
   <script src="https://unpkg.com/@zxing/library@latest"></script>
 
   <style>
@@ -17,11 +18,11 @@
 
     body {
       background-color: #f4f6f9;
-      color: #333333;
+      color: #333;
       padding-bottom: 30px;
     }
 
-    /* BARRA SUPERIOR ORIGINAL */
+    /* BARRA SUPERIOR */
     .header-bar {
       background-color: #0d2238;
       color: #ffffff;
@@ -29,19 +30,6 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-    }
-
-    .brand-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .brand-logo img {
-      height: 32px;
-      background: #fff;
-      padding: 2px 6px;
-      border-radius: 4px;
     }
 
     .brand-title {
@@ -77,7 +65,7 @@
       font-weight: 600;
     }
 
-    /* CONTAINER PRINCIPAL DO FORMULÁRIO */
+    /* CONTAINER DO FORMULÁRIO */
     .container {
       max-width: 500px;
       margin: 16px auto;
@@ -129,7 +117,6 @@
       color: #1a202c;
     }
 
-    /* BOTOES DA CÂMERA */
     .btn-action {
       width: 100%;
       padding: 12px;
@@ -147,12 +134,6 @@
       margin-bottom: 8px;
     }
 
-    .btn-secondary {
-      background-color: #edf2f7;
-      color: #2b6cb0;
-      border: 1px solid #cbd5e0;
-    }
-
     .box-scanner-area {
       border: 2px dashed #cbd5e0;
       border-radius: 10px;
@@ -161,7 +142,6 @@
       background: #f7fafc;
     }
 
-    /* ÁREA DO PRODUTO ENCONTRADO */
     .product-preview {
       margin-top: 16px;
       text-align: center;
@@ -176,7 +156,7 @@
       margin-top: 8px;
     }
 
-    /* OVERLAY DA CÂMERA CLEAN (SEM EMBAÇADO/TINTA ESCURA) */
+    /* LEITOR DE CÂMERA CLEAN (FULLSCREEN / SEM MASCARA ESCURA) */
     .camera-overlay {
       position: fixed;
       top: 0;
@@ -233,7 +213,7 @@
       object-fit: cover;
     }
 
-    /* QUADRADINHO / MOLDURA CLEAN DE LEITURA */
+    /* MOLDURA CLEAN APENAS COM OS CANTOS BRANCOS */
     .scan-target {
       position: absolute;
       width: 280px;
@@ -244,15 +224,15 @@
 
     .corner {
       position: absolute;
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       border-color: #ffffff;
       border-style: solid;
     }
 
-    .c-top-left { top: 0; left: 0; border-width: 3px 0 0 3px; border-top-left-radius: 8px; }
-    .c-top-right { top: 0; right: 0; border-width: 3px 3px 0 0; border-top-right-radius: 8px; }
-    .c-bottom-left { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-bottom-left-radius: 8px; }
+    .c-top-left     { top: 0; left: 0; border-width: 3px 0 0 3px; border-top-left-radius: 8px; }
+    .c-top-right    { top: 0; right: 0; border-width: 3px 3px 0 0; border-top-right-radius: 8px; }
+    .c-bottom-left  { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-bottom-left-radius: 8px; }
     .c-bottom-right { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-bottom-right-radius: 8px; }
 
     .camera-footer {
@@ -277,8 +257,9 @@
 </head>
 <body>
 
+  <!-- CABEÇALHO DA PÁGINA -->
   <div class="header-bar">
-    <div class="brand-logo">
+    <div>
       <div class="brand-title">Gestão de Trocas</div>
       <div class="brand-sub">Devoluções</div>
     </div>
@@ -289,6 +270,7 @@
   </div>
 
   <div class="container">
+    <!-- CAMPOS DE ENTRADA -->
     <div class="card">
       <div class="form-group">
         <label for="conferente">Conferente / Responsável</label>
@@ -315,11 +297,12 @@
       </div>
     </div>
 
+    <!-- SEÇÃO 1: ESCANEAR PRODUTO -->
     <div class="card">
       <div class="section-title">📷 1. Escanear produto</div>
       
       <div class="box-scanner-area">
-        <button class="btn-action" onclick="abrirCameraUltraHD()">📷 Abrir Câmera no Navegador</button>
+        <button class="btn-action" onclick="abrirCameraHD()">📷 Abrir Câmera no Navegador</button>
       </div>
 
       <div class="form-group" style="margin-top: 14px;">
@@ -329,6 +312,7 @@
 
       <button class="btn-action" onclick="executarBuscaManual()">🔍 Buscar produto</button>
 
+      <!-- RESULTADO DO PRODUTO LOCALIZADO -->
       <div id="productResult" class="product-preview">
         <h4 id="productTitle">Nome do Produto</h4>
         <img id="productImage" src="" alt="Foto do Produto">
@@ -341,6 +325,7 @@
     </div>
   </div>
 
+  <!-- OVERLAY DA CÂMERA (COM ZOOM E ALTA RESOLUÇÃO) -->
   <div id="cameraOverlay" class="camera-overlay">
     <div class="camera-header">
       <button onclick="fecharCamera()">←</button>
@@ -369,46 +354,44 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       codeReader = new ZXing.BrowserMultiFormatReader();
-      // Define a data de hoje por padrão
       document.getElementById('dataTroca').valueAsDate = new Date();
     });
 
-    async function abrirCameraUltraHD() {
+    async function abrirCameraHD() {
       document.getElementById('cameraOverlay').style.display = 'flex';
 
-      // Configurações de alta resolução (Full HD / 4K)
+      // Requisita resolução 4K/Full HD e câmera traseira
       const constraints = {
         video: {
           facingMode: { exact: "environment" },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
+          width: { ideal: 3840, min: 1920 },
+          height: { ideal: 2160, min: 1080 }
         }
       };
 
       try {
         const videoElement = document.getElementById('videoElement');
-        
-        // Tenta pegar acesso direto com parâmetros de alta qualidade
+
         try {
           currentStream = await navigator.mediaDevices.getUserMedia(constraints);
         } catch(e) {
-          // Fallback caso a traseira estrita falhe
+          // Fallback para suporte padrão se 4K for recusado pelo navegador
           currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
         }
 
         videoElement.srcObject = currentStream;
 
-        // Aplica o Zoom de 2.5x na câmera se o dispositivo/navegador suportar
+        // Aplica o Zoom de 2x a 2.5x para captura mais rápida
         const track = currentStream.getVideoTracks()[0];
         if (track && 'applyConstraints' in track) {
           const capabilities = track.getCapabilities ? track.getCapabilities() : {};
           if (capabilities.zoom) {
-            const targetZoom = Math.min(2.5, capabilities.zoom.max || 2.5);
-            track.applyConstraints({ advanced: [{ zoom: targetZoom }] }).catch(() => {});
+            const zoomDesejado = Math.min(2.5, capabilities.zoom.max || 2.5);
+            track.applyConstraints({ advanced: [{ zoom: zoomDesejado }] }).catch(() => {});
           }
         }
 
-        // Inicia decodificação contínua do vídeo
+        // Leitura contínua em alta velocidade
         codeReader.decodeFromStream(currentStream, 'videoElement', (result, err) => {
           if (result) {
             if (navigator.vibrate) navigator.vibrate(100);
@@ -418,14 +401,14 @@
 
             const input = document.getElementById('barcodeInput');
             input.value = ean;
-            input.blur(); // Recolhe o teclado suspenso imediatamente
+            input.blur(); // Recua o teclado suspenso imediatamente
 
             buscarProduto(ean);
           }
         });
 
       } catch (err) {
-        alert("Erro ao acessar câmera: " + err.message);
+        alert("Erro ao abrir a câmera: " + err.message);
         fecharCamera();
       }
     }
@@ -442,7 +425,7 @@
 
     function executarBuscaManual() {
       const input = document.getElementById('barcodeInput');
-      input.blur(); // Recua o teclado
+      input.blur(); // Oculta o teclado suspenso
       if (input.value) {
         buscarProduto(input.value);
       }
@@ -463,10 +446,10 @@
         const data = await response.json();
 
         if (data.status === 1 && data.product) {
-          titleElem.innerText = data.product.product_name || "Produto Localizado";
+          titleElem.innerText = data.product.product_name || "Produto Encontrado";
           imgElem.src = data.product.image_front_url || "https://via.placeholder.com/150?text=Sem+Foto";
         } else {
-          titleElem.innerText = "Produto não cadastrado na base";
+          titleElem.innerText = "Produto não cadastrado";
           imgElem.src = "https://via.placeholder.com/150?text=Sem+Foto";
         }
       } catch (e) {
@@ -474,11 +457,9 @@
         imgElem.src = "https://via.placeholder.com/150?text=Sem+Foto";
       }
 
-      // Preenche/Abre calendário de validade
       validadeInput.valueAsDate = new Date();
       validadeInput.focus();
     }
   </script>
 </body>
 </html>
-
