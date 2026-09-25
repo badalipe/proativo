@@ -228,7 +228,6 @@
  }
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
  
- /* OVERLAY DA CÂMERA FULLSCREEN CLEAN */
  #beep-scanner-overlay {
  position: fixed; inset: 0; background: #000; z-index: 999999;
  width: 100vw; height: 100vh; display: flex; flex-direction: column;
@@ -314,7 +313,6 @@
  .empty { text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px; }
  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #e2e8f0; font-size: 11px; font-weight: 700; }
 
- /* FORMATAÇÃO RIGOROSAMENTE QUADRADA DE IMAGEM */
  .product-img-box {
  display: flex;
  justify-content: center;
@@ -326,7 +324,7 @@
  width: 220px;
  height: 220px;
  aspect-ratio: 1 / 1 !important;
- object-fit: cover !important; /* Corta e ajusta retângulos para formar quadrado perfeito */
+ object-fit: cover !important;
  border-radius: 16px;
  border: 2px solid var(--border-color);
  background: #ffffff;
@@ -630,7 +628,7 @@
  "7896045112098": { nome: "Refresco em Pó Frisco Abacaxi 18g", img: "" },
  "7896183210120": { nome: "Leite Glória", img: "" },
  "7908077452537": { nome: "Caderno Universitário 80 Fls Foroni", img: "" },
- "7891024136409": { nome: "Iogurte Danone Danette Chocolate 360g", img: "https://images.openfoodfacts.org/images/products/789/102/413/6409/front_pt.12.400.jpg" }
+ "7891024136409": { nome: "Enxaguante Bucal Colgate Plax", img: "https://images.openfoodfacts.org/images/products/789/102/413/6409/front_pt.12.400.jpg" }
  };
  
  let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
@@ -729,6 +727,18 @@
  osc.stop(ctx.currentTime + 0.12);
  } catch (e) {}
  }
+
+ function acionarCalendarioAutomatico(prefix) {
+ setTimeout(() => {
+ const campoValidade = el(prefix + 'validade');
+ if (campoValidade) {
+ campoValidade.focus();
+ if (campoValidade.showPicker) {
+ try { campoValidade.showPicker(); } catch(err) {}
+ }
+ }
+ }, 300);
+ }
  
  async function abrirScanner(modulo) {
  moduloAtual = modulo;
@@ -759,6 +769,7 @@
  el(prefix + 'codigo').value = decodedText;
  pararScanner();
  buscarProduto(modulo);
+ acionarCalendarioAutomatico(prefix);
  },
  () => {}
  );
@@ -773,6 +784,7 @@
  el(prefix + 'codigo').value = decodedText;
  pararScanner();
  buscarProduto(modulo);
+ acionarCalendarioAutomatico(prefix);
  }
  );
  } catch(err) {
@@ -829,7 +841,7 @@
  return;
  }
  
- statusEl.innerHTML = '⚡ Buscando de forma rápida...';
+ statusEl.innerHTML = '⚡ Buscando...';
  
  if (catalogoLocal[code]) {
  const p = typeof catalogoLocal[code] === 'object' ? catalogoLocal[code] : { nome: catalogoLocal[code], img: '' };
@@ -848,7 +860,6 @@
  }
  
  try {
- // Busca rápida API 1 (Open Food Facts Brasil)
  let res = await fetch(`https://br.openfoodfacts.org/api/v0/product/${code}.json`);
  let data = await res.json();
  
@@ -863,7 +874,6 @@
  }
  }
 
- // Fallback de Busca Rápida API 2 (Open Food Facts Global)
  res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${code}`);
  data = await res.json();
  
@@ -902,7 +912,6 @@
  return;
  }
  
- // Salva no catálogo local em memória para garantir buscas instantâneas futuras
  if (code) {
  catalogoLocal[code] = { nome: desc, img: imagem };
  localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
