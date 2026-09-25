@@ -272,7 +272,7 @@
   }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   
-  /* Câmera em Tela Cheia Segura */
+  /* Câmera em Tela Cheia e Linha Guia Laser */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 999999;
     display: flex; flex-direction: column; justify-content: space-between;
@@ -284,7 +284,30 @@
   #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
   
   .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
-  .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.35); opacity: 0; transition: opacity 0.15s ease; z-index: 15; }
+  
+  .scan-laser-box {
+    width: 82%;
+    max-width: 320px;
+    height: 130px;
+    border: 2px solid rgba(16, 185, 129, 0.8);
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+  }
+  .scan-laser-line {
+    position: absolute;
+    top: 50%; left: 4px; right: 4px;
+    height: 2px;
+    background: #e30613;
+    box-shadow: 0 0 8px #e30613;
+    animation: laserScan 1.8s infinite ease-in-out;
+  }
+  @keyframes laserScan {
+    0%, 100% { top: 15%; opacity: 0.6; }
+    50% { top: 85%; opacity: 1; }
+  }
+
+  .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.4); opacity: 0; transition: opacity 0.15s ease; z-index: 15; }
   .scan-flash.active { opacity: 1; }
   
   .camera-controls-floating {
@@ -325,6 +348,7 @@
 </head>
 <body>
 
+  <!-- TELA DE LOGIN -->
   <div id="login-screen">
     <div class="login-card">
       <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -354,6 +378,7 @@
     </div>
   </div>
 
+  <!-- MENU PRINCIPAL -->
   <div id="menu-screen" class="hidden">
     <div class="menu-title">Selecione o Módulo Desejado</div>
     <div class="btn-row">
@@ -402,6 +427,7 @@
     </div>
   </div>
   
+  <!-- MÓDULO PRÓATIVO -->
   <div id="proativo-modal" class="system-modal hidden">
     <div id="app-proativo">
       <header class="top">
@@ -442,7 +468,7 @@
           <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
           <div class="scan-zone"><button class="primary" onclick="abrirScanner('proativo')">📷 Abrir câmera para escanear</button></div>
           <label>Código de barras</label>
-          <input id="pro_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
+          <input id="pro_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789..." onkeydown="checarEnterBusca(event, 'proativo')">
           <div class="actions"><button class="primary" onclick="buscarProduto('proativo')" style="width:auto">🔍 Buscar produto</button></div>
           <div id="pro_status" class="notice" style="margin-top:8px"></div>
         </section>
@@ -481,6 +507,7 @@
     </div>
   </div>
   
+  <!-- MÓDULO TROCAS -->
   <div id="trocas-modal" class="system-modal hidden">
     <div id="app-trocas">
       <header class="top">
@@ -529,7 +556,7 @@
           <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
           <div class="scan-zone"><button class="primary" onclick="abrirScanner('trocas')">📷 Abrir câmera para escanear</button></div>
           <label>Código de barras</label>
-          <input id="trc_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789...">
+          <input id="trc_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789..." onkeydown="checarEnterBusca(event, 'trocas')">
           <div class="actions"><button class="primary" onclick="buscarProduto('trocas')" style="width:auto">🔍 Buscar produto</button></div>
           <div id="trc_status" class="notice" style="margin-top:8px"></div>
         </section>
@@ -568,6 +595,7 @@
     </div>
   </div>
   
+  <!-- SCANNER DE CÓDIGO DE BARRAS (ALTA DEFINIÇÃO E FOCO ATIVO) -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">← Fechar</button>
@@ -576,6 +604,9 @@
     </div>
     <div class="beep-viewport"><div id="beep-reader"></div></div>
     <div class="beep-target-container">
+      <div class="scan-laser-box">
+        <div class="scan-laser-line"></div>
+      </div>
       <div class="scan-flash" id="scanFlash"></div>
     </div>
     <div class="camera-controls-floating">
@@ -722,7 +753,6 @@
     moduloAtual = modulo;
     el('beep-scanner-overlay').classList.remove('hidden');
     
-    // Garantir destruição de instâncias órfãs anteriores para evitar race conditions
     if (html5QrCode) {
       try {
         if (html5QrCode.isScanning) {
@@ -735,13 +765,25 @@
     html5QrCode = new Html5Qrcode("beep-reader");
     
     const config = {
-      fps: 15,
-      qrbox: false
+      fps: 20,
+      qrbox: { width: 280, height: 120 },
+      aspectRatio: 1.0,
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+        Html5QrcodeSupportedFormats.ITF
+      ]
     };
     
-    // Usar constraints simplificados e seguros para evitar exceções de hardware em navegadores mobile
     const constraints = {
-      facingMode: "environment"
+      facingMode: "environment",
+      width: { ideal: 1920, min: 1280 },
+      height: { ideal: 1080, min: 720 },
+      advanced: [{ focusMode: "continuous" }]
     };
     
     try {
@@ -752,14 +794,14 @@
           tocarBipe();
           dispararFlashScan();
           const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
-          el(prefix + 'codigo').value = decodedText;
+          const inputEl = el(prefix + 'codigo');
+          inputEl.value = decodedText;
           pararScanner();
           buscarProduto(modulo);
         },
         () => {}
       );
       
-      // Tentativa controlada de zoom (com try/catch isolado para não lançar erro global)
       setTimeout(() => {
         try {
           if (html5QrCode && typeof html5QrCode.getRunningTrackCapabilities === 'function') {
@@ -779,8 +821,24 @@
       }, 800);
       
     } catch (e) {
-      alert("Não foi possível acessar a câmera: " + (e.message || e));
-      pararScanner();
+      try {
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          config,
+          (decodedText) => {
+            tocarBipe();
+            dispararFlashScan();
+            const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+            el(prefix + 'codigo').value = decodedText;
+            pararScanner();
+            buscarProduto(modulo);
+          },
+          () => {}
+        );
+      } catch (err2) {
+        alert("Não foi possível iniciar a câmera: " + (err2.message || err2));
+        pararScanner();
+      }
     }
   }
   
@@ -818,6 +876,13 @@
     pararScanner();
     el(prefix + 'codigo').value = "";
     el(prefix + 'descricao').focus();
+  }
+  
+  function checarEnterBusca(e, modulo) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      buscarProduto(modulo);
+    }
   }
   
   function atualizarFotoProduto(modulo, imageUrl) {
