@@ -331,6 +331,7 @@
 </head>
 <body>
 
+  <!-- TELA DE LOGIN -->
   <div id="login-screen">
     <div class="login-card">
       <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -360,6 +361,7 @@
     </div>
   </div>
 
+  <!-- MENU PRINCIPAL -->
   <div id="menu-screen" class="hidden">
     <div class="menu-title">Selecione o Módulo Desejado</div>
     <div class="btn-row">
@@ -408,6 +410,7 @@
     </div>
   </div>
   
+  <!-- MÓDULO PRÓATIVO -->
   <div id="proativo-modal" class="system-modal hidden">
     <div id="app-proativo">
       <header class="top">
@@ -487,6 +490,7 @@
     </div>
   </div>
   
+  <!-- MÓDULO TROCAS -->
   <div id="trocas-modal" class="system-modal hidden">
     <div id="app-trocas">
       <header class="top">
@@ -574,6 +578,7 @@
     </div>
   </div>
   
+  <!-- SCANNER DE CÓDIGO DE BARRAS LIMPO -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">← Fechar</button>
@@ -884,13 +889,11 @@
     }
   }
 
-  // FUNÇÃO QUE ABRE O CALENDÁRIO AUTOMATICAMENTE APÓS ENCONTRAR O PRODUTO
   function abrirCalendarioValidade(modulo) {
     const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
     const inputValidade = el(prefix + 'validade');
     if (inputValidade) {
       inputValidade.focus();
-      // Tenta abrir o seletor nativo do calendário no celular
       if (typeof inputValidade.showPicker === 'function') {
         try {
           inputValidade.showPicker();
@@ -922,7 +925,7 @@
       el(prefix + 'descricao').value = nome;
       atualizarFotoProduto(modulo, img);
       statusEl.innerHTML = '<span class="ok">Localizado no catálogo local!</span>';
-      abrirCalendarioValidade(modulo); // ABRE O CALENDÁRIO AUTOMATICAMENTE
+      abrirCalendarioValidade(modulo);
       return;
     }
     
@@ -933,7 +936,7 @@
       el(prefix + 'descricao').value = nome;
       atualizarFotoProduto(modulo, img);
       statusEl.innerHTML = '<span class="ok">Localizado na base do sistema!</span>';
-      abrirCalendarioValidade(modulo); // ABRE O CALENDÁRIO AUTOMATICAMENTE
+      abrirCalendarioValidade(modulo);
       return;
     }
     
@@ -945,7 +948,7 @@
         const imgUrl = data.product.image_front_small_url || data.product.image_url || '';
         atualizarFotoProduto(modulo, imgUrl);
         statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
-        abrirCalendarioValidade(modulo); // ABRE O CALENDÁRIO AUTOMATICAMENTE
+        abrirCalendarioValidade(modulo);
       } else {
         statusEl.innerHTML = '<span class="warn">Não encontrado. Digite a descrição.</span>';
         el(prefix + 'descricao').focus();
@@ -1134,12 +1137,27 @@
         sheet.cell("A41").value(responsavel);
         
         listaData.forEach((item, index) => {
-          const row = 16 + index;
+          const row = 16 + index; // Linha inicial
           if (row <= 38) {
-            sheet.cell(`A${row}`).value(String(item.codigo).trim());
-            sheet.cell(`B${row}`).value(String(item.descricao).replace(/\s+/g, ' ').trim());
-            sheet.cell(`C${row}`).value(item.quantidade);
-            sheet.cell(`D${row}`).value(item.motivo);
+            // COLUNA A: Código de Barras (Força alinhamento centralizado em TODAS as linhas, inclusive a primeira)
+            const cellA = sheet.cell(`A${row}`);
+            cellA.value(String(item.codigo || '').trim());
+            cellA.style({ horizontalAlignment: 'center', verticalAlignment: 'center' });
+
+            // COLUNA B: Descrição do Produto (Alinhado à esquerda)
+            const cellB = sheet.cell(`B${row}`);
+            cellB.value(String(item.descricao || '').replace(/\s+/g, ' ').trim());
+            cellB.style({ horizontalAlignment: 'left', verticalAlignment: 'center' });
+
+            // COLUNA C: Quantidade (Centralizado)
+            const cellC = sheet.cell(`C${row}`);
+            cellC.value(Number(item.quantidade) || 0);
+            cellC.style({ horizontalAlignment: 'center', verticalAlignment: 'center' });
+
+            // COLUNA D: Motivo (Centralizado)
+            const cellD = sheet.cell(`D${row}`);
+            cellD.value(Number(item.motivo) || 1);
+            cellD.style({ horizontalAlignment: 'center', verticalAlignment: 'center' });
           }
         });
       }
