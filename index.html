@@ -326,7 +326,6 @@
 </head>
 <body>
 
-  <!-- TELA DE LOGIN -->
   <div id="login-screen">
     <div class="login-card">
       <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -356,7 +355,6 @@
     </div>
   </div>
 
-  <!-- MENU PRINCIPAL -->
   <div id="menu-screen" class="hidden">
     <div class="menu-title">Selecione o Módulo Desejado</div>
     <div class="btn-row">
@@ -405,7 +403,6 @@
     </div>
   </div>
   
-  <!-- MÓDULO PRÓATIVO -->
   <div id="proativo-modal" class="system-modal hidden">
     <div id="app-proativo">
       <header class="top">
@@ -485,7 +482,6 @@
     </div>
   </div>
   
-  <!-- MÓDULO TROCAS -->
   <div id="trocas-modal" class="system-modal hidden">
     <div id="app-trocas">
       <header class="top">
@@ -573,7 +569,6 @@
     </div>
   </div>
   
-  <!-- SCANNER DE CÓDIGO DE BARRAS (TELA CHEIA E RESOLUÇÃO MÁXIMA) -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">← Fechar</button>
@@ -732,10 +727,9 @@
       html5QrCode = new Html5Qrcode("beep-reader");
     }
     
-    // Configuração para usar máxima resolução nativa da câmera do celular
     const config = {
       fps: 20,
-      qrbox: false, // Sem restrição de caixinha: usa o visor completo para leitura em qualquer ângulo/distância
+      qrbox: false,
       aspectRatio: 16/9
     };
     
@@ -760,19 +754,24 @@
         () => {}
       );
       
-      try {
-        const capabilities = html5QrCode.getRunningTrackCapabilities();
-        if (capabilities.zoom) {
-          const zoomInput = el('beepZoomRange');
-          zoomInput.min = capabilities.zoom.min || 1;
-          zoomInput.max = capabilities.zoom.max || 5;
-          zoomInput.step = capabilities.zoom.step || 0.1;
-          zoomInput.oninput = (e) => {
-            el('beepZoomVal').innerText = e.target.value;
-            html5QrCode.applyVideoConstraints({ advanced: [{ zoom: e.target.value }] });
-          };
-        }
-      } catch(e){}
+      // Tentativa segura de recuperar controles de zoom (sem quebrar se o celular não suportar)
+      setTimeout(() => {
+        try {
+          if (html5QrCode && typeof html5QrCode.getRunningTrackCapabilities === 'function') {
+            const capabilities = html5QrCode.getRunningTrackCapabilities();
+            if (capabilities && capabilities.zoom) {
+              const zoomInput = el('beepZoomRange');
+              zoomInput.min = capabilities.zoom.min || 1;
+              zoomInput.max = capabilities.zoom.max || 5;
+              zoomInput.step = capabilities.zoom.step || 0.1;
+              zoomInput.oninput = (e) => {
+                el('beepZoomVal').innerText = e.target.value;
+                html5QrCode.applyVideoConstraints({ advanced: [{ zoom: parseFloat(e.target.value) }] });
+              };
+            }
+          }
+        } catch(err) {}
+      }, 500);
       
     } catch (e) {
       alert("Erro ao abrir a câmera: " + e);
@@ -795,7 +794,9 @@
   async function alternarLanterna() {
     try {
       lanternaAtiva = !lanternaAtiva;
-      await html5QrCode.applyVideoConstraints({ advanced: [{ torch: lanternaAtiva }] });
+      if (html5QrCode && typeof html5QrCode.applyVideoConstraints === 'function') {
+        await html5QrCode.applyVideoConstraints({ advanced: [{ torch: lanternaAtiva }] });
+      }
     } catch (e) {
       alert("Lanterna não disponível neste aparelho.");
     }
