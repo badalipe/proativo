@@ -347,6 +347,7 @@
 </head>
 <body>
 
+  <!-- TELA DE LOGIN -->
   <div id="login-screen">
     <div class="login-card">
       <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -376,6 +377,7 @@
     </div>
   </div>
 
+  <!-- MENU PRINCIPAL -->
   <div id="menu-screen" class="hidden">
     <div class="menu-title">Selecione o Módulo Desejado</div>
     <div class="btn-row">
@@ -424,6 +426,7 @@
     </div>
   </div>
   
+  <!-- MÓDULO PRÓATIVO -->
   <div id="proativo-modal" class="system-modal hidden">
     <div id="app-proativo">
       <header class="top">
@@ -503,6 +506,7 @@
     </div>
   </div>
   
+  <!-- MÓDULO TROCAS -->
   <div id="trocas-modal" class="system-modal hidden">
     <div id="app-trocas">
       <header class="top">
@@ -590,6 +594,7 @@
     </div>
   </div>
   
+  <!-- SCANNER DE CÓDIGO DE BARRAS -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">← Fechar</button>
@@ -751,15 +756,27 @@
     
     el('beep-scanner-overlay').classList.remove('hidden');
     
+    // NOVA ESTRATÉGIA: Garantir limpeza completa de instâncias zumbis antes de recriar
     try {
-      if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("beep-reader");
+      if (html5QrCode) {
+        try {
+          if (html5QrCode.isScanning) {
+            await html5QrCode.stop();
+          }
+        } catch (errStop) {}
+        
+        try {
+          await html5QrCode.clear();
+        } catch (errClear) {}
+        html5QrCode = null;
       }
-      
-      if (html5QrCode.isScanning) {
-        await html5QrCode.stop();
-      }
-    } catch (err) {}
+    } catch (e) {}
+    
+    // Limpa o elemento HTML por segurança para evitar conflitos do DOM
+    const readerDiv = el('beep-reader');
+    if (readerDiv) readerDiv.innerHTML = "";
+
+    html5QrCode = new Html5Qrcode("beep-reader");
     
     const config = {
       fps: 20,
@@ -779,8 +796,7 @@
     const constraints = {
       facingMode: "environment",
       width: { ideal: 1920, min: 1280 },
-      height: { ideal: 1080, min: 720 },
-      advanced: [{ focusMode: "continuous" }]
+      height: { ideal: 1080, min: 720 }
     };
     
     try {
@@ -842,7 +858,7 @@
   }
   
   async function pararScanner() {
-    if (scannerEmTransicao && !html5QrCode) return;
+    if (scannerEmTransicao) return;
     scannerEmTransicao = true;
     
     if (html5QrCode) {
@@ -855,8 +871,13 @@
       try {
         await html5QrCode.clear();
       } catch (e) {}
+      
+      html5QrCode = null;
     }
     
+    const readerDiv = el('beep-reader');
+    if (readerDiv) readerDiv.innerHTML = "";
+
     el('beep-scanner-overlay').classList.add('hidden');
     scannerEmTransicao = false;
   }
