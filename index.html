@@ -272,41 +272,19 @@
   }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   
+  /* SCANNER TOTALMENTE LIMPO E CLARO */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 999999;
     display: flex; flex-direction: column; justify-content: space-between;
   }
   .beep-top-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: rgba(0, 0, 0, 0.8); color: #fff; font-size: 15px; font-weight: 600; z-index: 20; }
   .beep-back-btn, .beep-manual-link { background: none; border: none; color: #fff; font-size: 14px; cursor: pointer; }
+  
   .beep-viewport { position: absolute; inset: 0; background: #000; z-index: 1; }
   #beep-reader { width: 100% !important; height: 100% !important; border: none !important; }
   #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
-  
-  .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
-  
-  .scan-laser-box {
-    width: 82%;
-    max-width: 320px;
-    height: 130px;
-    border: 2px solid rgba(16, 185, 129, 0.8);
-    border-radius: 12px;
-    position: relative;
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
-  }
-  .scan-laser-line {
-    position: absolute;
-    top: 50%; left: 4px; right: 4px;
-    height: 2px;
-    background: #e30613;
-    box-shadow: 0 0 8px #e30613;
-    animation: laserScan 1.8s infinite ease-in-out;
-  }
-  @keyframes laserScan {
-    0%, 100% { top: 15%; opacity: 0.6; }
-    50% { top: 85%; opacity: 1; }
-  }
 
-  .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.4); opacity: 0; transition: opacity 0.15s ease; z-index: 15; }
+  .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.4); opacity: 0; transition: opacity 0.15s ease; z-index: 15; pointer-events: none; }
   .scan-flash.active { opacity: 1; }
   
   .camera-controls-floating {
@@ -602,16 +580,11 @@
       <button type="button" class="beep-manual-link" onclick="fecharScannerSemCodigo()">Manual</button>
     </div>
     <div class="beep-viewport"><div id="beep-reader"></div></div>
-    <div class="beep-target-container">
-      <div class="scan-laser-box">
-        <div class="scan-laser-line"></div>
-      </div>
-      <div class="scan-flash" id="scanFlash"></div>
-    </div>
+    <div class="scan-flash" id="scanFlash"></div>
     <div class="camera-controls-floating">
       <button type="button" onclick="alternarLanterna()">🔦 Lanterna</button>
-      <div class="zoom-pill">Zoom: <span id="beepZoomVal">1.0</span>x</div>
-      <input type="range" id="beepZoomRange" min="1" max="5" step="0.1" value="1" style="width: 70px; accent-color: #fff;">
+      <div class="zoom-pill">Zoom: <span id="beepZoomVal">3.0</span>x</div>
+      <input type="range" id="beepZoomRange" min="1" max="5" step="0.1" value="3.0" style="width: 70px; accent-color: #fff;">
     </div>
     <div class="beep-bottom-bar"><button type="button" class="beep-btn-bottom-action" onclick="fecharScannerSemCodigo()">Inserir sem código</button></div>
   </div>
@@ -756,7 +729,6 @@
     
     el('beep-scanner-overlay').classList.remove('hidden');
     
-    // NOVA ESTRATÉGIA: Garantir limpeza completa de instâncias zumbis antes de recriar
     try {
       if (html5QrCode) {
         try {
@@ -772,7 +744,6 @@
       }
     } catch (e) {}
     
-    // Limpa o elemento HTML por segurança para evitar conflitos do DOM
     const readerDiv = el('beep-reader');
     if (readerDiv) readerDiv.innerHTML = "";
 
@@ -780,7 +751,7 @@
     
     const config = {
       fps: 20,
-      qrbox: { width: 280, height: 120 },
+      qrbox: { width: 300, height: 150 },
       aspectRatio: 1.0,
       formatsToSupport: [
         Html5QrcodeSupportedFormats.EAN_13,
@@ -815,8 +786,17 @@
         () => {}
       );
       
+      // Aplicar zoom inicial de 3.0x logo após iniciar a câmera com sucesso
       setTimeout(() => {
         try {
+          if (html5QrCode && typeof html5QrCode.applyVideoConstraints === 'function') {
+            html5QrCode.applyVideoConstraints({ advanced: [{ zoom: 3.0 }] });
+            const zoomInput = el('beepZoomRange');
+            if (zoomInput) zoomInput.value = "3.0";
+            const zoomVal = el('beepZoomVal');
+            if (zoomVal) zoomVal.innerText = "3.0";
+          }
+          
           if (html5QrCode && typeof html5QrCode.getRunningTrackCapabilities === 'function') {
             const capabilities = html5QrCode.getRunningTrackCapabilities();
             if (capabilities && capabilities.zoom) {
@@ -831,7 +811,7 @@
             }
           }
         } catch(err) {}
-      }, 800);
+      }, 500);
       
     } catch (e) {
       try {
@@ -848,6 +828,20 @@
           },
           () => {}
         );
+        
+        // Tenta aplicar 3x também no modo de fallback
+        setTimeout(() => {
+          try {
+            if (html5QrCode && typeof html5QrCode.applyVideoConstraints === 'function') {
+              html5QrCode.applyVideoConstraints({ advanced: [{ zoom: 3.0 }] });
+              const zoomInput = el('beepZoomRange');
+              if (zoomInput) zoomInput.value = "3.0";
+              const zoomVal = el('beepZoomVal');
+              if (zoomVal) zoomVal.innerText = "3.0";
+            }
+          } catch(err) {}
+        }, 500);
+
       } catch (err2) {
         alert("Não foi possível iniciar a câmera: " + (err2.message || err2));
         pararScanner();
