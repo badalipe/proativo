@@ -472,7 +472,7 @@
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
  
  <div id="pro_img_container" class="product-img-box hidden">
-   <img id="pro_img_preview" class="product-img-square" src="" alt="Foto do Produto">
+   <img id="pro_img_preview" class="product-img-square" src="" alt="Foto do Produto" onerror="tratarErroImagem(this, 'pro')">
  </div>
  <input type="hidden" id="pro_imagem_url" value="">
 
@@ -560,7 +560,7 @@
  <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Dados da Troca</h3></div>
  
  <div id="trc_img_container" class="product-img-box hidden">
-   <img id="trc_img_preview" class="product-img-square" src="" alt="Foto do Produto">
+   <img id="trc_img_preview" class="product-img-square" src="" alt="Foto do Produto" onerror="tratarErroImagem(this, 'trc')">
  </div>
  <input type="hidden" id="trc_imagem_url" value="">
 
@@ -819,14 +819,29 @@
  el(prefix + 'imagem_url').value = '';
  }
 
+ function formatarUrlImagemProxy(url) {
+ if (!url) return '';
+ if (url.startsWith('data:')) return url;
+ // Utiliza proxy seguro para evitar bloqueio de CORS do navegador nas fotos
+ const cleanUrl = url.replace(/^https?:\/\//, '');
+ return `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&w=400&h=400&fit=cover`;
+ }
+
  function exibirImagemProduto(prefix, imgUrl) {
- if (imgUrl) {
- el(prefix + 'img_preview').src = imgUrl;
- el(prefix + 'imagem_url').value = imgUrl;
+ if (imgUrl && imgUrl.trim() !== '') {
+ const urlFinal = formatarUrlImagemProxy(imgUrl);
+ el(prefix + 'img_preview').src = urlFinal;
+ el(prefix + 'imagem_url').value = urlFinal;
  el(prefix + 'img_container').classList.remove('hidden');
  } else {
  ocultarImagemProduto(prefix);
  }
+ }
+
+ function tratarErroImagem(imgElement, prefix) {
+ // Se der erro de carregamento na imagem, oculta o container suavemente em vez de mostrar ícone quebrado
+ const container = el(prefix + '_img_container');
+ if (container) container.classList.add('hidden');
  }
 
  async function buscarProduto(modulo) {
