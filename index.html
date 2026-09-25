@@ -272,7 +272,6 @@
   }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   
-  /* Câmera em Tela Cheia e Linha Guia Laser */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 999999;
     display: flex; flex-direction: column; justify-content: space-between;
@@ -348,7 +347,6 @@
 </head>
 <body>
 
-  <!-- TELA DE LOGIN -->
   <div id="login-screen">
     <div class="login-card">
       <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -378,7 +376,6 @@
     </div>
   </div>
 
-  <!-- MENU PRINCIPAL -->
   <div id="menu-screen" class="hidden">
     <div class="menu-title">Selecione o Módulo Desejado</div>
     <div class="btn-row">
@@ -427,7 +424,6 @@
     </div>
   </div>
   
-  <!-- MÓDULO PRÓATIVO -->
   <div id="proativo-modal" class="system-modal hidden">
     <div id="app-proativo">
       <header class="top">
@@ -507,7 +503,6 @@
     </div>
   </div>
   
-  <!-- MÓDULO TROCAS -->
   <div id="trocas-modal" class="system-modal hidden">
     <div id="app-trocas">
       <header class="top">
@@ -595,7 +590,6 @@
     </div>
   </div>
   
-  <!-- SCANNER DE CÓDIGO DE BARRAS (BLINDADO CONTRA CONFLITOS) -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">← Fechar</button>
@@ -1150,4 +1144,3 @@
   </script>
 </body>
 </html>
-
