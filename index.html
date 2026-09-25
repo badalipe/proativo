@@ -215,7 +215,6 @@
   }
   .input-codigo { font-family: 'Courier New', monospace; font-size: 18px !important; letter-spacing: 1px; font-weight: 700; }
   
-  /* Bloco da foto do produto */
   .product-img-container {
     width: 120px;
     height: 120px;
@@ -273,7 +272,7 @@
   }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   
-  /* Câmera em Tela Cheia e sem restrições de caixinha */
+  /* Câmera em Tela Cheia Segura */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 999999;
     display: flex; flex-direction: column; justify-content: space-between;
@@ -723,20 +722,26 @@
     moduloAtual = modulo;
     el('beep-scanner-overlay').classList.remove('hidden');
     
-    if (!html5QrCode) {
-      html5QrCode = new Html5Qrcode("beep-reader");
+    // Garantir destruição de instâncias órfãs anteriores para evitar race conditions
+    if (html5QrCode) {
+      try {
+        if (html5QrCode.isScanning) {
+          await html5QrCode.stop();
+        }
+        html5QrCode.clear();
+      } catch (err) {}
     }
+
+    html5QrCode = new Html5Qrcode("beep-reader");
     
     const config = {
-      fps: 20,
-      qrbox: false,
-      aspectRatio: 16/9
+      fps: 15,
+      qrbox: false
     };
     
+    // Usar constraints simplificados e seguros para evitar exceções de hardware em navegadores mobile
     const constraints = {
-      facingMode: "environment",
-      width: { ideal: 1920 },
-      height: { ideal: 1080 }
+      facingMode: "environment"
     };
     
     try {
@@ -754,7 +759,7 @@
         () => {}
       );
       
-      // Tentativa segura de recuperar controles de zoom (sem quebrar se o celular não suportar)
+      // Tentativa controlada de zoom (com try/catch isolado para não lançar erro global)
       setTimeout(() => {
         try {
           if (html5QrCode && typeof html5QrCode.getRunningTrackCapabilities === 'function') {
@@ -771,21 +776,27 @@
             }
           }
         } catch(err) {}
-      }, 500);
+      }, 800);
       
     } catch (e) {
-      alert("Erro ao abrir a câmera: " + e);
+      alert("Não foi possível acessar a câmera: " + (e.message || e));
       pararScanner();
     }
   }
   
   function pararScanner() {
-    if (html5QrCode && html5QrCode.isScanning) {
-      html5QrCode.stop().then(() => {
+    if (html5QrCode) {
+      if (html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => {
+          try { html5QrCode.clear(); } catch(e){}
+          el('beep-scanner-overlay').classList.add('hidden');
+        }).catch(() => {
+          el('beep-scanner-overlay').classList.add('hidden');
+        });
+      } else {
+        try { html5QrCode.clear(); } catch(e){}
         el('beep-scanner-overlay').classList.add('hidden');
-      }).catch(() => {
-        el('beep-scanner-overlay').classList.add('hidden');
-      });
+      }
     } else {
       el('beep-scanner-overlay').classList.add('hidden');
     }
@@ -798,7 +809,7 @@
         await html5QrCode.applyVideoConstraints({ advanced: [{ torch: lanternaAtiva }] });
       }
     } catch (e) {
-      alert("Lanterna não disponível neste aparelho.");
+      alert("Lanterna não suportada ou indisponível neste dispositivo.");
     }
   }
   
