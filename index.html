@@ -595,7 +595,7 @@
     </div>
   </div>
   
-  <!-- SCANNER DE CÓDIGO DE BARRAS (ALTA DEFINIÇÃO E FOCO ATIVO) -->
+  <!-- SCANNER DE CÓDIGO DE BARRAS (BLINDADO CONTRA CONFLITOS) -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">← Fechar</button>
@@ -651,6 +651,7 @@
   let moduloAtual = null;
   let html5QrCode = null;
   let lanternaAtiva = false;
+  let scannerEmTransicao = false;
   
   const el = id => document.getElementById(id);
   
@@ -750,19 +751,21 @@
   }
   
   async function abrirScanner(modulo) {
+    if (scannerEmTransicao) return;
+    scannerEmTransicao = true;
     moduloAtual = modulo;
+    
     el('beep-scanner-overlay').classList.remove('hidden');
     
-    if (html5QrCode) {
-      try {
-        if (html5QrCode.isScanning) {
-          await html5QrCode.stop();
-        }
-        html5QrCode.clear();
-      } catch (err) {}
-    }
-
-    html5QrCode = new Html5Qrcode("beep-reader");
+    try {
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("beep-reader");
+      }
+      
+      if (html5QrCode.isScanning) {
+        await html5QrCode.stop();
+      }
+    } catch (err) {}
     
     const config = {
       fps: 20,
@@ -839,25 +842,29 @@
         alert("Não foi possível iniciar a câmera: " + (err2.message || err2));
         pararScanner();
       }
+    } finally {
+      scannerEmTransicao = false;
     }
   }
   
-  function pararScanner() {
+  async function pararScanner() {
+    if (scannerEmTransicao && !html5QrCode) return;
+    scannerEmTransicao = true;
+    
     if (html5QrCode) {
-      if (html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => {
-          try { html5QrCode.clear(); } catch(e){}
-          el('beep-scanner-overlay').classList.add('hidden');
-        }).catch(() => {
-          el('beep-scanner-overlay').classList.add('hidden');
-        });
-      } else {
-        try { html5QrCode.clear(); } catch(e){}
-        el('beep-scanner-overlay').classList.add('hidden');
-      }
-    } else {
-      el('beep-scanner-overlay').classList.add('hidden');
+      try {
+        if (html5QrCode.isScanning) {
+          await html5QrCode.stop();
+        }
+      } catch (e) {}
+      
+      try {
+        await html5QrCode.clear();
+      } catch (e) {}
     }
+    
+    el('beep-scanner-overlay').classList.add('hidden');
+    scannerEmTransicao = false;
   }
   
   async function alternarLanterna() {
@@ -1143,4 +1150,3 @@
   </script>
 </body>
 </html>
-
