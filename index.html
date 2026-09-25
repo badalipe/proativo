@@ -631,7 +631,7 @@
    "7896183210120": { nome: "Leite Glória", img: "" },
    "7908077452537": { nome: "Caderno Universitário 80 Fls Foroni", img: "" },
    "7896089011357": { nome: "Café Pilão Tradicional A Vácuo 500g", img: "" },
-   "7891024136409": { nome: "Enxaguante Bucal Colgate Plax", img: "" }
+   "7891024136409": { nome: "Enxaguante Bucal Colgate Plax", img: "https://images.openfoodfacts.org/images/products/789/102/413/6409/front_pt.8.400.jpg" }
  };
  
  let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
@@ -847,37 +847,53 @@
    
    statusEl.innerHTML = '🔍 Buscando...';
    
+   // 1. Catálogo do histórico local
    if (catalogoLocal[code]) {
      const p = typeof catalogoLocal[code] === 'object' ? catalogoLocal[code] : { nome: catalogoLocal[code], img: '' };
      el(prefix + 'descricao').value = p.nome;
-     exibirImagemProduto(prefix, p.img);
+     if (p.img) exibirImagemProduto(prefix, p.img);
      statusEl.innerHTML = '<span class="ok">Localizado no catálogo local!</span>';
-     return;
+     if (p.img) return;
    }
    
+   // 2. Base pré-cadastrada no sistema
    if (produtosPreCadastrados[code]) {
      const p = produtosPreCadastrados[code];
      el(prefix + 'descricao').value = p.nome;
-     exibirImagemProduto(prefix, p.img);
-     statusEl.innerHTML = '<span class="ok">Localizado na base do sistema!</span>';
-     return;
+     if (p.img) {
+       exibirImagemProduto(prefix, p.img);
+       statusEl.innerHTML = '<span class="ok">Localizado na base do sistema!</span>';
+       return;
+     }
    }
    
+   // 3. Fallback: Consulta Web se não encontrou imagem
    try {
      const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
      const data = await res.json();
-     if (data.status === 1 && data.product.product_name) {
-       const nome = data.product.product_name;
+     if (data.status === 1 && data.product) {
+       const nome = data.product.product_name || el(prefix + 'descricao').value;
        const imgUrl = data.product.image_front_url || data.product.image_url || '';
-       el(prefix + 'descricao').value = nome;
-       exibirImagemProduto(prefix, imgUrl);
-       statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
+       
+       if (nome) el(prefix + 'descricao').value = nome;
+       if (imgUrl) {
+         exibirImagemProduto(prefix, imgUrl);
+         statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
+       } else if (el(prefix + 'descricao').value) {
+         statusEl.innerHTML = '<span class="ok">Produto localizado na base (sem imagem).</span>';
+       }
      } else {
-       statusEl.innerHTML = '<span class="warn">Não encontrado. Digite a descrição.</span>';
-       el(prefix + 'descricao').focus();
+       if (!el(prefix + 'descricao').value) {
+         statusEl.innerHTML = '<span class="warn">Não encontrado. Digite a descrição.</span>';
+         el(prefix + 'descricao').focus();
+       } else {
+         statusEl.innerHTML = '<span class="ok">Produto localizado na base (sem imagem online).</span>';
+       }
      }
    } catch (e) {
-     statusEl.innerHTML = '<span class="warn">Erro de consulta. Digite manualmente.</span>';
+     if (!el(prefix + 'descricao').value) {
+       statusEl.innerHTML = '<span class="warn">Erro de consulta. Digite manualmente.</span>';
+     }
    }
  }
  
