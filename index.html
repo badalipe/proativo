@@ -331,7 +331,6 @@
 </head>
 <body>
 
-  <!-- TELA DE LOGIN -->
   <div id="login-screen">
     <div class="login-card">
       <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -361,7 +360,6 @@
     </div>
   </div>
 
-  <!-- MENU PRINCIPAL -->
   <div id="menu-screen" class="hidden">
     <div class="menu-title">Selecione o Módulo Desejado</div>
     <div class="btn-row">
@@ -410,7 +408,6 @@
     </div>
   </div>
   
-  <!-- MÓDULO PRÓATIVO -->
   <div id="proativo-modal" class="system-modal hidden">
     <div id="app-proativo">
       <header class="top">
@@ -490,7 +487,6 @@
     </div>
   </div>
   
-  <!-- MÓDULO TROCAS -->
   <div id="trocas-modal" class="system-modal hidden">
     <div id="app-trocas">
       <header class="top">
@@ -578,7 +574,6 @@
     </div>
   </div>
   
-  <!-- SCANNER DE CÓDIGO DE BARRAS LIMPO -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">← Fechar</button>
@@ -631,7 +626,6 @@
   let lanternaAtiva = false;
   let scannerEmTransicao = false;
   
-  // Variável temporária para guardar a URL da imagem ativa na busca
   let imagemAtualProduto = "";
   
   const el = id => document.getElementById(id);
@@ -890,6 +884,23 @@
     }
   }
 
+  // FUNÇÃO QUE ABRE O CALENDÁRIO AUTOMATICAMENTE APÓS ENCONTRAR O PRODUTO
+  function abrirCalendarioValidade(modulo) {
+    const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+    const inputValidade = el(prefix + 'validade');
+    if (inputValidade) {
+      inputValidade.focus();
+      // Tenta abrir o seletor nativo do calendário no celular
+      if (typeof inputValidade.showPicker === 'function') {
+        try {
+          inputValidade.showPicker();
+        } catch (err) {}
+      } else {
+        inputValidade.click();
+      }
+    }
+  }
+
   async function buscarProduto(modulo) {
     const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
     const code = el(prefix + 'codigo').value.trim();
@@ -911,6 +922,7 @@
       el(prefix + 'descricao').value = nome;
       atualizarFotoProduto(modulo, img);
       statusEl.innerHTML = '<span class="ok">Localizado no catálogo local!</span>';
+      abrirCalendarioValidade(modulo); // ABRE O CALENDÁRIO AUTOMATICAMENTE
       return;
     }
     
@@ -921,6 +933,7 @@
       el(prefix + 'descricao').value = nome;
       atualizarFotoProduto(modulo, img);
       statusEl.innerHTML = '<span class="ok">Localizado na base do sistema!</span>';
+      abrirCalendarioValidade(modulo); // ABRE O CALENDÁRIO AUTOMATICAMENTE
       return;
     }
     
@@ -932,6 +945,7 @@
         const imgUrl = data.product.image_front_small_url || data.product.image_url || '';
         atualizarFotoProduto(modulo, imgUrl);
         statusEl.innerHTML = '<span class="ok">Localizado via consulta online!</span>';
+        abrirCalendarioValidade(modulo); // ABRE O CALENDÁRIO AUTOMATICAMENTE
       } else {
         statusEl.innerHTML = '<span class="warn">Não encontrado. Digite a descrição.</span>';
         el(prefix + 'descricao').focus();
@@ -962,7 +976,7 @@
       validade: validade,
       valor: val,
       total: qtd * val,
-      img: imagemAtualProduto // SALVA A IMAGEM CAPTURADA NO ITEM
+      img: imagemAtualProduto
     };
     
     if (modulo === 'trocas') {
@@ -976,7 +990,6 @@
     
     renderizarLista(modulo);
     
-    // Limpar campos
     el(prefix + 'codigo').value = '';
     el(prefix + 'descricao').value = '';
     el(prefix + 'quantidade').value = '';
@@ -1009,7 +1022,6 @@
       const dataFmt = item.validade.split('-').reverse().join('/');
       const infoExtra = item.motivo ? ` | Motivo: ${item.motivo === 1 ? '1-Avaria' : '2-Descarte'}` : '';
       
-      // Miniatura da foto ou ícone padrão caso não tenha
       const imgHtml = item.img && item.img.startsWith('http') 
         ? `<img src="${item.img}" class="item-thumb" alt="Foto">` 
         : `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;font-size:10px;color:#94a3b8;">📦</div>`;
