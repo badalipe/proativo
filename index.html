@@ -272,7 +272,7 @@
   }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   
-  /* SCANNER TOTALMENTE LIMPO E CLARO */
+  /* SCANNER LIMPO E CORRIGIDO PARA EVITAR TELA PRETA */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 999999;
     display: flex; flex-direction: column; justify-content: space-between;
@@ -280,8 +280,8 @@
   .beep-top-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: rgba(0, 0, 0, 0.8); color: #fff; font-size: 15px; font-weight: 600; z-index: 20; }
   .beep-back-btn, .beep-manual-link { background: none; border: none; color: #fff; font-size: 14px; cursor: pointer; }
   
-  .beep-viewport { position: absolute; inset: 0; background: #000; z-index: 1; }
-  #beep-reader { width: 100% !important; height: 100% !important; border: none !important; }
+  .beep-viewport { position: absolute; inset: 0; background: #000; z-index: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  #beep-reader { width: 100% !important; height: 100% !important; border: none !important; position: absolute !important; inset: 0 !important; }
   #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
 
   .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.4); opacity: 0; transition: opacity 0.15s ease; z-index: 15; pointer-events: none; }
@@ -750,8 +750,8 @@
     html5QrCode = new Html5Qrcode("beep-reader");
     
     const config = {
-      fps: 20,
-      qrbox: { width: 300, height: 150 },
+      fps: 15,
+      qrbox: { width: 280, height: 140 },
       aspectRatio: 1.0,
       formatsToSupport: [
         Html5QrcodeSupportedFormats.EAN_13,
@@ -764,10 +764,9 @@
       ]
     };
     
+    // ESTRATÉGIA CORRIGIDA: Uso limpo de facingMode direto para garantir compatibilidade total e evitar tela preta
     const constraints = {
-      facingMode: "environment",
-      width: { ideal: 1920, min: 1280 },
-      height: { ideal: 1080, min: 720 }
+      facingMode: "environment"
     };
     
     try {
@@ -786,7 +785,7 @@
         () => {}
       );
       
-      // Aplicar zoom inicial de 3.0x logo após iniciar a câmera com sucesso
+      // Aplicar zoom inicial de 3.0x com segurança após a câmera ligar
       setTimeout(() => {
         try {
           if (html5QrCode && typeof html5QrCode.applyVideoConstraints === 'function') {
@@ -811,41 +810,11 @@
             }
           }
         } catch(err) {}
-      }, 500);
+      }, 600);
       
     } catch (e) {
-      try {
-        await html5QrCode.start(
-          { facingMode: "environment" },
-          config,
-          (decodedText) => {
-            tocarBipe();
-            dispararFlashScan();
-            const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
-            el(prefix + 'codigo').value = decodedText;
-            pararScanner();
-            buscarProduto(modulo);
-          },
-          () => {}
-        );
-        
-        // Tenta aplicar 3x também no modo de fallback
-        setTimeout(() => {
-          try {
-            if (html5QrCode && typeof html5QrCode.applyVideoConstraints === 'function') {
-              html5QrCode.applyVideoConstraints({ advanced: [{ zoom: 3.0 }] });
-              const zoomInput = el('beepZoomRange');
-              if (zoomInput) zoomInput.value = "3.0";
-              const zoomVal = el('beepZoomVal');
-              if (zoomVal) zoomVal.innerText = "3.0";
-            }
-          } catch(err) {}
-        }, 500);
-
-      } catch (err2) {
-        alert("Não foi possível iniciar a câmera: " + (err2.message || err2));
-        pararScanner();
-      }
+      alert("Não foi possível iniciar a câmera: " + (e.message || e));
+      pararScanner();
     } finally {
       scannerEmTransicao = false;
     }
