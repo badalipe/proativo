@@ -228,7 +228,6 @@
  }
  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 
- /* CONTAINER DA FOTO DO PRODUTO (PERFEITAMENTE QUADRADO) */
  .product-img-box {
    display: flex;
    justify-content: center;
@@ -259,7 +258,6 @@
    flex-shrink: 0;
  }
 
- /* LAYOUT DA CÂMERA FULLSCREEN */
  #beep-scanner-overlay {
    position: fixed; inset: 0; background: #000; z-index: 999999;
    width: 100vw; height: 100vh; display: flex; flex-direction: column;
@@ -541,7 +539,7 @@
              <div class="caixa">
                <select id="trc_motivo">
                  <option value="1">1 - Avaria</option>
-                 <option value="2">2 - Descarte</option>
+                 <option value="2">2 - Vencido</option>
                </select>
              </div>
            </div>
@@ -968,7 +966,7 @@
      const itemEl = document.createElement('div');
      itemEl.className = 'item';
      const dataFmt = item.validade.split('-').reverse().join('/');
-     const infoExtra = item.motivo ? ` | Motivo: ${item.motivo === 1 ? '1-Avaria' : '2-Descarte'}` : '';
+     const infoExtra = item.motivo ? ` | Motivo: ${item.motivo === 1 ? '1-Avaria' : '2-Vencido'}` : '';
      const imgHtml = item.imagem ? `<img src="${item.imagem}" class="list-item-img" alt="Foto">` : '';
      
      itemEl.innerHTML = `
