@@ -250,6 +250,7 @@
 </head>
 <body>
 
+  <!-- TELA DE LOGIN -->
   <div id="login-screen">
     <div class="login-card">
       <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -279,6 +280,7 @@
     </div>
   </div>
 
+  <!-- MENU PRINCIPAL -->
   <div id="menu-screen" class="hidden">
     <div class="menu-title">Selecione o Módulo Desejado</div>
     <div class="btn-row">
@@ -327,6 +329,7 @@
     </div>
   </div>
   
+  <!-- MÓDULO PRÓATIVO -->
   <div id="proativo-modal" class="system-modal hidden">
     <div id="app-proativo" style="display:flex; flex-direction:column; height:100%; position:relative;">
       <header class="top">
@@ -424,6 +427,7 @@
     </div>
   </div>
   
+  <!-- MÓDULO TROCAS -->
   <div id="trocas-modal" class="system-modal hidden">
     <div id="app-trocas" style="display:flex; flex-direction:column; height:100%; position:relative;">
       <header class="top">
@@ -529,6 +533,7 @@
     </div>
   </div>
   
+  <!-- SCANNER OVERLAY -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
@@ -759,11 +764,9 @@
 
     html5QrCode = new Html5Qrcode("beep-reader");
 
-    // CONFIGURAÇÃO DE ULTRA RESOLUÇÃO E SCANNER ULTRA RÁPIDO
     const config = {
-      fps: 30, // FPS Máximo para leitura super fluida
-      qrbox: { width: 320, height: 180 },
-      aspectRatio: 1.0,
+      fps: 25,
+      qrbox: { width: 300, height: 160 },
       experimentalFeatures: {
         useBarCodeDetectorIfSupported: true
       },
@@ -778,12 +781,8 @@
       ]
     };
 
-    // Solicitando câmera traseira principal (environment) com alta resolução (4K / Full HD) e zoom de 3x
     const constraints = {
-      facingMode: "environment",
-      width: { ideal: 4096, min: 1280 },
-      height: { ideal: 2160, min: 720 },
-      advanced: [{ zoom: 3.0 }]
+      facingMode: "environment"
     };
 
     try {
@@ -800,36 +799,9 @@
         },
         () => {}
       );
-
-      // Reforço para garantir o zoom 3x via API do hardware de vídeo após a inicialização
-      setTimeout(async () => {
-        try {
-          if (html5QrCode && typeof html5QrCode.applyVideoConstraints === 'function') {
-            await html5QrCode.applyVideoConstraints({ advanced: [{ zoom: 3.0 }] });
-          }
-        } catch (errZoom) {}
-      }, 400);
-
     } catch (e) {
-      // Fallback automático caso a resolução máxima estrita falhe em algum aparelho antigo
-      try {
-        await html5QrCode.start(
-          { facingMode: "environment" },
-          { fps: 25, qrbox: { width: 300, height: 160 } },
-          (decodedText) => {
-            tocarBipe();
-            dispararFlashScan();
-            const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
-            el(prefix + 'codigo').value = decodedText;
-            buscarProduto(modulo);
-            pararScanner();
-          },
-          () => {}
-        );
-      } catch (errFallback) {
-        alert("Não foi possível iniciar a câmera em alta resolução. Verifique as permissões.");
-        pararScanner();
-      }
+      alert("Não foi possível acessar a câmera. Verifique se o site tem permissão nas configurações do navegador.");
+      pararScanner();
     } finally {
       travadoCamera = false;
     }
@@ -879,7 +851,6 @@
     }
   }
 
-  // ULTRA BUSCA DE DADOS (Otimizada e com múltiplas fontes paralelas)
   async function buscarProduto(modulo) {
     const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
     const code = el(prefix + 'codigo').value.trim();
@@ -894,7 +865,6 @@
     statusEl.innerHTML = '⚡ Ultra busca em andamento...';
     atualizarFotoProduto(modulo, null);
     
-    // 1º Catálogo Local
     if (catalogoLocal[code]) {
       const itemCat = catalogoLocal[code];
       const nome = typeof itemCat === 'object' ? itemCat.nome : itemCat;
@@ -906,7 +876,6 @@
       return;
     }
     
-    // 2º Base de Dados Interna Pré-Cadastrada
     if (produtosPreCadastrados[code]) {
       const itemPre = produtosPreCadastrados[code];
       const nome = typeof itemPre === 'object' ? itemPre.nome : itemPre;
@@ -918,10 +887,9 @@
       return;
     }
     
-    // 3º Ultra Consulta Online Paralela (Open Food Facts API com cache otimizado)
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000); // Timeout rápido de 4s para máxima agilidade
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
 
       const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, {
         signal: controller.signal
