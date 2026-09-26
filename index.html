@@ -132,10 +132,6 @@
   .product-img-container img { width: 100%; height: 100%; object-fit: cover; }
   .product-img-placeholder { font-size: 11px; color: var(--text-muted); text-align: center; padding: 4px; }
 
-  .campo label { margin: 0 0 3px; }
-  .campo .caixa { display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px; border: 1px solid var(--border-color); border-radius: 10px; background: #f8fafc; }
-  .campo .caixa input, .campo .caixa select { border: 0; background: transparent; padding: 0; height: 100%; font-size: 14px; }
-  
   .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
   
   button { font: inherit; border: 0; border-radius: 10px; padding: 12px 14px; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
@@ -173,7 +169,7 @@
   }
   .fab-camera:active { cursor: grabbing !important; }
 
-  /* CÂMARA EM TELA INTEIRA ULTRA LIMPA (MÁXIMA QUALIDADE + ZOOM 3X) */
+  /* CÂMARA EM TELA INTEIRA ULTRA LIMPA (FORÇANDO EXIBIÇÃO DE VÍDEO) */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 99999;
     display: flex; flex-direction: column; justify-content: space-between;
@@ -191,23 +187,22 @@
   .beep-viewport { position: absolute; inset: 0; background: #000; z-index: 10; display: flex; align-items: center; justify-content: center; overflow: hidden; }
   #beep-reader { width: 100% !important; height: 100% !important; border: none !important; background: transparent !important; position: relative; }
   
-  /* FORÇA A CÂMARA A PREENCHER TELA INTEIRA COM MÁXIMA QUALIDADE */
+  /* CORREÇÃO CRUCIAL: Força o vídeo do html5-qrcode a ocupar 100% e aparecer corretamente */
   #beep-reader video { 
     width: 100% !important; 
     height: 100% !important; 
     object-fit: cover !important; 
     position: absolute !important;
     inset: 0 !important;
+    display: block !important;
   }
   
-  /* ESCONDE TOTALMENTE ELEMENTOS NATIVOS E POLUIÇÕES DA BIBLIOTECA */
   #html5-qrcode-anchor-scan-box-whats-this, 
   #beep-reader__dashboard, 
   #beep-reader__dashboard_section_csr,
   #beep-reader div[style*="background"],
   #beep-reader img,
-  div[id^="html5-qrcode-button-camera-permission"],
-  div[style*="border: 2px solid rgb"] { 
+  div[id^="html5-qrcode-button-camera-permission"] { 
     display: none !important; 
   }
 
@@ -378,10 +373,10 @@
       <main class="wrap">
         <section class="card">
           <div class="row row-ident">
-            <div class="campo"><label>Quem digitou?</label><div class="caixa"><input id="pro_digitou" placeholder="Seu nome"></div></div>
-            <div class="campo"><label>Gerente / avaliação</label><div class="caixa"><input id="pro_gerente"></div></div>
-            <div class="campo"><label>Comprador</label><div class="caixa"><input id="pro_comprador"></div></div>
-            <div class="campo"><label>Data do levantamento</label><div class="caixa"><input id="pro_data" type="date"></div></div>
+            <div><label>Quem digitou?</label><input id="pro_digitou" placeholder="Seu nome"></div>
+            <div><label>Gerente / avaliação</label><input id="pro_gerente"></div>
+            <div><label>Comprador</label><input id="pro_comprador"></div>
+            <div><label>Data do levantamento</label><input id="pro_data" type="date"></div>
           </div>
         </section>
         
@@ -475,18 +470,16 @@
       <main class="wrap">
         <section class="card">
           <div class="row row-ident">
-            <div class="campo"><label>Conferente / Responsável</label><div class="caixa"><input id="trc_digitou" placeholder="Seu nome"></div></div>
-            <div class="campo"><label>Fornecedor</label><div class="caixa"><input id="trc_fornecedor" placeholder="Ex: Ambev, Nestlé"></div></div>
-            <div class="campo">
+            <div><label>Conferente / Responsável</label><input id="trc_digitou" placeholder="Seu nome"></div>
+            <div><label>Fornecedor</label><input id="trc_fornecedor" placeholder="Ex: Ambev, Nestlé"></div>
+            <div>
               <label>Motivo da Troca *</label>
-              <div class="caixa">
-                <select id="trc_motivo">
-                  <option value="1">1 - Avaria</option>
-                  <option value="2">2 - Descarte</option>
-                </select>
-              </div>
+              <select id="trc_motivo">
+                <option value="1">1 - Avaria</option>
+                <option value="2">2 - Descarte</option>
+              </select>
             </div>
-            <div class="campo"><label>Data da Troca</label><div class="caixa"><input id="trc_data" type="date"></div></div>
+            <div><label>Data da Troca</label><input id="trc_data" type="date"></div>
           </div>
         </section>
         
@@ -750,6 +743,7 @@
 
     el('beep-scanner-overlay').classList.remove('hidden');
 
+    // Limpeza profunda de qualquer instância anterior pendente
     if (html5QrCode) {
       try {
         if (html5QrCode.isScanning) {
@@ -768,11 +762,9 @@
     html5QrCode = new Html5Qrcode("beep-reader");
 
     const config = {
-      fps: 30,
-      qrbox: { width: 320, height: 180 },
-      experimentalFeatures: {
-        useBarCodeDetectorIfSupported: true
-      },
+      fps: 20,
+      qrbox: { width: 300, height: 180 },
+      aspectRatio: 1.0,
       formatsToSupport: [
         Html5QrcodeSupportedFormats.EAN_13,
         Html5QrcodeSupportedFormats.EAN_8,
@@ -784,17 +776,10 @@
       ]
     };
 
-    // Configuração estrita: Câmera traseira, resolução máxima e zoom de 3x
-    const constraints = {
-      facingMode: "environment",
-      width: { ideal: 3840 },
-      height: { ideal: 2160 },
-      advanced: [{ zoom: 3.0 }]
-    };
-
     try {
+      // Força a câmera traseira do dispositivo com resolução padrão limpa
       await html5QrCode.start(
-        constraints,
+        { facingMode: "environment" },
         config,
         (decodedText) => {
           tocarBipe();
@@ -806,11 +791,11 @@
         },
         () => {}
       );
-    } catch (e) {
-      // Fallback automático caso o hardware não suporte os parâmetros avançados
+    } catch (e1) {
       try {
+        // Fallback genérico caso a traseira estrita falhe
         await html5QrCode.start(
-          { facingMode: "environment" },
+          true,
           config,
           (decodedText) => {
             tocarBipe();
@@ -823,7 +808,7 @@
           () => {}
         );
       } catch (err) {
-        alert("Não foi possível acessar a câmera do dispositivo. Verifique se permitiu o uso da câmera.");
+        alert("Não foi possível renderizar a câmera. Verifique se outro app ou aba está usando o recurso.");
         pararScanner();
       }
     } finally {
@@ -891,7 +876,6 @@
     statusEl.innerHTML = '⚡ Consultando base de produtos...';
     atualizarFotoProduto(modulo, null);
     
-    // 1. Catálogo local de memória
     if (catalogoLocal[code]) {
       const itemCat = catalogoLocal[code];
       const nome = typeof itemCat === 'object' ? itemCat.nome : itemCat;
@@ -903,7 +887,6 @@
       return;
     }
     
-    // 2. Base pré-cadastrada (inclui o Café Pimpinela)
     if (produtosPreCadastrados[code]) {
       const itemPre = produtosPreCadastrados[code];
       const nome = typeof itemPre === 'object' ? itemPre.nome : itemPre;
@@ -915,7 +898,6 @@
       return;
     }
     
-    // 3. API Global Open Food Facts
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 6000);
