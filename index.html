@@ -175,18 +175,55 @@
   
   .top {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    color: #fff; padding: 14px 12px; position: sticky; top: 0; z-index: 100;
+    color: #fff; padding: 12px 12px; position: sticky; top: 0; z-index: 100;
     box-shadow: 0 2px 10px rgba(0,0,0,0.15);
   }
-  .header-title-container { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 600px; margin: 0 auto; }
-  .header-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  
+  /* NOVO LAYOUT DO CABEÇALHO EM DUAS LINHAS PARA EVITAR SOBREPOSIÇÃO */
+  .header-content-wrapper {
+    width: 100%; max-width: 600px; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .header-row-top {
+    display: flex; align-items: center; justify-content: space-between; width: 100%;
+  }
+  .header-row-bottom {
+    display: flex; align-items: center; justify-content: space-between; width: 100%;
+    gap: 10px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 8px;
+  }
+  
   .logo-container {
     background: #ffffff; padding: 4px 8px; border-radius: 8px;
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
-  .header-logo { height: 28px; width: auto; object-fit: contain; }
-  .header-text h1 { font-size: 15px; font-weight: 700; margin: 0; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .header-text .sub { color: #94a3b8; font-size: 10px; margin-top: 2px; }
+  .header-logo { height: 26px; width: auto; object-fit: contain; }
+  
+  .header-text h1 { font-size: 14px; font-weight: 700; margin: 0; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .header-text .sub { color: #94a3b8; font-size: 10px; margin-top: 1px; }
+  
+  /* CHIP SELETOR DE LOJA OTIMIZADO */
+  .select-loja-chip {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: #ffffff !important;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 28px 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 12px;
+    max-width: 220px;
+    text-overflow: ellipsis;
+  }
+  .select-loja-chip option {
+    background: #0f172a !important;
+    color: #ffffff !important;
+  }
   
   .wrap { width: 100%; max-width: 600px; margin: auto; padding: 12px 10px 80px; }
   
@@ -247,30 +284,6 @@
     border: 1px solid var(--border-color); border-radius: 10px; background: #f8fafc;
   }
   .campo .caixa input, .campo .caixa select { border: 0; background: transparent; padding: 0; height: 100%; font-size: 14px; }
-  
-  .header-right { display: flex; align-items: center; gap: 6px; }
-  
-  /* CHIP SELETOR DE LOJA EM CASCATA CORRIGIDO */
-  .select-loja-chip {
-    appearance: none;
-    -webkit-appearance: none;
-    background-color: rgba(255, 255, 255, 0.15) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    color: #ffffff !important;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 5px 24px 5px 10px;
-    border-radius: 999px;
-    cursor: pointer;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 6px center;
-    background-size: 12px;
-  }
-  .select-loja-chip option {
-    background: #0f172a !important;
-    color: #ffffff !important;
-  }
   
   .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
   
@@ -431,8 +444,8 @@
   <div id="proativo-modal" class="system-modal hidden">
     <div id="app-proativo">
       <header class="top">
-        <div class="header-title-container">
-          <div class="header-left">
+        <div class="header-content-wrapper">
+          <div class="header-row-top">
             <div class="logo-container">
               <svg class="header-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
                 <path d="M 30,120 L 30,55 C 30,35 45,20 65,20 L 115,20 C 145,20 165,40 165,70 C 165,95 145,115 120,120 L 155,160 L 125,160 L 95,120 L 65,120 L 65,160 L 30,160 Z M 65,50 L 65,95 L 110,95 C 125,95 135,85 135,72 C 135,60 125,50 110,50 Z" fill="#0066b2"/>
@@ -442,12 +455,13 @@
                 <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
               </svg>
             </div>
+            <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 12px; font-size: 12px;">Menu</button>
+          </div>
+          <div class="header-row-bottom">
             <div class="header-text">
               <h1>Pró Ativos • Frios</h1>
-              <div class="sub"><span>Validades e Estoque</span></div>
+              <div class="sub">Validades e Estoque</div>
             </div>
-          </div>
-          <div class="header-right">
             <!-- SELETOR EM CASCATA DE LOJAS -->
             <select id="selectLojaPro" class="select-loja-chip" onchange="mudarLojaSelect(this.value)">
               <option value="PATITIBA">PATITIBA</option>
@@ -464,7 +478,6 @@
               <option value="PARQUE MAMBUCABA">PARQUE MAMBUCABA</option>
               <option value="CENTRO">CENTRO</option>
             </select>
-            <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 10px; font-size: 11px;">Menu</button>
           </div>
         </div>
       </header>
@@ -526,8 +539,8 @@
   <div id="trocas-modal" class="system-modal hidden">
     <div id="app-trocas">
       <header class="top">
-        <div class="header-title-container">
-          <div class="header-left">
+        <div class="header-content-wrapper">
+          <div class="header-row-top">
             <div class="logo-container">
               <svg class="header-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
                 <path d="M 30,120 L 30,55 C 30,35 45,20 65,20 L 115,20 C 145,20 165,40 165,70 C 165,95 145,115 120,120 L 155,160 L 125,160 L 95,120 L 65,120 L 65,160 L 30,160 Z M 65,50 L 65,95 L 110,95 C 125,95 135,85 135,72 C 135,60 125,50 110,50 Z" fill="#0066b2"/>
@@ -537,12 +550,13 @@
                 <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
               </svg>
             </div>
+            <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 12px; font-size: 12px;">Menu</button>
+          </div>
+          <div class="header-row-bottom">
             <div class="header-text">
               <h1>Gestão de Trocas</h1>
-              <div class="sub"><span>Devoluções</span></div>
+              <div class="sub">Devoluções</div>
             </div>
-          </div>
-          <div class="header-right">
             <!-- SELETOR EM CASCATA DE LOJAS -->
             <select id="selectLojaTrc" class="select-loja-chip" onchange="mudarLojaSelect(this.value)">
               <option value="PATITIBA">PATITIBA</option>
@@ -559,7 +573,6 @@
               <option value="PARQUE MAMBUCABA">PARQUE MAMBUCABA</option>
               <option value="CENTRO">CENTRO</option>
             </select>
-            <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 10px; font-size: 11px;">Menu</button>
           </div>
         </div>
       </header>
