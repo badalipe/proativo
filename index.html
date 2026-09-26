@@ -175,7 +175,7 @@
     cursor: grabbing !important;
   }
 
-  /* CÂMARA LIMPA EM ECRÃ INTEIRO */
+  /* CÂMARA EM ECRÃ INTEIRO */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 99999;
     display: flex; flex-direction: column; justify-content: space-between;
@@ -241,7 +241,6 @@
 </head>
 <body>
 
-  <!-- TELA DE LOGIN -->
   <div id="login-screen">
     <div class="login-card">
       <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
@@ -271,7 +270,6 @@
     </div>
   </div>
 
-  <!-- MENU PRINCIPAL -->
   <div id="menu-screen" class="hidden">
     <div class="menu-title">Selecione o Módulo Desejado</div>
     <div class="btn-row">
@@ -320,7 +318,6 @@
     </div>
   </div>
   
-  <!-- MÓDULO PRÓATIVO -->
   <div id="proativo-modal" class="system-modal hidden">
     <div id="app-proativo" style="display:flex; flex-direction:column; height:100%; position:relative;">
       <header class="top">
@@ -418,7 +415,6 @@
     </div>
   </div>
   
-  <!-- MÓDULO TROCAS -->
   <div id="trocas-modal" class="system-modal hidden">
     <div id="app-trocas" style="display:flex; flex-direction:column; height:100%; position:relative;">
       <header class="top">
@@ -524,7 +520,6 @@
     </div>
   </div>
   
-  <!-- SCANNER COM VISOR TOTALMENTE LIMPO E ZOOM 3X AUTOMÁTICO -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
@@ -798,11 +793,9 @@
       ]
     };
 
-    // CORREÇÃO DA TELA PRETA: Removido resoluções fixas rígidas, usando valores ideais compatíveis com mobile
+    // Configuração limpa e direta para abrir a câmara traseira nativa sem falhas
     const constraints = {
-      facingMode: "environment",
-      width: { ideal: 1280 },
-      height: { ideal: 720 }
+      facingMode: "environment"
     };
 
     try {
@@ -819,23 +812,6 @@
         },
         () => {}
       );
-
-      // APLICAR ZOOM AUTOMÁTICO DE 3X LOGO APÓS A STREAM INICIAR
-      setTimeout(async () => {
-        try {
-          if (html5QrCode && typeof html5QrCode.applyVideoConstraints === 'function') {
-            await html5QrCode.applyVideoConstraints({ advanced: [{ zoom: 3.0 }] });
-          }
-        } catch (errZoom) {
-          try {
-            const track = html5QrCode.getRunningTrack();
-            if (track && typeof track.applyConstraints === 'function') {
-              await track.applyConstraints({ advanced: [{ zoom: 3.0 }] });
-            }
-          } catch(e2){}
-        }
-      }, 500);
-
     } catch (e) {
       alert("Não foi possível acessar a câmera. Verifique se o site tem permissão nas configurações do navegador.");
       pararScanner();
