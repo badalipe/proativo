@@ -175,7 +175,7 @@
     cursor: grabbing !important;
   }
 
-  /* CÂMARA LIMPA EM ECRÃ INTEIRO (SEM FUNDO ESCURO OPACO) */
+  /* CÂMARA LIMPA EM ECRÃ INTEIRO */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 99999;
     display: flex; flex-direction: column; justify-content: space-between;
@@ -194,9 +194,8 @@
   
   .beep-viewport { position: absolute; inset: 0; background: #000; z-index: 10; display: flex; align-items: center; justify-content: center; }
   #beep-reader { width: 100% !important; height: 100% !important; border: none !important; background: transparent !important; }
-  #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+  #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; playsinline: true; }
   
-  /* ESTILOS INTERNOS DE OVERRIDE PARA ANULAR QUALQUER SOMBRA DA BIBLIOTECA */
   #html5-qrcode-anchor-scan-box-whats-this, 
   #beep-reader__dashboard, 
   #beep-reader__dashboard_section_csr,
@@ -799,10 +798,11 @@
       ]
     };
 
+    // CORREÇÃO DA TELA PRETA: Removido resoluções fixas rígidas, usando valores ideais compatíveis com mobile
     const constraints = {
       facingMode: "environment",
-      width: { ideal: 1920 },
-      height: { ideal: 1080 }
+      width: { ideal: 1280 },
+      height: { ideal: 720 }
     };
 
     try {
@@ -820,7 +820,7 @@
         () => {}
       );
 
-      // APLICAR ZOOM AUTOMÁTICO DE 3X LOGO APÓS O INÍCIO DA STREAM
+      // APLICAR ZOOM AUTOMÁTICO DE 3X LOGO APÓS A STREAM INICIAR
       setTimeout(async () => {
         try {
           if (html5QrCode && typeof html5QrCode.applyVideoConstraints === 'function') {
@@ -1160,4 +1160,3 @@
   </script>
 </body>
 </html>
-
