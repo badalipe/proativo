@@ -171,9 +171,7 @@
     touch-action: none !important;
     user-select: none !important;
   }
-  .fab-camera:active {
-    cursor: grabbing !important;
-  }
+  .fab-camera:active { cursor: grabbing !important; }
 
   /* CÂMARA EM ECRÃ INTEIRO */
   #beep-scanner-overlay {
@@ -184,9 +182,7 @@
     display: flex; align-items: center; justify-content: space-between; 
     padding: 16px 20px; background: rgba(0,0,0,0.4); color: #fff; font-size: 16px; font-weight: 500; z-index: 30; 
   }
-  .beep-back-btn { 
-    background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; 
-  }
+  .beep-back-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; }
   .beep-manual-btn { 
     background: rgba(255, 255, 255, 0.25); border: 1px solid rgba(255, 255, 255, 0.4); 
     color: #fff; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px; cursor: pointer; letter-spacing: 0.5px;
@@ -200,9 +196,7 @@
   #beep-reader__dashboard, 
   #beep-reader__dashboard_section_csr,
   #beep-reader div[style*="background"],
-  #beep-reader img {
-    display: none !important;
-  }
+  #beep-reader img { display: none !important; }
   
   .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 20; }
   
@@ -229,8 +223,10 @@
   .ok { color: var(--accent-green); font-weight: 700; }
   .warn { color: #d97706; }
   
-  .item { border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #fff; }
-  .item-info { min-width: 0; }
+  .item { border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px; background: #fff; }
+  .item-thumb { width: 44px; height: 44px; border-radius: 6px; border: 1px solid var(--border-color); object-fit: cover; flex-shrink: 0; background: #f8fafc; display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--text-muted); text-align: center; }
+  .item-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 5px; }
+  .item-info { min-width: 0; flex-grow: 1; }
   .item strong { display: block; font-size: 13px; }
   .item small { color: var(--text-muted); font-size: 11px; display: block; margin-top: 2px; }
   .item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
@@ -543,11 +539,18 @@
     "patitiba": "frios2026"
   };
   
+  // Base estendida com itens essenciais brasileiros comuns de mercado
   const produtosPreCadastrados = {
+    "7896081800034": { nome: "Café Pimpinela Tradicional 500g", img: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=150" },
     "7896045112098": { nome: "Refresco em Pó Frisco Abacaxi 18g", img: "" },
     "7896183210120": { nome: "Leite Glória", img: "" },
     "7908077452537": { nome: "Caderno Universitário 80 Fls Foroni", img: "" },
-    "7896089011357": { nome: "Café Pilão Tradicional A Vácuo 500g", img: "" }
+    "7896089011357": { nome: "Café Pilão Tradicional A Vácuo 500g", img: "" },
+    "7891000100103": { nome: "Leite Condensado Nestlé Moça 395g", img: "" },
+    "7891000245209": { nome: "Creme de Leite Nestlé 200g", img: "" },
+    "7891910000197": { nome: "Refrigerante Coca-Cola 2L", img: "" },
+    "7894900010015": { nome: "Refrigerante Coca-Cola Lata 350ml", img: "" },
+    "7896005801017": { nome: "Arroz Tio João Tipo 1 5kg", img: "" }
   };
   
   let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
@@ -587,10 +590,10 @@
     if (el('pro_data')) el('pro_data').value = hoje;
     if (el('trc_data')) el('trc_data').value = hoje;
 
-    inicializarBotoesArrastaveis();
+    inicializarBitoesArrastaveis();
   });
 
-  function inicializarBotoesArrastaveis() {
+  function inicializarBitoesArrastaveis() {
     const botoes = document.querySelectorAll('.drag-fab');
     botoes.forEach(btn => {
       let isDragging = false;
@@ -793,7 +796,6 @@
       ]
     };
 
-    // Configuração limpa e direta para abrir a câmara traseira nativa sem falhas
     const constraints = {
       facingMode: "environment"
     };
@@ -859,8 +861,10 @@
 
     if (imageUrl && imageUrl.startsWith('http')) {
       box.innerHTML = `<img src="${imageUrl}" alt="Produto" onerror="this.onerror=null; this.parentNode.innerHTML='<span class=\'product-img-placeholder\'>Sem foto</span>';">`;
+      box.setAttribute('data-img', imageUrl);
     } else {
       box.innerHTML = `<span class="product-img-placeholder">Sem foto</span>`;
+      box.removeAttribute('data-img');
     }
   }
 
@@ -875,34 +879,37 @@
       return;
     }
     
-    statusEl.innerHTML = '⚡ Ultra busca em andamento...';
+    statusEl.innerHTML = '⚡ Consultando base de milhões de produtos...';
     atualizarFotoProduto(modulo, null);
     
+    // 1. Verificar catálogo local gravado (memória rápida do usuário)
     if (catalogoLocal[code]) {
       const itemCat = catalogoLocal[code];
       const nome = typeof itemCat === 'object' ? itemCat.nome : itemCat;
       const img = typeof itemCat === 'object' ? itemCat.img : '';
       el(prefix + 'descricao').value = nome;
       atualizarFotoProduto(modulo, img);
-      statusEl.innerHTML = '<span class="ok">⚡ Encontrado no catálogo local!</span>';
+      statusEl.innerHTML = '<span class="ok">⚡ Encontrado no histórico local!</span>';
       focarCalendario(prefix);
       return;
     }
     
+    // 2. Verificar base pré-cadastrada
     if (produtosPreCadastrados[code]) {
       const itemPre = produtosPreCadastrados[code];
       const nome = typeof itemPre === 'object' ? itemPre.nome : itemPre;
       const img = typeof itemPre === 'object' ? itemPre.img : '';
       el(prefix + 'descricao').value = nome;
       atualizarFotoProduto(modulo, img);
-      statusEl.innerHTML = '<span class="ok">⚡ Encontrado na base Rede Market!</span>';
+      statusEl.innerHTML = '<span class="ok">⚡ Encontrado na base principal!</span>';
       focarCalendario(prefix);
       return;
     }
     
+    // 3. Consulta em tempo real na API Global Open Food Facts (Milhões de itens alimentícios)
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, {
         signal: controller.signal
@@ -915,16 +922,20 @@
         el(prefix + 'descricao').value = nomeProd;
         const imgUrl = data.product.image_front_small_url || data.product.image_url || '';
         atualizarFotoProduto(modulo, imgUrl);
-        statusEl.innerHTML = '<span class="ok">⚡ Encontrado com sucesso online!</span>';
+        statusEl.innerHTML = '<span class="ok">⚡ Encontrado na base global!</span>';
+        
+        // Salva automaticamente para as próximas vezes
+        catalogoLocal[code] = { nome: nomeProd, img: imgUrl };
+        localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
+
         focarCalendario(prefix);
-      } else {
-        statusEl.innerHTML = '<span class="warn">⚠️ Produto não cadastrado nas bases. Digite a descrição manualmente.</span>';
-        el(prefix + 'descricao').focus();
+        return;
       }
-    } catch (e) {
-      statusEl.innerHTML = '<span class="warn">⚠️ Falha na rede. Preencha a descrição manualmente.</span>';
-      el(prefix + 'descricao').focus();
-    }
+    } catch (e) {}
+
+    // 4. Fallback caso não ache
+    statusEl.innerHTML = '<span class="warn">⚠️ Não cadastrado na base global. Digite o nome abaixo.</span>';
+    el(prefix + 'descricao').focus();
   }
 
   function focarCalendario(prefix) {
@@ -947,6 +958,9 @@
     const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
     const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
     const validade = el(prefix + 'validade').value;
+    const boxId = modulo === 'proativo' ? 'pro_foto_box' : 'trc_foto_box';
+    const fotoBox = el(boxId);
+    const imgUrl = fotoBox ? (fotoBox.getAttribute('data-img') || '') : '';
     
     if (!desc || isNaN(qtd) || !validade) {
       alert("Preencha descrição, quantidade e validade.");
@@ -961,8 +975,15 @@
       unidade: el(prefix + 'unidade').value || 'und',
       validade: validade,
       valor: val,
-      total: qtd * val
+      total: qtd * val,
+      imagem: imgUrl
     };
+
+    // Salva no catálogo local do usuário para consultas instantâneas futuras
+    if (item.codigo !== 'S/C') {
+      catalogoLocal[item.codigo] = { nome: desc, img: imgUrl };
+      localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
+    }
     
     if (modulo === 'trocas') {
       item.motivo = parseInt(el('trc_motivo').value);
@@ -1006,7 +1027,12 @@
       const dataFmt = item.validade.split('-').reverse().join('/');
       const infoExtra = item.motivo ? ` | Motivo: ${item.motivo === 1 ? '1-Avaria' : '2-Descarte'}` : '';
       
+      const thumbHtml = item.imagem && item.imagem.startsWith('http') 
+        ? `<div class="item-thumb"><img src="${item.imagem}" alt="Prod"></div>` 
+        : `<div class="item-thumb"><span>Sem foto</span></div>`;
+      
       itemEl.innerHTML = `
+        ${thumbHtml}
         <div class="item-info">
           <strong>${item.descricao}</strong>
           <small>Cód: ${item.codigo} | Qtd: ${item.quantidade} ${item.unidade} | Val: ${dataFmt}${infoExtra}</small>
@@ -1064,7 +1090,6 @@
         const arrayBuffer = await response.arrayBuffer();
         workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
       } catch (e) {
-        alert("Aviso: Modelo oficial não encontrado. Gerando padrão.");
         workbook = await XlsxPopulate.fromBlankAsync();
       }
       
