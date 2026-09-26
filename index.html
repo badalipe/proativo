@@ -175,14 +175,14 @@
     cursor: grabbing !important;
   }
 
-  /* FORÇAR LIMPEZA TOTAL DA CAIXA ESCURA DA BIBLIOTECA */
+  /* CÂMARA EM ECRÃ INTEIRO SEM FUNDO ESCURO OPACO */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 99999;
     display: flex; flex-direction: column; justify-content: space-between;
   }
   .beep-top-bar { 
     display: flex; align-items: center; justify-content: space-between; 
-    padding: 16px 20px; background: transparent; color: #fff; font-size: 16px; font-weight: 500; z-index: 30; 
+    padding: 16px 20px; background: rgba(0,0,0,0.4); color: #fff; font-size: 16px; font-weight: 500; z-index: 30; 
   }
   .beep-back-btn { 
     background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; 
@@ -196,7 +196,7 @@
   #beep-reader { width: 100% !important; height: 100% !important; border: none !important; background: transparent !important; }
   #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
   
-  /* REMOÇÃO DE QUALQUER ELEMENTO DE SOMBRA INJETADO */
+  /* REMOÇÃO DE QUALQUER SOMBRA INTERNA DA BIBLIOTECA */
   #html5-qrcode-anchor-scan-box-whats-this, 
   #beep-reader__dashboard, 
   #beep-reader__dashboard_section_csr,
@@ -542,7 +542,7 @@
     </div>
   </div>
   
-  <!-- SCANNER OVERLAY COMPLETAMENTE LIMPO -->
+  <!-- SCANNER COM VISOR NORMAL (SEM SOMBRAS ESCURAS) -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
@@ -749,7 +749,6 @@
     setTimeout(() => flash.classList.remove('active'), 350);
   }
 
-  // INJETAR ESTILO DINÂMICO PARA ELIMINAR QUALQUER CAIXA OU SOMBRA DA BIBLIOTECA
   function injetarEstiloCameraLimpa() {
     let styleId = 'override-qr-box';
     if (!document.getElementById(styleId)) {
@@ -1110,7 +1109,7 @@
           
           sheet.cell(`A${row}`).value(index + 1);
           sheet.cell(`B${row}`).value("");
-          sheet.cell(`C${row}`).value(nomeLoja);
+          sheet.cell(`C${row}`, nomeLoja);
           sheet.cell(`D${row}`).value(item.codigo);
           sheet.cell(`E${row}`).value(item.descricao);
           sheet.cell(`F${row}`).value(item.quantidade);
