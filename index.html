@@ -249,10 +249,27 @@
   .campo .caixa input, .campo .caixa select { border: 0; background: transparent; padding: 0; height: 100%; font-size: 14px; }
   
   .header-right { display: flex; align-items: center; gap: 6px; }
-  .chip-loja {
-    display: flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; font-size: 11px; font-weight: 600;
-    padding: 5px 8px; border-radius: 999px; cursor: pointer;
+  
+  /* CHIP SELETOR DE LOJA EM CASCATA */
+  .select-loja-chip {
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 24px 5px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 12px;
+  }
+  .select-loja-chip option {
+    background: #0f172a;
+    color: #fff;
   }
   
   .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
@@ -431,7 +448,22 @@
             </div>
           </div>
           <div class="header-right">
-            <button type="button" class="chip-loja" onclick="alternarLoja()"><span id="lblLojaPro">PATITIBA</span></button>
+            <!-- SELETOR EM CASCATA DE LOJAS -->
+            <select id="selectLojaPro" class="select-loja-chip" onchange="mudarLojaSelect(this.value)">
+              <option value="PATITIBA">PATITIBA</option>
+              <option value="BANANAL">BANANAL</option>
+              <option value="LAPA">LAPA</option>
+              <option value="CAIS">CAIS</option>
+              <option value="TEXACO">TEXACO</option>
+              <option value="BALNEÁRIO">BALNEÁRIO</option>
+              <option value="ENSEADA">ENSEADA</option>
+              <option value="JAPUÍBA">JAPUÍBA</option>
+              <option value="NOVA ANGRA">NOVA ANGRA</option>
+              <option value="RIBEIRA">RIBEIRA</option>
+              <option value="FRADE">FRADE</option>
+              <option value="PARQUE MAMBUCABA">PARQUE MAMBUCABA</option>
+              <option value="CENTRO">CENTRO</option>
+            </select>
             <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 10px; font-size: 11px;">Menu</button>
           </div>
         </div>
@@ -511,7 +543,22 @@
             </div>
           </div>
           <div class="header-right">
-            <button type="button" class="chip-loja" onclick="alternarLoja()"><span id="lblLojaTrc">PATITIBA</span></button>
+            <!-- SELETOR EM CASCATA DE LOJAS -->
+            <select id="selectLojaTrc" class="select-loja-chip" onchange="mudarLojaSelect(this.value)">
+              <option value="PATITIBA">PATITIBA</option>
+              <option value="BANANAL">BANANAL</option>
+              <option value="LAPA">LAPA</option>
+              <option value="CAIS">CAIS</option>
+              <option value="TEXACO">TEXACO</option>
+              <option value="BALNEÁRIO">BALNEÁRIO</option>
+              <option value="ENSEADA">ENSEADA</option>
+              <option value="JAPUÍBA">JAPUÍBA</option>
+              <option value="NOVA ANGRA">NOVA ANGRA</option>
+              <option value="RIBEIRA">RIBEIRA</option>
+              <option value="FRADE">FRADE</option>
+              <option value="PARQUE MAMBUCABA">PARQUE MAMBUCABA</option>
+              <option value="CENTRO">CENTRO</option>
+            </select>
             <button type="button" class="secondary" onclick="voltarAoMenu()" style="padding: 6px 10px; font-size: 11px;">Menu</button>
           </div>
         </div>
@@ -617,13 +664,12 @@
     "BALNEÁRIO", "ENSEADA", "JAPUÍBA", "NOVA ANGRA", 
     "RIBEIRA", "FRADE", "PARQUE MAMBUCABA", "CENTRO"
   ];
-  let lojaAtualIndex = 0;
+  let lojaSelecionada = "PATITIBA";
 
-  function alternarLoja() {
-    lojaAtualIndex = (lojaAtualIndex + 1) % listaLojas.length;
-    const nomeLoja = listaLojas[lojaAtualIndex];
-    if (el('lblLojaPro')) el('lblLojaPro').innerText = nomeLoja;
-    if (el('lblLojaTrc')) el('lblLojaTrc').innerText = nomeLoja;
+  function mudarLojaSelect(novaLoja) {
+    lojaSelecionada = novaLoja;
+    if (el('selectLojaPro')) el('selectLojaPro').value = novaLoja;
+    if (el('selectLojaTrc')) el('selectLojaTrc').value = novaLoja;
   }
 
   let moduloAtual = null;
@@ -1096,7 +1142,7 @@
       
       const sheet = workbook.sheet(0);
       const nomeModulo = modulo === 'proativo' ? "Pró Ativo Frios" : "Relatório de Trocas";
-      const nomeLoja = listaLojas[lojaAtualIndex];
+      const nomeLoja = lojaSelecionada;
       
       if (modulo === 'proativo') {
         const digitou = el('pro_digitou').value;
@@ -1137,24 +1183,20 @@
         sheet.cell("A41").value(responsavel);
         
         listaData.forEach((item, index) => {
-          const row = 16 + index; // Linha inicial
+          const row = 16 + index;
           if (row <= 38) {
-            // COLUNA A: Código de Barras (Força alinhamento centralizado em TODAS as linhas, inclusive a primeira)
             const cellA = sheet.cell(`A${row}`);
             cellA.value(String(item.codigo || '').trim());
             cellA.style({ horizontalAlignment: 'center', verticalAlignment: 'center' });
 
-            // COLUNA B: Descrição do Produto (Alinhado à esquerda)
             const cellB = sheet.cell(`B${row}`);
             cellB.value(String(item.descricao || '').replace(/\s+/g, ' ').trim());
             cellB.style({ horizontalAlignment: 'left', verticalAlignment: 'center' });
 
-            // COLUNA C: Quantidade (Centralizado)
             const cellC = sheet.cell(`C${row}`);
             cellC.value(Number(item.quantidade) || 0);
             cellC.style({ horizontalAlignment: 'center', verticalAlignment: 'center' });
 
-            // COLUNA D: Motivo (Centralizado)
             const cellD = sheet.cell(`D${row}`);
             cellD.value(Number(item.motivo) || 1);
             cellD.style({ horizontalAlignment: 'center', verticalAlignment: 'center' });
