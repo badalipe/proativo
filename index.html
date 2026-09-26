@@ -175,7 +175,7 @@
     cursor: grabbing !important;
   }
 
-  /* CÂMARA EM ECRÃ INTEIRO SEM FUNDO ESCURO OPACO */
+  /* CÂMARA LIMPA EM ECRÃ INTEIRO (SEM FUNDO ESCURO OPACO) */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 99999;
     display: flex; flex-direction: column; justify-content: space-between;
@@ -196,7 +196,7 @@
   #beep-reader { width: 100% !important; height: 100% !important; border: none !important; background: transparent !important; }
   #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
   
-  /* REMOÇÃO DE QUALQUER SOMBRA INTERNA DA BIBLIOTECA */
+  /* ESTILOS INTERNOS DE OVERRIDE PARA ANULAR QUALQUER SOMBRA DA BIBLIOTECA */
   #html5-qrcode-anchor-scan-box-whats-this, 
   #beep-reader__dashboard, 
   #beep-reader__dashboard_section_csr,
@@ -207,23 +207,6 @@
   
   .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 20; }
   
-  .scan-corner-box {
-    width: 86%; max-width: 340px; height: 180px;
-    position: relative; border-radius: 4px; background: transparent !important;
-    box-shadow: none !important;
-  }
-  .scan-corner-box::before, .scan-corner-box::after {
-    content: ''; position: absolute; width: 36px; height: 36px; border-color: #ffffff; border-style: solid; border-width: 4px 0 0 4px; top: 0; left: 0;
-  }
-  .scan-corner-box::after {
-    left: auto; right: 0; border-width: 4px 4px 0 0;
-  }
-  .scan-corner-bottom-left, .scan-corner-bottom-right {
-    position: absolute; width: 36px; height: 36px; border-color: #ffffff; border-style: solid; border-width: 0 0 4px 4px; bottom: 0; left: 0;
-  }
-  .scan-corner-bottom-right {
-    left: auto; right: 0; border-width: 0 4px 4px 0;
-  }
   .scan-laser-line {
     position: absolute; top: 50%; left: 10px; right: 10px; height: 2px;
     background: #e30613; box-shadow: 0 0 10px #e30613; animation: laserScan 1.8s infinite ease-in-out;
@@ -542,7 +525,7 @@
     </div>
   </div>
   
-  <!-- SCANNER COM VISOR NORMAL (SEM SOMBRAS ESCURAS) -->
+  <!-- SCANNER COM VISOR TOTALMENTE LIMPO E ZOOM 3X AUTOMÁTICO -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
@@ -551,11 +534,7 @@
     </div>
     <div class="beep-viewport"><div id="beep-reader"></div></div>
     <div class="beep-target-container">
-      <div class="scan-corner-box">
-        <div class="scan-corner-bottom-left"></div>
-        <div class="scan-corner-bottom-right"></div>
-        <div class="scan-laser-line"></div>
-      </div>
+      <div class="scan-laser-line"></div>
       <div class="scan-flash" id="scanFlash"></div>
     </div>
     <div class="beep-bottom-bar">
@@ -759,7 +738,9 @@
         #beep-reader__dashboard,
         #beep-reader__dashboard_section_csr,
         #beep-reader div[style*="background"],
-        #beep-reader img {
+        #beep-reader img,
+        div[id^="html5-qrcode-button-camera-permission"],
+        div[style*="border: 2px solid rgb"] {
           display: none !important;
         }
         #beep-reader__scan_region {
@@ -767,6 +748,9 @@
         }
         #beep-reader video {
           background: transparent !important;
+          object-fit: cover !important;
+          width: 100% !important;
+          height: 100% !important;
         }
       `;
       document.head.appendChild(st);
@@ -800,7 +784,7 @@
 
     const config = {
       fps: 25,
-      qrbox: { width: 300, height: 160 },
+      qrbox: { width: 320, height: 180 },
       experimentalFeatures: {
         useBarCodeDetectorIfSupported: true
       },
@@ -816,7 +800,9 @@
     };
 
     const constraints = {
-      facingMode: "environment"
+      facingMode: "environment",
+      width: { ideal: 1920 },
+      height: { ideal: 1080 }
     };
 
     try {
@@ -833,6 +819,23 @@
         },
         () => {}
       );
+
+      // APLICAR ZOOM AUTOMÁTICO DE 3X LOGO APÓS O INÍCIO DA STREAM
+      setTimeout(async () => {
+        try {
+          if (html5QrCode && typeof html5QrCode.applyVideoConstraints === 'function') {
+            await html5QrCode.applyVideoConstraints({ advanced: [{ zoom: 3.0 }] });
+          }
+        } catch (errZoom) {
+          try {
+            const track = html5QrCode.getRunningTrack();
+            if (track && typeof track.applyConstraints === 'function') {
+              await track.applyConstraints({ advanced: [{ zoom: 3.0 }] });
+            }
+          } catch(e2){}
+        }
+      }, 500);
+
     } catch (e) {
       alert("Não foi possível acessar a câmera. Verifique se o site tem permissão nas configurações do navegador.");
       pararScanner();
@@ -1109,7 +1112,7 @@
           
           sheet.cell(`A${row}`).value(index + 1);
           sheet.cell(`B${row}`).value("");
-          sheet.cell(`C${row}`, nomeLoja);
+          sheet.cell(`C${row}`).value(nomeLoja);
           sheet.cell(`D${row}`).value(item.codigo);
           sheet.cell(`E${row}`).value(item.descricao);
           sheet.cell(`F${row}`).value(item.quantidade);
