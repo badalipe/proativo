@@ -173,14 +173,14 @@
   }
   .fab-camera:active { cursor: grabbing !important; }
 
-  /* CÂMARA EM ECRÃ INTEIRO */
+  /* CÂMARA EM TELA INTEIRA ULTRA LIMPA (MÁXIMA QUALIDADE + ZOOM 3X) */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 99999;
     display: flex; flex-direction: column; justify-content: space-between;
   }
   .beep-top-bar { 
     display: flex; align-items: center; justify-content: space-between; 
-    padding: 16px 20px; background: rgba(0,0,0,0.4); color: #fff; font-size: 16px; font-weight: 500; z-index: 30; 
+    padding: 16px 20px; background: rgba(0,0,0,0.6); color: #fff; font-size: 16px; font-weight: 500; z-index: 30; 
   }
   .beep-back-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; }
   .beep-manual-btn { 
@@ -188,15 +188,34 @@
     color: #fff; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px; cursor: pointer; letter-spacing: 0.5px;
   }
   
-  .beep-viewport { position: absolute; inset: 0; background: #000; z-index: 10; display: flex; align-items: center; justify-content: center; }
-  #beep-reader { width: 100% !important; height: 100% !important; border: none !important; background: transparent !important; }
-  #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; playsinline: true; }
+  .beep-viewport { position: absolute; inset: 0; background: #000; z-index: 10; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  #beep-reader { width: 100% !important; height: 100% !important; border: none !important; background: transparent !important; position: relative; }
   
+  /* FORÇA A CÂMARA A PREENCHER TELA INTEIRA COM MÁXIMA QUALIDADE */
+  #beep-reader video { 
+    width: 100% !important; 
+    height: 100% !important; 
+    object-fit: cover !important; 
+    position: absolute !important;
+    inset: 0 !important;
+  }
+  
+  /* ESCONDE TOTALMENTE ELEMENTOS NATIVOS E POLUIÇÕES DA BIBLIOTECA */
   #html5-qrcode-anchor-scan-box-whats-this, 
   #beep-reader__dashboard, 
   #beep-reader__dashboard_section_csr,
   #beep-reader div[style*="background"],
-  #beep-reader img { display: none !important; }
+  #beep-reader img,
+  div[id^="html5-qrcode-button-camera-permission"],
+  div[style*="border: 2px solid rgb"] { 
+    display: none !important; 
+  }
+
+  #beep-reader__scan_region {
+    background: transparent !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
   
   .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 20; }
   
@@ -204,7 +223,7 @@
     position: absolute; top: 50%; left: 10px; right: 10px; height: 2px;
     background: #e30613; box-shadow: 0 0 10px #e30613; animation: laserScan 1.8s infinite ease-in-out;
   }
-  @keyframes laserScan { 0%, 100% { top: 15%; opacity: 0.6; } 50% { top: 85%; opacity: 1; } }
+  @keyframes laserScan { 0%, 100% { top: 25%; opacity: 0.6; } 50% { top: 75%; opacity: 1; } }
   .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.4); opacity: 0; transition: opacity 0.15s ease; z-index: 25; pointer-events: none; }
   .scan-flash.active { opacity: 1; }
   
@@ -539,7 +558,6 @@
     "patitiba": "frios2026"
   };
   
-  // Base estendida com itens essenciais brasileiros comuns de mercado
   const produtosPreCadastrados = {
     "7896081800034": { nome: "Café Pimpinela Tradicional 500g", img: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=150" },
     "7896045112098": { nome: "Refresco em Pó Frisco Abacaxi 18g", img: "" },
@@ -724,42 +742,12 @@
     flash.classList.add('active');
     setTimeout(() => flash.classList.remove('active'), 350);
   }
-
-  function injetarEstiloCameraLimpa() {
-    let styleId = 'override-qr-box';
-    if (!document.getElementById(styleId)) {
-      let st = document.createElement('style');
-      st.id = styleId;
-      st.innerHTML = `
-        #html5-qrcode-anchor-scan-box-whats-this,
-        #beep-reader__dashboard,
-        #beep-reader__dashboard_section_csr,
-        #beep-reader div[style*="background"],
-        #beep-reader img,
-        div[id^="html5-qrcode-button-camera-permission"],
-        div[style*="border: 2px solid rgb"] {
-          display: none !important;
-        }
-        #beep-reader__scan_region {
-          background: transparent !important;
-        }
-        #beep-reader video {
-          background: transparent !important;
-          object-fit: cover !important;
-          width: 100% !important;
-          height: 100% !important;
-        }
-      `;
-      document.head.appendChild(st);
-    }
-  }
   
   async function abrirScanner(modulo) {
     if (travadoCamera) return;
     travadoCamera = true;
     moduloAtual = modulo;
 
-    injetarEstiloCameraLimpa();
     el('beep-scanner-overlay').classList.remove('hidden');
 
     if (html5QrCode) {
@@ -780,7 +768,7 @@
     html5QrCode = new Html5Qrcode("beep-reader");
 
     const config = {
-      fps: 25,
+      fps: 30,
       qrbox: { width: 320, height: 180 },
       experimentalFeatures: {
         useBarCodeDetectorIfSupported: true
@@ -796,8 +784,12 @@
       ]
     };
 
+    // Configuração estrita: Câmera traseira, resolução máxima e zoom de 3x
     const constraints = {
-      facingMode: "environment"
+      facingMode: "environment",
+      width: { ideal: 3840 },
+      height: { ideal: 2160 },
+      advanced: [{ zoom: 3.0 }]
     };
 
     try {
@@ -815,8 +807,25 @@
         () => {}
       );
     } catch (e) {
-      alert("Não foi possível acessar a câmera. Verifique se o site tem permissão nas configurações do navegador.");
-      pararScanner();
+      // Fallback automático caso o hardware não suporte os parâmetros avançados
+      try {
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          config,
+          (decodedText) => {
+            tocarBipe();
+            dispararFlashScan();
+            const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+            el(prefix + 'codigo').value = decodedText;
+            buscarProduto(modulo);
+            pararScanner();
+          },
+          () => {}
+        );
+      } catch (err) {
+        alert("Não foi possível acessar a câmera do dispositivo. Verifique se permitiu o uso da câmera.");
+        pararScanner();
+      }
     } finally {
       travadoCamera = false;
     }
@@ -879,22 +888,22 @@
       return;
     }
     
-    statusEl.innerHTML = '⚡ Consultando base de milhões de produtos...';
+    statusEl.innerHTML = '⚡ Consultando base de produtos...';
     atualizarFotoProduto(modulo, null);
     
-    // 1. Verificar catálogo local gravado (memória rápida do usuário)
+    // 1. Catálogo local de memória
     if (catalogoLocal[code]) {
       const itemCat = catalogoLocal[code];
       const nome = typeof itemCat === 'object' ? itemCat.nome : itemCat;
       const img = typeof itemCat === 'object' ? itemCat.img : '';
       el(prefix + 'descricao').value = nome;
       atualizarFotoProduto(modulo, img);
-      statusEl.innerHTML = '<span class="ok">⚡ Encontrado no histórico local!</span>';
+      statusEl.innerHTML = '<span class="ok">⚡ Encontrado no histórico!</span>';
       focarCalendario(prefix);
       return;
     }
     
-    // 2. Verificar base pré-cadastrada
+    // 2. Base pré-cadastrada (inclui o Café Pimpinela)
     if (produtosPreCadastrados[code]) {
       const itemPre = produtosPreCadastrados[code];
       const nome = typeof itemPre === 'object' ? itemPre.nome : itemPre;
@@ -906,10 +915,10 @@
       return;
     }
     
-    // 3. Consulta em tempo real na API Global Open Food Facts (Milhões de itens alimentícios)
+    // 3. API Global Open Food Facts
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
       const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, {
         signal: controller.signal
@@ -924,7 +933,6 @@
         atualizarFotoProduto(modulo, imgUrl);
         statusEl.innerHTML = '<span class="ok">⚡ Encontrado na base global!</span>';
         
-        // Salva automaticamente para as próximas vezes
         catalogoLocal[code] = { nome: nomeProd, img: imgUrl };
         localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
 
@@ -933,8 +941,7 @@
       }
     } catch (e) {}
 
-    // 4. Fallback caso não ache
-    statusEl.innerHTML = '<span class="warn">⚠️ Não cadastrado na base global. Digite o nome abaixo.</span>';
+    statusEl.innerHTML = '<span class="warn">⚠️ Não cadastrado. Digite o nome do produto abaixo.</span>';
     el(prefix + 'descricao').focus();
   }
 
@@ -979,7 +986,6 @@
       imagem: imgUrl
     };
 
-    // Salva no catálogo local do usuário para consultas instantâneas futuras
     if (item.codigo !== 'S/C') {
       catalogoLocal[item.codigo] = { nome: desc, img: imgUrl };
       localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
