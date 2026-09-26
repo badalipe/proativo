@@ -22,127 +22,107 @@
     }
 
     /* ==========================================================
-       CABEÇALHO PROFISSIONAL MINIMALISTA (REDESENHADO)
+       CABEÇALHO PROFISSIONAL E HARMONIOSO (LIMPO E ORGANIZADO)
        ================================================---------- */
     .top {
-      background: linear-gradient(135deg, #090d16 0%, #1e293b 100%);
-      color: #fff; 
-      padding: 14px 16px; 
-      position: sticky; 
-      top: 0; 
+      background: #0b1329;
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
       z-index: 100;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
-    
-    .header-content-wrapper {
-      width: 100%; 
-      max-width: 600px; 
+
+    .top-content {
+      max-width: 600px;
       margin: 0 auto;
-      display: flex; 
-      flex-direction: column; 
+      display: flex;
+      flex-direction: column;
       gap: 10px;
     }
 
-    .header-main-row {
-      display: flex; 
-      align-items: center; 
-      justify-content: space-between; 
-      width: 100%;
-      gap: 12px;
-    }
-
-    .header-brand-group {
+    .top-row-main {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 10px;
-      min-width: 0;
     }
 
-    /* Logo integrada com acabamento limpo */
-    .logo-container-pro {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 5px 10px;
-      border-radius: 8px;
+    /* Caixa da Logo limpa e alinhada */
+    .logo-box {
+      background: #ffffff;
+      padding: 4px 8px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
-      justify-content: center;
       flex-shrink: 0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
-    .header-logo { height: 22px; width: auto; object-fit: contain; }
+    .logo-box svg {
+      height: 24px;
+      width: auto;
+    }
 
-    .header-text-box {
+    /* Títulos ao lado da logo */
+    .titles-box {
+      flex-grow: 1;
       min-width: 0;
     }
-    .header-text-box h1 { 
-      font-size: 15px; 
-      font-weight: 700; 
-      margin: 0; 
-      color: #ffffff; 
-      letter-spacing: -0.2px;
-      white-space: nowrap; 
-      overflow: hidden; 
-      text-overflow: ellipsis; 
+    .titles-box h1 {
+      font-size: 14px;
+      color: #ffffff;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .header-text-box .sub { 
-      color: #38bdf8; 
-      font-size: 11px; 
+    .titles-box p {
+      font-size: 11px;
+      color: #38bdf8;
+      margin: 0;
       font-weight: 500;
-      margin-top: 1px; 
-      letter-spacing: 0.3px;
       text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
 
-    /* Botão de Menu estilo pílula refinado */
-    .btn-menu-pro {
+    /* Botão Menu refinado alinhado à direita */
+    .btn-menu-top {
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
+      color: #ffffff;
       padding: 6px 14px;
       border-radius: 20px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
       flex-shrink: 0;
+      transition: background 0.2s;
     }
-    .btn-menu-pro:active {
+    .btn-menu-top:active {
       background: rgba(255, 255, 255, 0.25);
     }
 
-    /* Seletor de Loja Estilizado */
-    .header-sub-row {
+    /* Seletor de Loja na linha inferior, com largura total elegante */
+    .select-loja-top {
       width: 100%;
-      display: flex;
-      align-items: center;
-    }
-
-    .select-loja-pro {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 100%;
-      background-color: rgba(15, 23, 42, 0.6) !important;
-      border: 1px solid rgba(255, 255, 255, 0.15) !important;
-      color: #e2e8f0 !important;
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      padding: 8px 12px;
+      border-radius: 8px;
       font-size: 12px;
       font-weight: 600;
-      padding: 8px 32px 8px 14px;
-      border-radius: 10px;
+      outline: none;
       cursor: pointer;
-      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      background-size: 14px;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
     }
-    .select-loja-pro option {
-      background: #0f172a !important;
-      color: #ffffff !important;
+    .select-loja-top option {
+      background: #1e293b;
+      color: #ffffff;
     }
 
     /* ==========================================================
-       CONTEÚDO DA PÁGINA (EXEMPLO DE LAYOUT)
+       CONTEÚDO DA PÁGINA (ÁREA DE TRABALHO)
        ================================================---------- */
     .container {
       max-width: 600px;
@@ -159,7 +139,7 @@
     }
 
     .card h2 {
-      font-size: 14px;
+      font-size: 13px;
       color: #64748b;
       margin-bottom: 12px;
       text-transform: uppercase;
@@ -188,28 +168,28 @@
 <body>
 
   <header class="top">
-    <div class="header-content-wrapper">
-      <div class="header-main-row">
-        <div class="header-brand-group">
-          <div class="logo-container-pro">
-            <svg class="header-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
-              <path d="M 30,120 L 30,55 C 30,35 45,20 65,20 L 115,20 C 145,20 165,40 165,70 C 165,95 145,115 120,120 L 155,160 L 125,160 L 95,120 L 65,120 L 65,160 L 30,160 Z M 65,50 L 65,95 L 110,95 C 125,95 135,85 135,72 C 135,60 125,50 110,50 Z" fill="#0066b2"/>
-              <circle cx="30" cy="35" r="14" fill="#0066b2"/>
-              <circle cx="30" cy="145" r="14" fill="#0066b2"/>
-              <text x="175" y="68" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#0066b2" letter-spacing="-1">rede</text>
-              <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
-            </svg>
-          </div>
-          <div class="header-text-box">
-            <h1>Gestão de Trocas</h1>
-            <div class="sub">Devoluções</div>
-          </div>
+    <div class="top-content">
+      <div class="top-row-main">
+        <div class="logo-box">
+          <svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 30,120 L 30,55 C 30,35 45,20 65,20 L 115,20 C 145,20 165,40 165,70 C 165,95 145,115 120,120 L 155,160 L 125,160 L 95,120 L 65,120 L 65,160 L 30,160 Z M 65,50 L 65,95 L 110,95 C 125,95 135,85 135,72 C 135,60 125,50 110,50 Z" fill="#0066b2"/>
+            <circle cx="30" cy="35" r="14" fill="#0066b2"/>
+            <circle cx="30" cy="145" r="14" fill="#0066b2"/>
+            <text x="175" y="68" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#0066b2" letter-spacing="-1">rede</text>
+            <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
+          </svg>
         </div>
-        <button type="button" class="btn-menu-pro" onclick="voltarAoMenu()">Menu</button>
+        
+        <div class="titles-box">
+          <h1>Gestão de Trocas</h1>
+          <p>Devoluções</p>
+        </div>
+
+        <button class="btn-menu-top" onclick="abrirMenu()">Menu</button>
       </div>
 
-      <div class="header-sub-row">
-        <select id="selectLojaTrc" class="select-loja-pro" onchange="mudarLojaSelect(this.value)">
+      <div>
+        <select class="select-loja-top" id="selectLoja" onchange="mudarLoja(this.value)">
           <option value="PATITIBA">PATITIBA</option>
           <option value="BANANAL">BANANAL</option>
           <option value="LAPA">LAPA</option>
@@ -231,20 +211,19 @@
   <main class="container">
     <section class="card">
       <h2>Área de Trabalho</h2>
-      <button class="btn-primary" onclick="alert('Módulo pronto!')">Nova Operação</button>
+      <button class="btn-primary" onclick="alert('Operação iniciada!')">Nova Operação</button>
     </section>
   </main>
 
   <script>
-    function voltarAoMenu() {
-      // Insira aqui a lógica de redirecionamento para o menu principal
-      window.location.href = "index.html"; 
+    function abrirMenu() {
+      // Sua lógica de menu atual
+      console.log("Abrir menu principal");
     }
 
-    function mudarLojaSelect(loja) {
-      console.log("Loja alterada para: ", loja);
-      // Salvar preferência se necessário (ex: localStorage)
-      localStorage.setItem("lojaSelecionada", loja);
+    function mudarLoja(loja) {
+      console.log("Loja selecionada:", loja);
+      localStorage.setItem("lojaAtual", loja);
     }
   </script>
 </body>
