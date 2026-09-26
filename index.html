@@ -250,13 +250,13 @@
   
   .header-right { display: flex; align-items: center; gap: 6px; }
   
-  /* CHIP SELETOR DE LOJA EM CASCATA */
+  /* CHIP SELETOR DE LOJA EM CASCATA CORRIGIDO */
   .select-loja-chip {
     appearance: none;
     -webkit-appearance: none;
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    color: #fff;
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
     font-size: 11px;
     font-weight: 600;
     padding: 5px 24px 5px 10px;
@@ -268,8 +268,8 @@
     background-size: 12px;
   }
   .select-loja-chip option {
-    background: #0f172a;
-    color: #fff;
+    background: #0f172a !important;
+    color: #ffffff !important;
   }
   
   .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
@@ -625,7 +625,7 @@
     </div>
   </div>
   
-  <!-- SCANNER DE CÓDIGO DE BARRAS LIMPO -->
+  <!-- SCANNER DE CÓDIGO DE BARRAS SEGURO CONTRA TRANSIÇÕES -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">← Fechar</button>
@@ -659,11 +659,6 @@
   let itensProAtivo = JSON.parse(localStorage.getItem('sys_proative_itens') || '[]');
   let itensTrocas = JSON.parse(localStorage.getItem('sys_trocas_itens') || '[]');
   
-  const listaLojas = [
-    "PATITIBA", "BANANAL", "LAPA", "CAIS", "TEXACO", 
-    "BALNEÁRIO", "ENSEADA", "JAPUÍBA", "NOVA ANGRA", 
-    "RIBEIRA", "FRADE", "PARQUE MAMBUCABA", "CENTRO"
-  ];
   let lojaSelecionada = "PATITIBA";
 
   function mudarLojaSelect(novaLoja) {
@@ -676,7 +671,6 @@
   let html5QrCode = null;
   let lanternaAtiva = false;
   let scannerEmTransicao = false;
-  
   let imagemAtualProduto = "";
   
   const el = id => document.getElementById(id);
