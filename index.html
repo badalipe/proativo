@@ -159,7 +159,7 @@
   }
   .fab-camera:active { cursor: grabbing !important; }
 
-  /* CÂMARA EM TELA INTEIRA */
+  /* CÂMARA EM TELA INTEIRA ESTILO BEEP */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 99999;
     display: flex; flex-direction: column; justify-content: space-between;
@@ -182,11 +182,40 @@
   #beep-reader__scan_region { background: transparent !important; width: 100% !important; height: 100% !important; }
   
   .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 20; }
-  .scan-laser-line {
-    position: absolute; top: 50%; left: 10px; right: 10px; height: 2px;
-    background: #e30613; box-shadow: 0 0 10px #e30613; animation: laserScan 1.8s infinite ease-in-out;
+  
+  /* MOLDURA DE CANTOS ESTILO APLICATIVO BEEP */
+  .beep-scanner-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 78%;
+    height: 38%;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 20;
   }
-  @keyframes laserScan { 0%, 100% { top: 25%; opacity: 0.6; } 50% { top: 75%; opacity: 1; } }
+  .beep-scanner-frame::before, .beep-scanner-frame::after {
+    content: '';
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    border-color: #ffffff;
+    border-style: solid;
+  }
+  .beep-scanner-frame::before { top: 0; left: 0; border-width: 4px 0 0 4px; }
+  .beep-scanner-frame::after { top: 0; right: 0; border-width: 4px 4px 0 0; }
+  .beep-scanner-frame-bottom-left, .beep-scanner-frame-bottom-right {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    border-color: #ffffff;
+    border-style: solid;
+  }
+  .beep-scanner-frame-bottom-left { bottom: 0; left: 0; border-width: 0 0 4px 4px; }
+  .beep-scanner-frame-bottom-right { bottom: 0; right: 0; border-width: 0 4px 4px 0; }
+
   .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.4); opacity: 0; transition: opacity 0.15s ease; z-index: 25; pointer-events: none; }
   .scan-flash.active { opacity: 1; }
   
@@ -500,7 +529,7 @@
     </div>
   </div>
   
-  <!-- SCANNER -->
+  <!-- SCANNER COM MOLDURA ESTILO BEEP E ZOOM DE 2.8x -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
@@ -508,10 +537,16 @@
       <button type="button" class="beep-manual-btn" onclick="fecharScannerSemCodigo()">MANUAL</button>
     </div>
     <div class="beep-viewport"><div id="beep-reader"></div></div>
+    
+    <!-- MOLDURA DE CANTOS ESTILO BEEP -->
     <div class="beep-target-container">
-      <div class="scan-laser-line"></div>
+      <div class="beep-scanner-frame">
+        <div class="beep-scanner-frame-bottom-left"></div>
+        <div class="beep-scanner-frame-bottom-right"></div>
+      </div>
       <div class="scan-flash" id="scanFlash"></div>
     </div>
+
     <div class="beep-bottom-bar">
       <button type="button" class="beep-btn-bottom-action" onclick="pararScanner()">Fechar Câmera</button>
     </div>
@@ -524,7 +559,6 @@
     "patitiba": "frios2026"
   };
   
-  // Base estendida enorme com centenas de itens comuns do mercado brasileiro (incluindo o código digitado 7896419730705 e similares)
   const produtosPreCadastrados = {
     "7896419730705": { nome: "Produto Cadastrado Rede Market", img: "" },
     "7898996002190": { nome: "Açúcar Cristal Carioca 1kg", img: "" },
@@ -748,6 +782,13 @@
       fps: 20,
       qrbox: { width: 300, height: 180 },
       aspectRatio: 1.0,
+      videoConstraints: {
+        facingMode: "environment",
+        advanced: [
+          { zoom: 2.8 },              
+          { focusMode: "continuous" }   
+        ]
+      },
       formatsToSupport: [
         Html5QrcodeSupportedFormats.EAN_13,
         Html5QrcodeSupportedFormats.EAN_8,
@@ -777,7 +818,11 @@
       try {
         await html5QrCode.start(
           true,
-          config,
+          {
+            fps: 20,
+            qrbox: { width: 300, height: 180 },
+            aspectRatio: 1.0
+          },
           (decodedText) => {
             tocarBipe();
             dispararFlashScan();
@@ -843,7 +888,6 @@
     }
   }
 
-  // MOTOR DE BUSCA OTIMIZADO E INTELIGENTE EM CASCATA COM MEMÓRIA PERMANENTE
   async function buscarProduto(modulo) {
     const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
     const code = el(prefix + 'codigo').value.trim();
@@ -858,7 +902,6 @@
     statusEl.innerHTML = '⚡ Buscando produto...';
     atualizarFotoProduto(modulo, null);
     
-    // 1. Catálogo local salvo das suas digitações anteriores
     if (catalogoLocal[code]) {
       const itemCat = catalogoLocal[code];
       const nome = typeof itemCat === 'object' ? itemCat.nome : itemCat;
@@ -870,7 +913,6 @@
       return;
     }
     
-    // 2. Base pré-cadastrada de itens do mercado
     if (produtosPreCadastrados[code]) {
       const itemPre = produtosPreCadastrados[code];
       const nome = typeof itemPre === 'object' ? itemPre.nome : itemPre;
@@ -882,7 +924,6 @@
       return;
     }
     
-    // 3. API Open Food Facts (Base mundial aberta)
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3500);
@@ -903,15 +944,6 @@
       }
     } catch (e) {}
 
-    // 4. API BrasilOpen / EAN Lookup público alternativo
-    try {
-      const controller2 = new AbortController();
-      const timeoutId2 = setTimeout(() => controller2.abort(), 3500);
-      const res2 = await fetch(`https://brasilapi.com.br/api/cptec/v1/fuso-horario`, { signal: controller2.signal }); // Fallback teste de conectividade
-      // Se digitou manualmente um código desconhecido, o sistema abre espaço para digitação imediata e memoriza para a próxima vez
-    } catch (e) {}
-
-    // Caso não esteja em nenhuma API, o sistema preenche o campo com o código e deixa você digitar o nome. Ao adicionar, ele grava para sempre no seu telemóvel!
     statusEl.innerHTML = '<span class="ok">💡 Digite o nome do produto uma vez. Ele ficará salvo para sempre no sistema!</span>';
     el(prefix + 'descricao').focus();
   }
@@ -958,7 +990,6 @@
       imagem: imgUrl
     };
 
-    // Salva automaticamente na memória do seu navegador para nunca mais precisar redigitar esse código!
     if (code !== 'S/C') {
       catalogoLocal[code] = { nome: desc, img: imgUrl };
       localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
@@ -1053,6 +1084,7 @@
     return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './planilha_padrao_original.xlsx';
   }
   
+  // GERAÇÃO DE EXCEL COM BORDAS E FORMATAÇÃO PROFISSIONAL APLICADA
   async function gerarExcel(modulo) {
     const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
     if (listaData.length === 0) {
@@ -1072,58 +1104,111 @@
         workbook = await XlsxPopulate.fromBlankAsync();
       }
       
-      const sheet = workbook.sheet(0);
       const nomeModulo = modulo === 'proativo' ? "Pró Ativo Frios" : "Relatório de Trocas";
       const nomeLoja = listaLojas[lojaAtualIndex];
+      let sheetOriginal = workbook.sheet(0);
       
       if (modulo === 'proativo') {
         const digitou = el('pro_digitou').value;
         const gerente = el('pro_gerente').value;
         const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        sheet.cell("H1").value(nomeLoja);
-        sheet.cell("H2").value(gerente);
-        sheet.cell("H3").value(dataLev);
-        sheet.cell("H4").value(digitou);
+        const itensPorPagina = 32; 
+        const totalPaginas = Math.ceil(listaData.length / itensPorPagina);
         
-        listaData.forEach((item, index) => {
-          const row = 7 + index;
-          const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
+        for (let pagina = 0; pagina < totalPaginas; pagina++) {
+          let sheet = pagina === 0 ? sheetOriginal : workbook.addSheet(`Página_${pagina + 1}`, sheetOriginal);
           
-          sheet.cell(`A${row}`).value(index + 1);
-          sheet.cell(`B${row}`).value("");
-          sheet.cell(`C${row}`).value(nomeLoja);
-          sheet.cell(`D${row}`).value(item.codigo);
-          sheet.cell(`E${row}`).value(item.descricao);
-          sheet.cell(`F${row}`).value(item.quantidade);
+          sheet.column('A').width(8);
+          sheet.column('B').width(12);
+          sheet.column('C').width(15);
+          sheet.column('D').width(18);
+          sheet.column('E').width(35);
+          sheet.column('F').width(12);
+          sheet.column('G').width(10);
+          sheet.column('H').width(15);
+          sheet.column('I').width(12);
           
-          const cellG = sheet.cell(`G${row}`);
-          cellG.value(String(item.unidade || 'und').trim());
-          cellG.style({ horizontalAlignment: 'center', verticalAlignment: 'center' });
+          sheet.cell("H1").value(nomeLoja);
+          sheet.cell("H2").value(gerente);
+          sheet.cell("H3").value(dataLev);
+          sheet.cell("H4").value(digitou);
           
-          sheet.cell(`H${row}`).value(dataFmn = dataFmt);
-          sheet.cell(`H${row}`).value(dataFmt);
-          sheet.cell(`I${row}`).value(item.valor);
-        });
+          const inicio = pagina * itensPorPagina;
+          const fim = Math.min(inicio + itensPorPagina, listaData.length);
+          const paginaItens = listaData.slice(inicio, fim);
+          
+          paginaItens.forEach((item, index) => {
+            const row = 7 + index;
+            const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
+            
+            const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
+            cols.forEach(col => {
+              sheet.cell(`${col}${row}`).style({
+                border: {
+                  top: "thin",
+                  bottom: "thin",
+                  left: "thin",
+                  right: "thin"
+                },
+                verticalAlignment: "center"
+              });
+            });
+            
+            sheet.cell(`A${row}`).value(inicio + index + 1).style({ horizontalAlignment: 'center' });
+            sheet.cell(`B${row}`).value("");
+            sheet.cell(`C${row}`).value(nomeLoja).style({ horizontalAlignment: 'center' });
+            sheet.cell(`D${row}`).value(item.codigo).style({ horizontalAlignment: 'center' });
+            sheet.cell(`E${row}`).value(item.descricao);
+            sheet.cell(`F${row}`).value(item.quantidade).style({ horizontalAlignment: 'center' });
+            sheet.cell(`G${row}`).value(String(item.unidade || 'und').trim()).style({ horizontalAlignment: 'center' });
+            sheet.cell(`H${row}`).value(dataFmt).style({ horizontalAlignment: 'center' });
+            sheet.cell(`I${row}`).value(item.valor).style({ horizontalAlignment: 'right' });
+          });
+        }
         
       } else {
         const responsavel = el('trc_digitou').value;
         const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        sheet.cell("B7").value("X");
-        sheet.cell("A10").value(nomeLoja);
-        sheet.cell("A12").value(dataTroca);
-        sheet.cell("A41").value(responsavel);
+        const itensPorPaginaTrc = 23; 
+        const totalPaginas = Math.ceil(listaData.length / itensPorPaginaTrc);
         
-        listaData.forEach((item, index) => {
-          const row = 16 + index;
-          if (row <= 38) {
-            sheet.cell(`A${row}`).value(String(item.codigo).trim());
-            sheet.cell(`B${row}`).value(String(item.descricao).replace(/\s+/g, ' ').trim());
-            sheet.cell(`C${row}`).value(item.quantidade);
-            sheet.cell(`D${row}`).value(item.motivo);
-          }
-        });
+        for (let pagina = 0; pagina < totalPaginas; pagina++) {
+          let sheet = pagina === 0 ? sheetOriginal : workbook.addSheet(`Trocas_${pagina + 1}`, sheetOriginal);
+          
+          sheet.cell("B7").value("X");
+          sheet.cell("A10").value(nomeLoja);
+          sheet.cell("A12").value(dataTroca);
+          sheet.cell("A41").value(responsavel);
+          
+          const inicio = pagina * itensPorPaginaTrc;
+          const fim = Math.min(inicio + itensPorPaginaTrc, listaData.length);
+          const paginaItens = listaData.slice(inicio, fim);
+          
+          paginaItens.forEach((item, index) => {
+            const row = 16 + index;
+            if (row <= 38) {
+              const colsTrc = ['A', 'B', 'C', 'D'];
+              colsTrc.forEach(col => {
+                sheet.cell(`${col}${row}`).style({
+                  border: {
+                    top: "thin",
+                    bottom: "thin",
+                    left: "thin",
+                    right: "thin"
+                  },
+                  verticalAlignment: "center"
+                });
+              });
+
+              sheet.cell(`A${row}`).value(String(item.codigo).trim()).style({ horizontalAlignment: 'center' });
+              sheet.cell(`B${row}`).value(String(item.descricao).replace(/\s+/g, ' ').trim());
+              sheet.cell(`C${row}`).value(item.quantidade).style({ horizontalAlignment: 'center' });
+              sheet.cell(`D${row}`).value(item.motivo).style({ horizontalAlignment: 'center' });
+            }
+          });
+        }
       }
       
       const blob = await workbook.outputAsync();
@@ -1133,7 +1218,7 @@
       a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
       a.click();
       window.URL.revokeObjectURL(url);
-      alert("Relatório preenchido com sucesso no modelo oficial!");
+      alert("Relatório gerado com sucesso!");
     } catch (e) {
       alert("Erro ao exportar Excel: " + e.message);
     }
