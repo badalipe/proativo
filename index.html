@@ -708,7 +708,14 @@
     }
     
     if (modulo === 'cartaz') {
-      window.open('https://rmarket.cartazfacil.pro/unitario.php', '_blank');
+      let senhaDigitada = prompt("Digite a senha para acessar o módulo CARTAZ:");
+      let senhaCorreta = "190505";
+      
+      if (senhaDigitada === senhaCorreta) {
+        window.open('https://rmarket.cartazfacil.pro/unitario.php', '_blank');
+      } else if (senhaDigitada !== null) {
+        alert("Senha incorreta! Acesso negado.");
+      }
       return;
     }
     
