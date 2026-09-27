@@ -51,6 +51,25 @@
   .login-card p { color: var(--text-muted); font-size: 12px; margin-bottom: 20px; }
   .login-error { background: #fef2f2; color: var(--accent-red); padding: 8px; border-radius: 6px; font-size: 12px; margin-bottom: 14px; font-weight: 600; }
 
+  /* MODAL DE SENHA PERSONALIZADO */
+  .custom-modal-overlay {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center;
+    z-index: 99999; padding: 16px; animation: fadeIn 0.2s ease-out;
+  }
+  .custom-modal-card {
+    background: #ffffff; width: 100%; max-width: 340px;
+    padding: 24px 20px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    text-align: center; animation: scaleUp 0.2s ease-out;
+  }
+  .custom-modal-card h3 { font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 6px; }
+  .custom-modal-card p { color: var(--text-muted); font-size: 12px; margin-bottom: 16px; }
+  .custom-modal-error { background: #fef2f2; color: var(--accent-red); padding: 6px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; font-weight: 600; }
+  .custom-modal-buttons { display: flex; gap: 10px; margin-top: 16px; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
   #menu-screen {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     width: 100%; height: 100vh; max-width: 400px; text-align: center; padding: 10px; margin: auto; overflow-y: auto;
@@ -136,8 +155,8 @@
   
   button { font: inherit; border: 0; border-radius: 10px; padding: 12px 14px; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
   .primary { background: var(--primary); color: #fff; width: 100%; }
-  .secondary { background: #f0f7ff; color: var(--primary); }
-  .danger { background: #fef2f2; color: var(--accent-red); }
+  .secondary { background: #f0f7ff; color: var(--primary); width: 100%; }
+  .danger { background: #fef2f2; color: var(--accent-red); width: 100%; }
   
   .row { display: grid; grid-template-columns: 1fr; gap: 8px; }
   @media(min-width: 480px) {
@@ -183,7 +202,6 @@
   
   .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 20; }
   
-  /* MOLDURA DE CANTOS ESTILO APLICATIVO BEEP */
   .beep-scanner-frame {
     position: absolute;
     top: 50%;
@@ -275,6 +293,22 @@
           <button type="submit" class="primary">Entrar no Sistema</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE SENHA DO CARTAZ (PERSONALIZADO) -->
+  <div id="cartaz-modal-senha" class="custom-modal-overlay hidden">
+    <div class="custom-modal-card">
+      <h3>Módulo Cartaz</h3>
+      <p>Digite a senha de acesso:</p>
+      <div id="cartazError" class="custom-modal-error hidden">Senha incorreta! Acesso negado.</div>
+      <div style="text-align: left;">
+        <input id="cartazSenhaInput" type="password" placeholder="••••••" autocomplete="current-password">
+      </div>
+      <div class="custom-modal-buttons">
+        <button type="button" class="secondary" onclick="fecharModalCartaz()">Cancelar</button>
+        <button type="button" class="primary" onclick="validarSenhaCartaz()">Entrar</button>
+      </div>
     </div>
   </div>
 
@@ -708,14 +742,11 @@
     }
     
     if (modulo === 'cartaz') {
-      let senhaDigitada = prompt("Digite a senha para acessar o módulo CARTAZ:");
-      let senhaCorreta = "190505";
-      
-      if (senhaDigitada === senhaCorreta) {
-        window.open('https://rmarket.cartazfacil.pro/unitario.php', '_blank');
-      } else if (senhaDigitada !== null) {
-        alert("Senha incorreta! Acesso negado.");
-      }
+      // Exibe o modal personalizado em vez do prompt padrão
+      el('cartazSenhaInput').value = '';
+      el('cartazError').classList.add('hidden');
+      el('cartaz-modal-senha').classList.remove('hidden');
+      setTimeout(() => el('cartazSenhaInput').focus(), 100);
       return;
     }
     
@@ -730,6 +761,36 @@
       renderizarLista('trocas');
     }
   }
+
+  function fecharModalCartaz() {
+    el('cartaz-modal-senha').classList.add('hidden');
+  }
+
+  function validarSenhaCartaz() {
+    const senhaDigitada = el('cartazSenhaInput').value;
+    const senhaCorreta = "190505";
+    
+    if (senhaDigitada === senhaCorreta) {
+      fecharModalCartaz();
+      window.open('https://rmarket.cartazfacil.pro/unitario.php', '_blank');
+    } else {
+      el('cartazError').classList.remove('hidden');
+      el('cartazSenhaInput').focus();
+    }
+  }
+
+  // Permitir fechar/enviar modal de senha do cartaz apertando Enter
+  document.addEventListener('DOMContentLoaded', () => {
+    const inputCartaz = el('cartazSenhaInput');
+    if (inputCartaz) {
+      inputCartaz.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          validarSenhaCartaz();
+        }
+      });
+    }
+  });
   
   function voltarAoMenu() {
     pararScanner();
@@ -1091,7 +1152,6 @@
     return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './planilha_padrao_original.xlsx';
   }
   
-  // GERAÇÃO DE EXCEL COM PAGINAÇÃO POR ABAS IDÊNTICAS E LOGOTIPO PRESERVADO
   async function gerarExcel(modulo) {
     const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
     if (listaData.length === 0) {
@@ -1120,7 +1180,7 @@
         const gerente = el('pro_gerente').value;
         const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        const itensPorPagina = 24; // 24 itens por página (linhas 7 a 30)
+        const itensPorPagina = 24; 
         const totalPaginas = Math.ceil(listaData.length / itensPorPagina);
         
         for (let pagina = 0; pagina < totalPaginas; pagina++) {
