@@ -742,7 +742,6 @@
     }
     
     if (modulo === 'cartaz') {
-      // Exibe o modal personalizado em vez do prompt padrão
       el('cartazSenhaInput').value = '';
       el('cartazError').classList.add('hidden');
       el('cartaz-modal-senha').classList.remove('hidden');
@@ -779,7 +778,6 @@
     }
   }
 
-  // Permitir fechar/enviar modal de senha do cartaz apertando Enter
   document.addEventListener('DOMContentLoaded', () => {
     const inputCartaz = el('cartazSenhaInput');
     if (inputCartaz) {
@@ -847,11 +845,13 @@
     html5QrCode = new Html5Qrcode("beep-reader");
 
     const config = {
-      fps: 20,
-      qrbox: { width: 300, height: 180 },
-      aspectRatio: 1.0,
+      fps: 25,
+      qrbox: { width: 320, height: 180 },
+      aspectRatio: 16/9,
       videoConstraints: {
         facingMode: "environment",
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
         advanced: [
           { zoom: 2.8 },              
           { focusMode: "continuous" }   
@@ -887,9 +887,13 @@
         await html5QrCode.start(
           true,
           {
-            fps: 20,
-            qrbox: { width: 300, height: 180 },
-            aspectRatio: 1.0
+            fps: 25,
+            qrbox: { width: 320, height: 180 },
+            aspectRatio: 16/9,
+            videoConstraints: {
+              width: { ideal: 1920 },
+              height: { ideal: 1080 }
+            }
           },
           (decodedText) => {
             tocarBipe();
