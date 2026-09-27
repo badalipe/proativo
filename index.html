@@ -845,13 +845,13 @@
     html5QrCode = new Html5Qrcode("beep-reader");
 
     const config = {
-      fps: 25,
+      fps: 30,
       qrbox: { width: 320, height: 180 },
-      aspectRatio: 16/9,
+      aspectRatio: window.innerWidth / window.innerHeight, // Ocupa perfeitamente a proporção exata da tela do celular sem tarjas pretas
       videoConstraints: {
         facingMode: "environment",
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
+        width: { ideal: 3840 },  // Força resolução Ultra HD/4K nativa para máxima nitidez
+        height: { ideal: 2160 },
         advanced: [
           { zoom: 2.8 },              
           { focusMode: "continuous" }   
@@ -889,7 +889,7 @@
           {
             fps: 25,
             qrbox: { width: 320, height: 180 },
-            aspectRatio: 16/9,
+            aspectRatio: window.innerWidth / window.innerHeight,
             videoConstraints: {
               width: { ideal: 1920 },
               height: { ideal: 1080 }
