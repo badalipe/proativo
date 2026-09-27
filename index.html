@@ -1084,7 +1084,7 @@
     return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './planilha_padrao_original.xlsx';
   }
   
-  // GERAÇÃO DE EXCEL COM BORDAS E FORMATAÇÃO PROFISSIONAL APLICADA
+  // GERAÇÃO DE EXCEL COM PAGINAÇÃO POR ABAS IDÊNTICAS E LOGOTIPO PRESERVADO
   async function gerarExcel(modulo) {
     const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
     if (listaData.length === 0) {
@@ -1113,21 +1113,11 @@
         const gerente = el('pro_gerente').value;
         const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        const itensPorPagina = 32; 
+        const itensPorPagina = 24; // 24 itens por página (linhas 7 a 30)
         const totalPaginas = Math.ceil(listaData.length / itensPorPagina);
         
         for (let pagina = 0; pagina < totalPaginas; pagina++) {
           let sheet = pagina === 0 ? sheetOriginal : workbook.addSheet(`Página_${pagina + 1}`, sheetOriginal);
-          
-          sheet.column('A').width(8);
-          sheet.column('B').width(12);
-          sheet.column('C').width(15);
-          sheet.column('D').width(18);
-          sheet.column('E').width(35);
-          sheet.column('F').width(12);
-          sheet.column('G').width(10);
-          sheet.column('H').width(15);
-          sheet.column('I').width(12);
           
           sheet.cell("H1").value(nomeLoja);
           sheet.cell("H2").value(gerente);
@@ -1142,28 +1132,15 @@
             const row = 7 + index;
             const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
             
-            const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
-            cols.forEach(col => {
-              sheet.cell(`${col}${row}`).style({
-                border: {
-                  top: "thin",
-                  bottom: "thin",
-                  left: "thin",
-                  right: "thin"
-                },
-                verticalAlignment: "center"
-              });
-            });
-            
-            sheet.cell(`A${row}`).value(inicio + index + 1).style({ horizontalAlignment: 'center' });
+            sheet.cell(`A${row}`).value(inicio + index + 1);
             sheet.cell(`B${row}`).value("");
-            sheet.cell(`C${row}`).value(nomeLoja).style({ horizontalAlignment: 'center' });
-            sheet.cell(`D${row}`).value(item.codigo).style({ horizontalAlignment: 'center' });
+            sheet.cell(`C${row}`).value(nomeLoja);
+            sheet.cell(`D${row}`).value(item.codigo);
             sheet.cell(`E${row}`).value(item.descricao);
-            sheet.cell(`F${row}`).value(item.quantidade).style({ horizontalAlignment: 'center' });
-            sheet.cell(`G${row}`).value(String(item.unidade || 'und').trim()).style({ horizontalAlignment: 'center' });
-            sheet.cell(`H${row}`).value(dataFmt).style({ horizontalAlignment: 'center' });
-            sheet.cell(`I${row}`).value(item.valor).style({ horizontalAlignment: 'right' });
+            sheet.cell(`F${row}`).value(item.quantidade);
+            sheet.cell(`G${row}`).value(String(item.unidade || 'und').trim());
+            sheet.cell(`H${row}`).value(dataFmt);
+            sheet.cell(`I${row}`).value(item.valor);
           });
         }
         
@@ -1189,23 +1166,10 @@
           paginaItens.forEach((item, index) => {
             const row = 16 + index;
             if (row <= 38) {
-              const colsTrc = ['A', 'B', 'C', 'D'];
-              colsTrc.forEach(col => {
-                sheet.cell(`${col}${row}`).style({
-                  border: {
-                    top: "thin",
-                    bottom: "thin",
-                    left: "thin",
-                    right: "thin"
-                  },
-                  verticalAlignment: "center"
-                });
-              });
-
-              sheet.cell(`A${row}`).value(String(item.codigo).trim()).style({ horizontalAlignment: 'center' });
+              sheet.cell(`A${row}`).value(String(item.codigo).trim());
               sheet.cell(`B${row}`).value(String(item.descricao).replace(/\s+/g, ' ').trim());
-              sheet.cell(`C${row}`).value(item.quantidade).style({ horizontalAlignment: 'center' });
-              sheet.cell(`D${row}`).value(item.motivo).style({ horizontalAlignment: 'center' });
+              sheet.cell(`C${row}`).value(item.quantidade);
+              sheet.cell(`D${row}`).value(item.motivo);
             }
           });
         }
@@ -1218,7 +1182,7 @@
       a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
       a.click();
       window.URL.revokeObjectURL(url);
-      alert("Relatório gerado com sucesso!");
+      alert("Relatório gerado com páginas separadas e logotipos preservados com sucesso!");
     } catch (e) {
       alert("Erro ao exportar Excel: " + e.message);
     }
