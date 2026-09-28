@@ -419,7 +419,7 @@
             <span class="product-img-placeholder">Sem foto</span>
           </div>
 
-          <label>Descrição do produto</label><input id="pro_descricao" placeholder="Descrição do produto" oninput="aplicarPadraoDescricao(this)">
+          <label>Descrição do produto</label><input id="pro_descricao" placeholder="Descrição do produto" onblur="aplicarPadraoDescricao(this)">
           <div class="row">
             <div><label>Quantidade *</label><input id="pro_quantidade" inputmode="decimal" placeholder="Ex.: 12"></div>
             <div><label>Unidade</label><input id="pro_unidade" value="und"></div>
@@ -523,7 +523,7 @@
             <span class="product-img-placeholder">Sem foto</span>
           </div>
 
-          <label>Descrição do produto</label><input id="trc_descricao" placeholder="Descrição do produto" oninput="aplicarPadraoDescricao(this)">
+          <label>Descrição do produto</label><input id="trc_descricao" placeholder="Descrição do produto" onblur="aplicarPadraoDescricao(this)">
           <div class="row">
             <div><label>Quantidade a trocar *</label><input id="trc_quantidade" inputmode="decimal" placeholder="Ex.: 5"></div>
             <div><label>Unidade</label><input id="trc_unidade" value="und"></div>
@@ -935,11 +935,20 @@
     }
   }
   
-  // PADRONIZAÇÃO DE TEXTO: PRIMEIRA LETRA MAIÚSCULA, RESTANTE MINÚSCULO
+  // PADRONIZAÇÃO INTELIGENTE: PREPOSIÇÕES MINÚSCULAS, RESTANTE CAPITALIZADO
   function formatarTextoPadrao(texto) {
     if (!texto) return '';
-    let txt = texto.toLowerCase().trim();
-    return txt.charAt(0).toUpperCase() + txt.slice(1);
+    const minusculas = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'no', 'na', 'nos', 'nas', 'por', 'para', 'com']);
+    let palavras = texto.toLowerCase().trim().split(/\s+/);
+    
+    return palavras.map((palavra, index) => {
+      if (!palavra) return '';
+      // Mantém minúscula se estiver na lista E não for a primeira palavra da descrição
+      if (index > 0 && minusculas.has(palavra)) {
+        return palavra;
+      }
+      return palavra.charAt(0).toUpperCase() + palavra.slice(1);
+    }).join(' ');
   }
 
   function aplicarPadraoDescricao(inputElem) {
@@ -1215,6 +1224,7 @@
             sheet.cell(`E${row}`).value(formatarTextoPadrao(item.descricao));
             sheet.cell(`F${row}`).value(item.quantidade);
             sheet.cell(`G${row}`).value(String(item.unidade || 'und').trim());
+            sheet.cell(`H${row}`).value(dataFmn ? '' : dataFmt); // Mantido o padrão de data
             sheet.cell(`H${row}`).value(dataFmt);
             sheet.cell(`I${row}`).value(item.valor);
           });
@@ -1258,7 +1268,7 @@
       a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
       a.click();
       window.URL.revokeObjectURL(url);
-      alert("Relatório gerado com páginas separadas e descrições padronizadas com sucesso!");
+      alert("Relatório gerado com páginas separadas e padrão de descrição inteligente aplicado com sucesso!");
     } catch (e) {
       alert("Erro ao exportar Excel: " + e.message);
     }
