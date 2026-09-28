@@ -500,7 +500,7 @@
               <label>Motivo da Troca *</label>
               <select id="trc_motivo">
                 <option value="1">1 - Avaria</option>
-                <option value="2">2 - Descarte</option>
+                <option value="2">2 - Vencido</option>
               </select>
             </div>
             <div><label>Data da Troca</label><input id="trc_data" type="date"></div>
@@ -943,7 +943,6 @@
     
     return palavras.map((palavra, index) => {
       if (!palavra) return '';
-      // Mantém minúscula se estiver na lista E não for a primeira palavra da descrição
       if (index > 0 && minusculas.has(palavra)) {
         return palavra;
       }
@@ -1121,7 +1120,9 @@
       const itemEl = document.createElement('div');
       itemEl.className = 'item';
       const dataFmt = item.validade.split('-').reverse().join('/');
-      const infoExtra = item.motivo ? ` | Motivo: ${item.motivo === 1 ? '1-Avaria' : '2-Descarte'}` : '';
+      // Ajustado a exibição descritiva do motivo na lista caso seja 2
+      const descMotivo = item.motivo === 1 ? '1-Avaria' : '2-Vencido';
+      const infoExtra = item.motivo ? ` | Motivo: ${descMotivo}` : '';
       
       const thumbHtml = item.imagem && item.imagem.startsWith('http') 
         ? `<div class="item-thumb"><img src="${item.imagem}" alt="Prod"></div>` 
@@ -1224,7 +1225,6 @@
             sheet.cell(`E${row}`).value(formatarTextoPadrao(item.descricao));
             sheet.cell(`F${row}`).value(item.quantidade);
             sheet.cell(`G${row}`).value(String(item.unidade || 'und').trim());
-            sheet.cell(`H${row}`).value(dataFmn ? '' : dataFmt); // Mantido o padrão de data
             sheet.cell(`H${row}`).value(dataFmt);
             sheet.cell(`I${row}`).value(item.valor);
           });
@@ -1268,7 +1268,7 @@
       a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
       a.click();
       window.URL.revokeObjectURL(url);
-      alert("Relatório gerado com páginas separadas e padrão de descrição inteligente aplicado com sucesso!");
+      alert("Relatório gerado com sucesso!");
     } catch (e) {
       alert("Erro ao exportar Excel: " + e.message);
     }
