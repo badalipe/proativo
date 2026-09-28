@@ -52,7 +52,6 @@
   .login-card p { color: var(--text-muted); font-size: 12px; margin-bottom: 24px; }
   .login-error { background: #fef2f2; color: var(--accent-red); padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 16px; font-weight: 600; }
 
-  /* MODAL DE SENHA PERSONALIZADO */
   .custom-modal-overlay {
     position: fixed; inset: 0; background: rgba(9, 13, 22, 0.85);
     backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center;
@@ -134,7 +133,6 @@
     flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
   
-  /* CARTÕES MODERNIZADOS COM PROFUNDIDADE SUAVE */
   .card { 
     background: var(--card-bg); border-radius: 18px; padding: 18px 16px; margin-bottom: 14px; 
     border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); 
@@ -148,7 +146,6 @@
   
   label { display: block; font-size: 11px; font-weight: 700; margin: 10px 0 5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
   
-  /* INPUTS REFINADOS COM BORDAS ARREDONDADAS E FOCO ELEGANTE */
   input, select { 
     font: inherit; width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); 
     border-radius: 12px; background: #fafafa; color: var(--text-main); font-size: 15px;
@@ -160,7 +157,6 @@
   }
   .input-codigo { font-family: 'Courier New', monospace; font-size: 18px !important; letter-spacing: 1px; font-weight: 700; }
   
-  /* CONTAINER DA FOTO COM BORDAS E SOMBRA APRIMORADAS */
   .product-img-container {
     width: 100%; height: 180px; border: 1.5px solid var(--border-color); border-radius: 14px;
     background: #ffffff; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 12px 0; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
@@ -189,7 +185,6 @@
   }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
   
-  /* BOTÃO FLUTUANTE DA CÂMARA (FAB) REFINADO COM SOMBRA PROFUNDA */
   .fab-camera {
     position: fixed !important; bottom: 24px !important; right: 24px !important;
     width: 64px !important; height: 64px !important;
@@ -202,7 +197,6 @@
   }
   .fab-camera:active { cursor: grabbing !important; transform: scale(0.95); }
 
-  /* CÂMARA EM TELA INTEIRA ESTILO BEEP */
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 99999;
     display: flex; flex-direction: column; justify-content: space-between;
@@ -259,7 +253,6 @@
   .ok { color: var(--accent-green); font-weight: 700; }
   .warn { color: #d97706; }
   
-  /* LISTAGEM DE ITENS POLIDA */
   .item { 
     border: 1px solid var(--border-color); border-left: 4px solid var(--primary); 
     border-radius: 14px; padding: 12px 14px; margin-top: 10px; display: flex; 
@@ -309,7 +302,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE SENHA DO CARTAZ (PERSONALIZADO) -->
+  <!-- MODAL DE SENHA DO CARTAZ -->
   <div id="cartaz-modal-senha" class="custom-modal-overlay hidden">
     <div class="custom-modal-card">
       <h3>Módulo Cartaz</h3>
@@ -576,7 +569,7 @@
     </div>
   </div>
   
-  <!-- SCANNER COM MOLDURA ESTILO BEEP E ZOOM DE 2.8x -->
+  <!-- SCANNER -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
@@ -585,7 +578,6 @@
     </div>
     <div class="beep-viewport"><div id="beep-reader"></div></div>
     
-    <!-- MOLDURA DE CANTOS ESTILO BEEP -->
     <div class="beep-target-container">
       <div class="beep-scanner-frame">
         <div class="beep-scanner-frame-bottom-left"></div>
@@ -608,25 +600,25 @@
   
   const produtosPreCadastrados = {
     "7896419730705": { nome: "Produto Cadastrado Rede Market", img: "" },
-    "7898996002190": { nome: "Açúcar Cristal Carioca 1kg", img: "" },
-    "7896030902341": { nome: "Açúcar Refinado União 1kg", img: "" },
-    "7896081800034": { nome: "Café Pimpinela Tradicional 500g", img: "" },
-    "7896089011357": { nome: "Café Pilão Tradicional A Vácuo 500g", img: "" },
-    "7896005801017": { nome: "Arroz Tio João Tipo 1 5kg", img: "" },
-    "7896018400038": { nome: "Óleo de Soja Liza 900ml", img: "" },
-    "7891025101016": { nome: "Feijão Carioca Camil 1kg", img: "" },
-    "7896004701233": { nome: "Farinha de Trigo Dona Benta 1kg", img: "" },
-    "7896003704013": { nome: "Macarrão Espaguete Petybon 500g", img: "" },
-    "7896098900122": { nome: "Leite Longa Vida Italac Integral 1L", img: "" },
-    "7896051101112": { nome: "Manteiga Qualy com Sal 500g", img: "" },
-    "7891000100103": { nome: "Leite Condensado Nestlé Moça 395g", img: "" },
-    "7891000245209": { nome: "Creme de Leite Nestlé 200g", img: "" },
-    "7891910000197": { nome: "Refrigerante Coca-Cola 2L", img: "" },
-    "7894900010015": { nome: "Refrigerante Coca-Cola Lata 350ml", img: "" },
-    "7896036081125": { nome: "Detergente Líquido Ypê Neutro 500ml", img: "" },
-    "7896011400212": { nome: "Biscoito Recheado Negresco 90g", img: "" },
-    "7896009501145": { nome: "Achocolatado em Pó Nescau 400g", img: "" },
-    "7896045112098": { nome: "Refresco em Pó Frisco Abacaxi 18g", img: "" }
+    "7898996002190": { nome: "Açúcar Cristal Carioca 1kg", img: "https://images.openfoodfacts.org/images/products/789/899/600/2190/front_pt.3.400.jpg" },
+    "7896030902341": { nome: "Açúcar Refinado União 1kg", img: "https://images.openfoodfacts.org/images/products/789/603/090/2341/front_pt.3.400.jpg" },
+    "7896081800034": { nome: "Café Pimpinela Tradicional 500g", img: "https://images.openfoodfacts.org/images/products/789/608/180/0034/front_pt.3.400.jpg" },
+    "7896089011357": { nome: "Café Pilão Tradicional A Vácuo 500g", img: "https://images.openfoodfacts.org/images/products/789/608/901/1357/front_pt.3.400.jpg" },
+    "7896005801017": { nome: "Arroz Tio João Tipo 1 5kg", img: "https://images.openfoodfacts.org/images/products/789/600/580/1017/front_pt.3.400.jpg" },
+    "7896018400038": { nome: "Óleo de Soja Liza 900ml", img: "https://images.openfoodfacts.org/images/products/789/601/840/0038/front_pt.3.400.jpg" },
+    "7891025101016": { nome: "Feijão Carioca Camil 1kg", img: "https://images.openfoodfacts.org/images/products/789/102/510/1016/front_pt.3.400.jpg" },
+    "7896004701233": { nome: "Farinha de Trigo Dona Benta 1kg", img: "https://images.openfoodfacts.org/images/products/789/600/470/1233/front_pt.3.400.jpg" },
+    "7896003704013": { nome: "Macarrão Espaguete Petybon 500g", img: "https://images.openfoodfacts.org/images/products/789/600/370/4013/front_pt.3.400.jpg" },
+    "7896098900122": { nome: "Leite Longa Vida Italac Integral 1L", img: "https://images.openfoodfacts.org/images/products/789/609/890/0122/front_pt.3.400.jpg" },
+    "7896051101112": { nome: "Manteiga Qualy com Sal 500g", img: "https://images.openfoodfacts.org/images/products/789/605/110/1112/front_pt.3.400.jpg" },
+    "7891000100103": { nome: "Leite Condensado Nestlé Moça 395g", img: "https://images.openfoodfacts.org/images/products/789/100/010/0103/front_pt.3.400.jpg" },
+    "7891000245209": { nome: "Creme de Leite Nestlé 200g", img: "https://images.openfoodfacts.org/images/products/789/100/024/5209/front_pt.3.400.jpg" },
+    "7891910000197": { nome: "Refrigerante Coca-Cola 2L", img: "https://images.openfoodfacts.org/images/products/789/191/000/0197/front_pt.3.400.jpg" },
+    "7894900010015": { nome: "Refrigerante Coca-Cola Lata 350ml", img: "https://images.openfoodfacts.org/images/products/789/490/001/0015/front_pt.3.400.jpg" },
+    "7896036081125": { nome: "Detergente Líquido Ypê Neutro 500ml", img: "https://images.openfoodfacts.org/images/products/789/603/608/1125/front_pt.3.400.jpg" },
+    "7896011400212": { nome: "Biscoito Recheado Negresco 90g", img: "https://images.openfoodfacts.org/images/products/789/601/140/0212/front_pt.3.400.jpg" },
+    "7896009501145": { nome: "Achocolatado em Pó Nescau 400g", img: "https://images.openfoodfacts.org/images/products/789/600/950/1145/front_pt.3.400.jpg" },
+    "7896045112098": { nome: "Refresco em Pó Frisco Abacaxi 18g", img: "https://images.openfoodfacts.org/images/products/789/604/511/2098/front_pt.3.400.jpg" }
   };
   
   let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
@@ -679,14 +671,11 @@
         isDragging = true;
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
         const rect = btn.getBoundingClientRect();
         initialX = rect.left;
         initialY = rect.top;
-
         startX = clientX - initialX;
         startY = clientY - initialY;
-
         btn.style.bottom = 'auto';
         btn.style.right = 'auto';
         btn.style.left = initialX + 'px';
@@ -697,16 +686,12 @@
         if (!isDragging) return;
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
         let newX = clientX - startX;
         let newY = clientY - startY;
-
         const maxX = window.innerWidth - btn.offsetWidth;
         const maxY = window.innerHeight - btn.offsetHeight;
-
         newX = Math.max(10, Math.min(newX, maxX - 10));
         newY = Math.max(10, Math.min(newY, maxY - 10));
-
         btn.style.left = newX + 'px';
         btn.style.top = newY + 'px';
       };
@@ -716,7 +701,6 @@
       btn.addEventListener('touchstart', dragStart, { passive: false });
       window.addEventListener('touchmove', dragMove, { passive: false });
       window.addEventListener('touchend', dragEnd);
-
       btn.addEventListener('mousedown', dragStart);
       window.addEventListener('mousemove', dragMove);
       window.addEventListener('mouseup', dragEnd);
@@ -753,7 +737,6 @@
       alert("⚠️ Área em desenvolvimento! Em breve esta funcionalidade estará disponível.");
       return;
     }
-    
     if (modulo === 'cartaz') {
       el('cartazSenhaInput').value = '';
       el('cartazError').classList.add('hidden');
@@ -761,10 +744,8 @@
       setTimeout(() => el('cartazSenhaInput').focus(), 100);
       return;
     }
-    
     moduloAtual = modulo;
     el('menu-screen').classList.add('hidden');
-    
     if (modulo === 'proativo') {
       el('proativo-modal').classList.remove('hidden');
       renderizarLista('proativo');
@@ -780,9 +761,7 @@
 
   function validarSenhaCartaz() {
     const senhaDigitada = el('cartazSenhaInput').value;
-    const senhaCorreta = "190505";
-    
-    if (senhaDigitada === senhaCorreta) {
+    if (senhaDigitada === "190505") {
       fecharModalCartaz();
       window.open('https://rmarket.cartazfacil.pro/unitario.php', '_blank');
     } else {
@@ -791,18 +770,6 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const inputCartaz = el('cartazSenhaInput');
-    if (inputCartaz) {
-      inputCartaz.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          validarSenhaCartaz();
-        }
-      });
-    }
-  });
-  
   function voltarAoMenu() {
     pararScanner();
     el('proativo-modal').classList.add('hidden');
@@ -837,26 +804,20 @@
     if (travadoCamera) return;
     travadoCamera = true;
     moduloAtual = modulo;
-
     el('beep-scanner-overlay').classList.remove('hidden');
 
     if (html5QrCode) {
       try {
-        if (html5QrCode.isScanning) {
-          await html5QrCode.stop();
-        }
+        if (html5QrCode.isScanning) await html5QrCode.stop();
         await html5QrCode.clear();
       } catch (err) {}
       html5QrCode = null;
     }
 
     const viewport = document.querySelector('.beep-viewport');
-    if (viewport) {
-      viewport.innerHTML = '<div id="beep-reader"></div>';
-    }
+    if (viewport) viewport.innerHTML = '<div id="beep-reader"></div>';
 
     html5QrCode = new Html5Qrcode("beep-reader");
-
     const config = {
       fps: 30,
       qrbox: { width: 320, height: 180 },
@@ -865,20 +826,8 @@
         facingMode: "environment",
         width: { ideal: 3840 },
         height: { ideal: 2160 },
-        advanced: [
-          { zoom: 2.8 },              
-          { focusMode: "continuous" }   
-        ]
-      },
-      formatsToSupport: [
-        Html5QrcodeSupportedFormats.EAN_13,
-        Html5QrcodeSupportedFormats.EAN_8,
-        Html5QrcodeSupportedFormats.CODE_128,
-        Html5QrcodeSupportedFormats.CODE_39,
-        Html5QrcodeSupportedFormats.UPC_A,
-        Html5QrcodeSupportedFormats.UPC_E,
-        Html5QrcodeSupportedFormats.ITF
-      ]
+        advanced: [{ zoom: 2.8 }, { focusMode: "continuous" }]
+      }
     };
 
     try {
@@ -897,29 +846,16 @@
       );
     } catch (e1) {
       try {
-        await html5QrCode.start(
-          true,
-          {
-            fps: 25,
-            qrbox: { width: 320, height: 180 },
-            aspectRatio: window.innerWidth / window.innerHeight,
-            videoConstraints: {
-              width: { ideal: 1920 },
-              height: { ideal: 1080 }
-            }
-          },
-          (decodedText) => {
-            tocarBipe();
-            dispararFlashScan();
-            const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
-            el(prefix + 'codigo').value = decodedText;
-            buscarProduto(modulo);
-            pararScanner();
-          },
-          () => {}
-        );
+        await html5QrCode.start(true, config, (decodedText) => {
+          tocarBipe();
+          dispararFlashScan();
+          const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+          el(prefix + 'codigo').value = decodedText;
+          buscarProduto(modulo);
+          pararScanner();
+        }, () => {});
       } catch (err) {
-        alert("Não foi possível renderizar a câmera.");
+        alert("Não foi possível acessar a câmera.");
         pararScanner();
       }
     } finally {
@@ -930,17 +866,13 @@
   async function pararScanner() {
     if (travadoCamera) return;
     travadoCamera = true;
-
     if (html5QrCode) {
       try {
-        if (html5QrCode.isScanning) {
-          await html5QrCode.stop();
-        }
+        if (html5QrCode.isScanning) await html5QrCode.stop();
         await html5QrCode.clear();
       } catch (e) {}
       html5QrCode = null;
     }
-
     el('beep-scanner-overlay').classList.add('hidden');
     travadoCamera = false;
   }
@@ -963,12 +895,9 @@
     if (!texto) return '';
     const minusculas = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'no', 'na', 'nos', 'nas', 'por', 'para', 'com']);
     let palavras = texto.toLowerCase().trim().split(/\s+/);
-    
     return palavras.map((palavra, index) => {
       if (!palavra) return '';
-      if (index > 0 && minusculas.has(palavra)) {
-        return palavra;
-      }
+      if (index > 0 && minusculas.has(palavra)) return palavra;
       return palavra.charAt(0).toUpperCase() + palavra.slice(1);
     }).join(' ');
   }
@@ -1010,17 +939,19 @@
     statusEl.innerHTML = '⚡ Buscando produto...';
     atualizarFotoProduto(modulo, null);
     
+    // 1. Verificar cache local
     if (catalogoLocal[code]) {
       const itemCat = catalogoLocal[code];
       const nome = typeof itemCat === 'object' ? itemCat.nome : itemCat;
       const img = typeof itemCat === 'object' ? itemCat.img : '';
       el(prefix + 'descricao').value = formatarTextoPadrao(nome);
       atualizarFotoProduto(modulo, img);
-      statusEl.innerHTML = '<span class="ok">⚡ Encontrado na sua memória local!</span>';
+      statusEl.innerHTML = '<span class="ok">⚡ Encontrado na memória local!</span>';
       focarCalendario(prefix);
       return;
     }
     
+    // 2. Verificar base pré-cadastrada
     if (produtosPreCadastrados[code]) {
       const itemPre = produtosPreCadastrados[code];
       const nome = typeof itemPre === 'object' ? itemPre.nome : itemPre;
@@ -1032,23 +963,29 @@
       return;
     }
     
+    // 3. Buscar na API Open Food Facts
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
       const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, { signal: controller.signal });
       clearTimeout(timeoutId);
       const data = await res.json();
-      if (data.status === 1 && data.product && (data.product.product_name || data.product.product_name_pt)) {
-        const nomeProd = formatarTextoPadrao(data.product.product_name_pt || data.product.product_name);
-        el(prefix + 'descricao').value = nomeProd;
-        const imgUrl = data.product.image_front_small_url || data.product.image_url || '';
-        atualizarFotoProduto(modulo, imgUrl);
-        statusEl.innerHTML = '<span class="ok">⚡ Encontrado online!</span>';
+      
+      if (data.status === 1 && data.product) {
+        const prod = data.product;
+        const nomeProd = formatarTextoPadrao(prod.product_name_pt || prod.product_name || prod.generic_name || '');
         
-        catalogoLocal[code] = { nome: nomeProd, img: imgUrl };
-        localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
-        focarCalendario(prefix);
-        return;
+        if (nomeProd) {
+          el(prefix + 'descricao').value = nomeProd;
+          const imgUrl = prod.image_front_url || prod.image_front_small_url || prod.image_url || '';
+          atualizarFotoProduto(modulo, imgUrl);
+          statusEl.innerHTML = '<span class="ok">⚡ Encontrado online!</span>';
+          
+          catalogoLocal[code] = { nome: nomeProd, img: imgUrl };
+          localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
+          focarCalendario(prefix);
+          return;
+        }
       }
     } catch (e) {}
 
@@ -1061,11 +998,7 @@
       const campoData = el(prefix + 'validade');
       if (campoData) {
         campoData.focus();
-        if (typeof campoData.showPicker === 'function') {
-          campoData.showPicker();
-        } else {
-          campoData.click();
-        }
+        if (typeof campoData.showPicker === 'function') campoData.showPicker();
       }
     }, 250);
   }
