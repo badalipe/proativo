@@ -132,6 +132,24 @@
     width: 100%; max-width: 600px; margin: 0 auto; padding: 14px 12px 100px; 
     flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
+
+  /* ESTILOS PROFISSIONAIS DO RODAPÉ FIXO */
+  .system-footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #090d16; border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 10px 16px; text-align: center; z-index: 105;
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
+  }
+  .footer-inner {
+    max-width: 600px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 12px;
+  }
+  .footer-brand-img {
+    height: 22px; width: auto; object-fit: contain; opacity: 0.85; transition: opacity 0.2s;
+  }
+  .footer-brand-img:hover { opacity: 1; }
+  .footer-text {
+    font-size: 11px; color: #64748b; font-weight: 500; letter-spacing: 0.3px;
+  }
   
   .card { 
     background: var(--card-bg); border-radius: 18px; padding: 18px 16px; margin-bottom: 14px; 
@@ -186,14 +204,14 @@
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
   
   .fab-camera {
-    position: fixed !important; bottom: 24px !important; right: 24px !important;
-    width: 64px !important; height: 64px !important;
+    position: fixed !important; bottom: 64px !important; right: 20px !important;
+    width: 60px !important; height: 60px !important;
     background: linear-gradient(135deg, var(--primary) 0%, #004d87 100%) !important;
     color: #ffffff !important; border-radius: 50% !important;
     display: flex !important; align-items: center !important; justify-content: center !important;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 102, 178, 0.5) !important;
     border: 2px solid rgba(255, 255, 255, 0.4) !important; cursor: grab !important;
-    z-index: 9999 !important; font-size: 28px !important; touch-action: none !important; user-select: none !important;
+    z-index: 110 !important; font-size: 26px !important; touch-action: none !important; user-select: none !important;
   }
   .fab-camera:active { cursor: grabbing !important; transform: scale(0.95); }
 
@@ -253,7 +271,6 @@
   .ok { color: var(--accent-green); font-weight: 700; }
   .warn { color: #d97706; }
   
-  /* ESTILOS PARA LISTAGEM E EDIÇÃO DOS ITENS LANÇADOS */
   .item { 
     border: 1px solid var(--border-color); border-left: 4px solid var(--primary); 
     border-radius: 14px; padding: 12px 14px; margin-top: 10px; display: flex; 
@@ -484,6 +501,14 @@
         </section>
       </main>
 
+      <!-- RODAPÉ PROFISSIONAL -->
+      <footer class="system-footer">
+        <div class="footer-inner">
+          <img src="https://images.openfoodfacts.org/images/products/789/641/973/0705/front_pt.3.400.jpg" alt="Logo Rodapé" class="footer-brand-img" onerror="this.style.display='none'">
+          <span class="footer-text">Rede Market • Sistema Integrado de Gestão</span>
+        </div>
+      </footer>
+
       <button type="button" class="fab-camera drag-fab" onclick="abrirScanner('proativo')" title="Escanear com Câmera">📷</button>
     </div>
   </div>
@@ -587,6 +612,14 @@
           </div>
         </section>
       </main>
+
+      <!-- RODAPÉ PROFISSIONAL -->
+      <footer class="system-footer">
+        <div class="footer-inner">
+          <img src="https://images.openfoodfacts.org/images/products/789/641/973/0705/front_pt.3.400.jpg" alt="Logo Rodapé" class="footer-brand-img" onerror="this.style.display='none'">
+          <span class="footer-text">Rede Market • Sistema Integrado de Gestão</span>
+        </div>
+      </footer>
 
       <button type="button" class="fab-camera drag-fab" onclick="abrirScanner('trocas')" title="Escanear com Câmera">📷</button>
     </div>
@@ -1136,12 +1169,11 @@
     if (!item) return;
 
     let novaQtd = item.quantidade + delta;
-    if (novaQtd < 0.1) novaQtd = 1; // Evita zerar ou ficar negativo com botões rápidos
+    if (novaQtd < 0.1) novaQtd = 1;
     
     item.quantidade = Number(novaQtd.toFixed(2));
     item.total = item.quantidade * item.valor;
 
-    // Atualiza na tela visualmente sem perder o foco dos inputs
     const qtdSpan = el(`qtd_val_${id}`);
     if (qtdSpan) qtdSpan.innerText = item.quantidade;
 
@@ -1159,7 +1191,6 @@
       item.descricao = formatarTextoPadrao(inputDesc.value.trim());
     }
 
-    // Persiste no LocalStorage
     if (modulo === 'proativo') {
       localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
     } else {
