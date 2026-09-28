@@ -253,19 +253,42 @@
   .ok { color: var(--accent-green); font-weight: 700; }
   .warn { color: #d97706; }
   
+  /* ESTILOS PARA LISTAGEM E EDIÇÃO DOS ITENS LANÇADOS */
   .item { 
     border: 1px solid var(--border-color); border-left: 4px solid var(--primary); 
     border-radius: 14px; padding: 12px 14px; margin-top: 10px; display: flex; 
-    justify-content: space-between; align-items: center; gap: 12px; background: #fff; 
+    flex-direction: column; gap: 10px; background: #fff; 
     box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: transform 0.1s ease;
   }
+  .item-main-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
   .item-thumb { width: 48px; height: 48px; border-radius: 10px; border: 1px solid var(--border-color); object-fit: cover; flex-shrink: 0; background: #f8fafc; display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--text-muted); text-align: center; overflow: hidden; }
   .item-thumb img { width: 100%; height: 100%; object-fit: contain; }
-  .item-info { min-width: 0; flex-grow: 1; }
-  .item strong { display: block; font-size: 13px; color: var(--text-main); font-weight: 700; }
-  .item small { color: var(--text-muted); font-size: 11px; display: block; margin-top: 3px; line-height: 1.3; }
-  .item-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .item-info { min-width: 0; flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
+  
+  .item-desc-input {
+    width: 100%; font-size: 13px; font-weight: 700; color: var(--text-main);
+    background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px;
+    padding: 6px 8px; outline: none; font-family: inherit;
+  }
+  .item-desc-input:focus { background: #fff; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,102,178,0.1); }
+  
+  .item small { color: var(--text-muted); font-size: 11px; display: block; line-height: 1.3; }
+  .item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .item-total { font-weight: 700; font-size: 13px; color: var(--primary); white-space: nowrap; }
+  
+  .item-controls-row {
+    display: flex; align-items: center; justify-content: space-between; 
+    background: #f8fafc; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border-color);
+  }
+  .qty-adjuster { display: flex; align-items: center; gap: 6px; }
+  .qty-btn { 
+    background: #e2e8f0; color: var(--text-main); border: none; width: 26px; height: 26px; 
+    border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; 
+    align-items: center; justify-content: center; padding: 0; 
+  }
+  .qty-btn:active { background: var(--primary); color: #fff; }
+  .qty-val { font-size: 13px; font-weight: 700; min-width: 24px; text-align: center; }
+
   .empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
   .pill { display: inline-block; padding: 4px 10px; border-radius: 99px; background: #e0f2fe; color: var(--primary); font-size: 11px; font-weight: 700; }
   </style>
@@ -939,7 +962,6 @@
     statusEl.innerHTML = '⚡ Buscando produto...';
     atualizarFotoProduto(modulo, null);
     
-    // 1. Verificar cache local
     if (catalogoLocal[code]) {
       const itemCat = catalogoLocal[code];
       const nome = typeof itemCat === 'object' ? itemCat.nome : itemCat;
@@ -951,7 +973,6 @@
       return;
     }
     
-    // 2. Verificar base pré-cadastrada
     if (produtosPreCadastrados[code]) {
       const itemPre = produtosPreCadastrados[code];
       const nome = typeof itemPre === 'object' ? itemPre.nome : itemPre;
@@ -963,7 +984,6 @@
       return;
     }
     
-    // 3. Buscar na API Open Food Facts
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000);
@@ -1084,18 +1104,70 @@
         : `<div class="item-thumb"><span>Sem foto</span></div>`;
       
       itemEl.innerHTML = `
-        ${thumbHtml}
-        <div class="item-info">
-          <strong>${item.descricao}</strong>
-          <small>Cód: ${item.codigo} | Qtd: ${item.quantidade} ${item.unidade} | Val: ${dataFmt}${infoExtra}</small>
+        <div class="item-main-row">
+          ${thumbHtml}
+          <div class="item-info">
+            <input type="text" class="item-desc-input" id="desc_${item.id}" value="${item.descricao}">
+            <small>Cód: ${item.codigo} | Val: ${dataFmt}${infoExtra}</small>
+          </div>
+          <div class="item-right">
+            <span class="item-total" id="total_${item.id}">R$ ${item.total.toFixed(2)}</span>
+            <button type="button" class="danger" style="padding: 6px 10px; font-size: 11px; border-radius: 8px;" onclick="removerItem('${modulo}', ${item.id})">🗑️</button>
+          </div>
         </div>
-        <div class="item-right">
-          <span class="item-total">R$ ${item.total.toFixed(2)}</span>
-          <button type="button" class="danger" style="padding: 6px 10px; font-size: 11px; border-radius: 8px;" onclick="removerItem('${modulo}', ${item.id})">🗑️</button>
+        <div class="item-controls-row">
+          <div class="qty-adjuster">
+            <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">QTD:</span>
+            <button type="button" class="qty-btn" onclick="ajustarQtdItem('${modulo}', ${item.id}, -1)">-</button>
+            <span class="qty-val" id="qtd_val_${item.id}">${item.quantidade}</span>
+            <button type="button" class="qty-btn" onclick="ajustarQtdItem('${modulo}', ${item.id}, 1)">+</button>
+            <span style="font-size: 11px; font-weight: 600; color: var(--text-muted);">${item.unidade}</span>
+          </div>
+          <button type="button" class="primary" style="padding: 6px 14px; font-size: 12px; width: auto;" onclick="salvarItemEditado('${modulo}', ${item.id})">✔️ Salvar</button>
         </div>
       `;
       listContainer.appendChild(itemEl);
     });
+  }
+
+  function ajustarQtdItem(modulo, id, delta) {
+    const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
+    const item = listaData.find(i => i.id === id);
+    if (!item) return;
+
+    let novaQtd = item.quantidade + delta;
+    if (novaQtd < 0.1) novaQtd = 1; // Evita zerar ou ficar negativo com botões rápidos
+    
+    item.quantidade = Number(novaQtd.toFixed(2));
+    item.total = item.quantidade * item.valor;
+
+    // Atualiza na tela visualmente sem perder o foco dos inputs
+    const qtdSpan = el(`qtd_val_${id}`);
+    if (qtdSpan) qtdSpan.innerText = item.quantidade;
+
+    const totalSpan = el(`total_${id}`);
+    if (totalSpan) totalSpan.innerText = `R$ ${item.total.toFixed(2)}`;
+  }
+
+  function salvarItemEditado(modulo, id) {
+    const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
+    const item = listaData.find(i => i.id === id);
+    if (!item) return;
+
+    const inputDesc = el(`desc_${id}`);
+    if (inputDesc) {
+      item.descricao = formatarTextoPadrao(inputDesc.value.trim());
+    }
+
+    // Persiste no LocalStorage
+    if (modulo === 'proativo') {
+      localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
+    } else {
+      localStorage.setItem('sys_trocas_itens', JSON.stringify(itensTrocas));
+    }
+
+    renderizarLista(modulo);
+    alert("Alterações salvas com sucesso!");
   }
   
   function removerItem(modulo, id) {
