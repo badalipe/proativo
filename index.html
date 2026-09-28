@@ -144,13 +144,16 @@
   input:focus, select:focus { outline: none; border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(0, 102, 178, 0.15); }
   .input-codigo { font-family: 'Courier New', monospace; font-size: 18px !important; letter-spacing: 1px; font-weight: 700; }
   
-  /* IMAGEM DO PRODUTO AMPLIADA - AJUSTE PARA PREENCHER O QUADRO HORIZONTAL */
+  /* CONTAINER DA FOTO - ROTACIONA E DEITA FOTOS VERTICAIS AUTOMATICAMENTE COM ALTO PREENCHIMENTO */
   .product-img-container {
     width: 100%; height: 160px; border: 2px solid var(--border-color); border-radius: 14px;
     background: #0f172a; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 12px 0; flex-shrink: 0; box-shadow: var(--shadow-sm);
   }
-  /* Força a imagem a preencher totalmente o espaço do quadro horizontal, cortando o excesso sem distorcer */
-  .product-img-container img { width: 100%; height: 100%; object-fit: cover; }
+  .product-img-container img { 
+    width: 100%; height: 100%; 
+    object-fit: cover; 
+    transition: transform 0.2s ease;
+  }
   .product-img-placeholder { font-size: 13px; color: #94a3b8; text-align: center; padding: 4px; }
 
   .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
@@ -205,33 +208,16 @@
   .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 20; }
   
   .beep-scanner-frame {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 78%;
-    height: 38%;
-    border: 2px solid transparent;
-    box-sizing: border-box;
-    pointer-events: none;
-    z-index: 20;
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 78%; height: 38%; border: 2px solid transparent; box-sizing: border-box; pointer-events: none; z-index: 20;
   }
   .beep-scanner-frame::before, .beep-scanner-frame::after {
-    content: '';
-    position: absolute;
-    width: 36px;
-    height: 36px;
-    border-color: #ffffff;
-    border-style: solid;
+    content: ''; position: absolute; width: 36px; height: 36px; border-color: #ffffff; border-style: solid;
   }
   .beep-scanner-frame::before { top: 0; left: 0; border-width: 4px 0 0 4px; }
   .beep-scanner-frame::after { top: 0; right: 0; border-width: 4px 4px 0 0; }
   .beep-scanner-frame-bottom-left, .beep-scanner-frame-bottom-right {
-    position: absolute;
-    width: 36px;
-    height: 36px;
-    border-color: #ffffff;
-    border-style: solid;
+    position: absolute; width: 36px; height: 36px; border-color: #ffffff; border-style: solid;
   }
   .beep-scanner-frame-bottom-left { bottom: 0; left: 0; border-width: 0 0 4px 4px; }
   .beep-scanner-frame-bottom-right { bottom: 0; right: 0; border-width: 0 4px 4px 0; }
@@ -255,8 +241,8 @@
   .warn { color: #d97706; }
   
   .item { border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px; background: #fff; }
-  .item-thumb { width: 44px; height: 44px; border-radius: 6px; border: 1px solid var(--border-color); object-fit: cover; flex-shrink: 0; background: #f8fafc; display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--text-muted); text-align: center; }
-  .item-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 5px; }
+  .item-thumb { width: 44px; height: 44px; border-radius: 6px; border: 1px solid var(--border-color); object-fit: cover; flex-shrink: 0; background: #f8fafc; display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--text-muted); text-align: center; overflow: hidden; }
+  .item-thumb img { width: 100%; height: 100%; object-fit: cover; }
   .item-info { min-width: 0; flex-grow: 1; }
   .item strong { display: block; font-size: 13px; }
   .item small { color: var(--text-muted); font-size: 11px; display: block; margin-top: 2px; }
@@ -954,11 +940,21 @@
     if (!box) return;
 
     if (imageUrl && imageUrl.startsWith('http')) {
-      box.innerHTML = `<img src="${imageUrl}" alt="Produto" onerror="this.onerror=null; this.parentNode.innerHTML='<span class=\'product-img-placeholder\'>Sem foto</span>';">`;
+      box.innerHTML = `<img src="${imageUrl}" alt="Produto" id="${boxId}_img" onload="ajustarOrientacaoImagem(this)" onerror="this.onerror=null; this.parentNode.innerHTML='<span class=\'product-img-placeholder\'>Sem foto</span>';">`;
       box.setAttribute('data-img', imageUrl);
     } else {
       box.innerHTML = `<span class="product-img-placeholder">Sem foto</span>`;
       box.removeAttribute('data-img');
+    }
+  }
+
+  /* FUNÇÃO QUE DEITA FOTOS VERTICAIS AUTOMATICAMENTE E APLICA ALTO PREENCHIMENTO */
+  function ajustarOrientacaoImagem(img) {
+    if (img.naturalHeight > img.naturalWidth) {
+      // Se a foto estiver em pé (vertical), deita ela em 90 graus e ajusta a escala para preencher o campo horizontal
+      img.style.transform = 'rotate(90deg) scale(1.65)';
+    } else {
+      img.style.transform = 'none';
     }
   }
 
@@ -1112,7 +1108,7 @@
       const infoExtra = item.motivo ? ` | Motivo: ${item.motivo === 1 ? '1-Avaria' : '2-Descarte'}` : '';
       
       const thumbHtml = item.imagem && item.imagem.startsWith('http') 
-        ? `<div class="item-thumb"><img src="${item.imagem}" alt="Prod"></div>` 
+        ? `<div class="item-thumb"><img src="${item.imagem}" alt="Prod" onload="ajustarOrientacaoImagem(this)"></div>` 
         : `<div class="item-thumb"><span>Sem foto</span></div>`;
       
       itemEl.innerHTML = `
