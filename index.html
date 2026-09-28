@@ -144,15 +144,15 @@
   input:focus, select:focus { outline: none; border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(0, 102, 178, 0.15); }
   .input-codigo { font-family: 'Courier New', monospace; font-size: 18px !important; letter-spacing: 1px; font-weight: 700; }
   
-  /* CONTAINER DA FOTO COM AJUSTE PERFEITO (OBJECT-FIT COVER) */
+  /* CONTAINER DA FOTO OTIMIZADO PARA EXIBIR A IMAGEM INTEIRA SEM CORTES RUINS */
   .product-img-container {
     width: 100%; height: 180px; border: 2px solid var(--border-color); border-radius: 14px;
-    background: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 12px 0; flex-shrink: 0; box-shadow: var(--shadow-sm);
+    background: #ffffff; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 12px 0; flex-shrink: 0; box-shadow: var(--shadow-sm);
   }
   .product-img-container img { 
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover; 
+    max-width: 100%; 
+    max-height: 100%; 
+    object-fit: contain; 
     object-position: center;
   }
   .product-img-placeholder { font-size: 13px; color: #94a3b8; text-align: center; padding: 4px; }
@@ -243,7 +243,7 @@
   
   .item { border: 1px solid var(--border-color); border-left: 4px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px; background: #fff; }
   .item-thumb { width: 44px; height: 44px; border-radius: 6px; border: 1px solid var(--border-color); object-fit: cover; flex-shrink: 0; background: #f8fafc; display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--text-muted); text-align: center; overflow: hidden; }
-  .item-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .item-thumb img { width: 100%; height: 100%; object-fit: contain; }
   .item-info { min-width: 0; flex-grow: 1; }
   .item strong { display: block; font-size: 13px; }
   .item small { color: var(--text-muted); font-size: 11px; display: block; margin-top: 2px; }
@@ -1223,7 +1223,7 @@
           const fim = Math.min(inicio + itensPorPaginaTrc, listaData.length);
           const paginaItens = listaData.slice(inicio, fim);
           
-          paginaItens.forEach((item, index) => {
+          paginaItens.gammaforEach ? null : paginaItens.forEach((item, index) => {
             const row = 16 + index;
             if (row <= 38) {
               sheet.cell(`A${row}`).value(String(item.codigo).trim());
