@@ -41,6 +41,7 @@
   #login-screen {
     position: fixed; inset: 0; background: #090d16;
     display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 16px;
+    flex-direction: column;
   }
 
   .login-card {
@@ -48,17 +49,21 @@
     padding: 28px 24px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); text-align: center;
   }
   .login-logo { height: 50px; margin-bottom: 12px; }
-  
-  .login-brand-wrapper {
-    display: inline-flex; align-items: center; justify-content: center;
-    background: #0f172a; padding: 6px 14px; border-radius: 10px;
-    margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  }
-  .login-brand-img { height: 24px; width: auto; object-fit: contain; }
 
   .login-card h2 { margin: 0 0 6px; font-size: 20px; font-weight: 700; color: var(--text-main); }
   .login-card p { color: var(--text-muted); font-size: 12px; margin-bottom: 20px; }
   .login-error { background: #fef2f2; color: var(--accent-red); padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 16px; font-weight: 600; }
+
+  /* Rodapé fixo global para telas como login */
+  .global-footer {
+    position: absolute; bottom: 10px; left: 0; right: 0;
+    text-align: center; z-index: 10000;
+  }
+  .global-footer span {
+    font-size: 11px; color: #94a3b8; font-weight: 600; letter-spacing: 0.3px;
+    background: rgba(9, 13, 22, 0.7); padding: 6px 12px; border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
 
   .custom-modal-overlay {
     position: fixed; inset: 0; background: rgba(9, 13, 22, 0.85);
@@ -151,12 +156,6 @@
   }
   .footer-inner {
     max-width: 600px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
-  }
-  .footer-brand-container {
-    background: rgba(255, 255, 255, 0.98); padding: 4px 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  }
-  .footer-brand-img {
-    height: 26px; width: auto; object-fit: contain; display: block;
   }
   .footer-text {
     font-size: 10px; color: #cbd5e1; font-weight: 600; letter-spacing: 0.3px;
@@ -333,12 +332,6 @@
         <text x="175" y="68" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#0066b2" letter-spacing="-1">rede</text>
         <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
       </svg>
-      
-      <div>
-        <div class="login-brand-wrapper">
-          <img src="assinatura.BD.png" alt="Assinatura" class="login-brand-img" onerror="this.parentElement.style.display='none'">
-        </div>
-      </div>
 
       <h2>Acesso ao Sistema</h2>
       <p>Insira suas credenciais para continuar</p>
@@ -357,6 +350,10 @@
           <button type="submit" class="primary">Entrar no Sistema</button>
         </div>
       </form>
+    </div>
+
+    <div class="global-footer">
+      <span>Desenvolvido por BD Tecnologia by Encarregado Felipe Farizeli</span>
     </div>
   </div>
 
@@ -521,10 +518,7 @@
 
       <footer class="system-footer">
         <div class="footer-inner">
-          <div class="footer-brand-container">
-            <img src="assinatura.BD.png" alt="Assinatura" class="footer-brand-img" onerror="this.parentElement.style.display='none'">
-          </div>
-          <span class="footer-text">Desenvolvido para Rede Market • Sistema Integrado de Gestão</span>
+          <span class="footer-text">Desenvolvido por BD Tecnologia by Encarregado Felipe Farizeli</span>
         </div>
       </footer>
 
@@ -634,10 +628,7 @@
 
       <footer class="system-footer">
         <div class="footer-inner">
-          <div class="footer-brand-container">
-            <img src="assinatura.BD.png" alt="Assinatura" class="footer-brand-img" onerror="this.parentElement.style.display='none'">
-          </div>
-          <span class="footer-text">Desenvolvido para Rede Market • Sistema Integrado de Gestão</span>
+          <span class="footer-text">Desenvolvido por BD Tecnologia by Encarregado Felipe Farizeli</span>
         </div>
       </footer>
 
@@ -1354,4 +1345,3 @@
   </script>
 </body>
 </html>
-
