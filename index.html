@@ -305,6 +305,7 @@
   .item-controls-row {
     display: flex; align-items: center; justify-content: space-between; 
     background: #f8fafc; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border-color);
+    gap: 8px; flex-wrap: wrap;
   }
   .qty-adjuster { display: flex; align-items: center; gap: 6px; }
   .qty-btn { 
@@ -314,6 +315,11 @@
   }
   .qty-btn:active { background: var(--primary); color: #fff; }
   .qty-val { font-size: 13px; font-weight: 700; min-width: 24px; text-align: center; }
+
+  .item-select-motivo {
+    font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 8px;
+    border: 1px solid var(--border-color); background: #fff; color: var(--text-main);
+  }
 
   .empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
   .pill { display: inline-block; padding: 4px 10px; border-radius: 99px; background: #e0f2fe; color: var(--primary); font-size: 11px; font-weight: 700; }
@@ -574,7 +580,7 @@
             <div><label>Conferente / Responsável</label><input id="trc_digitou" placeholder="Seu nome"></div>
             <div><label>Fornecedor</label><input id="trc_fornecedor" placeholder="Ex: Ambev, Nestlé"></div>
             <div>
-              <label>Motivo da Troca *</label>
+              <label>Motivo Padrão *</label>
               <select id="trc_motivo">
                 <option value="1">1 - Avaria</option>
                 <option value="2">2 - Vencido</option>
@@ -1139,19 +1145,31 @@
       const itemEl = document.createElement('div');
       itemEl.className = 'item';
       const dataFmt = item.validade.split('-').reverse().join('/');
-      const descMotivo = item.motivo === 1 ? '1-Avaria' : '2-Vencido';
-      const infoExtra = item.motivo ? ` | Motivo: ${descMotivo}` : '';
       
       const thumbHtml = item.imagem && item.imagem.startsWith('http') 
         ? `<div class="item-thumb"><img src="${item.imagem}" alt="Prod"></div>` 
         : `<div class="item-thumb"><span>Sem foto</span></div>`;
+
+      // Se for o módulo de trocas, adicionamos o seletor de motivo editável no card
+      let controlesExtraHtml = '';
+      if (modulo === 'trocas') {
+        controlesExtraHtml = `
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">MOTIVO:</span>
+            <select class="item-select-motivo" id="motivo_${item.id}">
+              <option value="1" ${item.motivo === 1 ? 'selected' : ''}>1 - Avaria</option>
+              <option value="2" ${item.motivo === 2 ? 'selected' : ''}>2 - Vencido</option>
+            </select>
+          </div>
+        `;
+      }
       
       itemEl.innerHTML = `
         <div class="item-main-row">
           ${thumbHtml}
           <div class="item-info">
             <input type="text" class="item-desc-input" id="desc_${item.id}" value="${item.descricao}">
-            <small>Cód: ${item.codigo} | Val: ${dataFmt}${infoExtra}</small>
+            <small>Cód: ${item.codigo} | Val: ${dataFmt}</small>
           </div>
           <div class="item-right">
             <span class="item-total" id="total_${item.id}">R$ ${item.total.toFixed(2)}</span>
@@ -1166,7 +1184,8 @@
             <button type="button" class="qty-btn" onclick="ajustarQtdItem('${modulo}', ${item.id}, 1)">+</button>
             <span style="font-size: 11px; font-weight: 600; color: var(--text-muted);">${item.unidade}</span>
           </div>
-          <button type="button" class="primary" style="padding: 6px 14px; font-size: 12px; width: auto;" onclick="salvarItemEditado('${modulo}', ${item.id})">✔️️ Salvar</button>
+          ${controlesExtraHtml}
+          <button type="button" class="primary" style="padding: 6px 14px; font-size: 12px; width: auto;" onclick="salvarItemEditado('${modulo}', ${item.id})">✔ Salvar</button>
         </div>
       `;
       listContainer.appendChild(itemEl);
@@ -1201,10 +1220,14 @@
       item.descricao = formatarTextoPadrao(inputDesc.value.trim());
     }
 
-    if (modulo === 'proativo') {
-      localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
-    } else {
+    if (modulo === 'trocas') {
+      const selectMotivo = el(`motivo_${id}`);
+      if (selectMotivo) {
+        item.motivo = parseInt(selectMotivo.value);
+      }
       localStorage.setItem('sys_trocas_itens', JSON.stringify(itensTrocas));
+    } else {
+      localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
     }
 
     renderizarLista(modulo);
@@ -1302,14 +1325,12 @@
         const responsavel = el('trc_digitou').value;
         const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        // Capacidade por folha: da linha 16 até a linha 54 são exatamente 39 linhas disponíveis
         const itensPorPaginaTrc = 39; 
         const totalPaginas = Math.ceil(listaData.length / itensPorPaginaTrc);
         
         for (let pagina = 0; pagina < totalPaginas; pagina++) {
           let sheet = pagina === 0 ? sheetOriginal : workbook.addSheet(`Trocas_${pagina + 1}`, sheetOriginal);
           
-          // Reaplicando dados de cabeçalho na folha gerada para manter o mesmo layout original com logo
           sheet.cell("B7").value("X");
           sheet.cell("A10").value(nomeLoja);
           sheet.cell("A12").value(dataTroca);
