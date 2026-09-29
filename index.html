@@ -54,7 +54,6 @@
   .login-card p { color: var(--text-muted); font-size: 12px; margin-bottom: 20px; }
   .login-error { background: #fef2f2; color: var(--accent-red); padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 16px; font-weight: 600; }
 
-  /* Rodapé fixo global para telas como login */
   .global-footer {
     position: absolute; bottom: 10px; left: 0; right: 0;
     text-align: center; z-index: 10000;
@@ -1167,7 +1166,7 @@
             <button type="button" class="qty-btn" onclick="ajustarQtdItem('${modulo}', ${item.id}, 1)">+</button>
             <span style="font-size: 11px; font-weight: 600; color: var(--text-muted);">${item.unidade}</span>
           </div>
-          <button type="button" class="primary" style="padding: 6px 14px; font-size: 12px; width: auto;" onclick="salvarItemEditado('${modulo}', ${item.id})">✔️ Salvar</button>
+          <button type="button" class="primary" style="padding: 6px 14px; font-size: 12px; width: auto;" onclick="salvarItemEditado('${modulo}', ${item.id})">✔️️ Salvar</button>
         </div>
       `;
       listContainer.appendChild(itemEl);
@@ -1303,12 +1302,14 @@
         const responsavel = el('trc_digitou').value;
         const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        const itensPorPaginaTrc = 23; 
+        // Capacidade por folha: da linha 16 até a linha 54 são exatamente 39 linhas disponíveis
+        const itensPorPaginaTrc = 39; 
         const totalPaginas = Math.ceil(listaData.length / itensPorPaginaTrc);
         
         for (let pagina = 0; pagina < totalPaginas; pagina++) {
           let sheet = pagina === 0 ? sheetOriginal : workbook.addSheet(`Trocas_${pagina + 1}`, sheetOriginal);
           
+          // Reaplicando dados de cabeçalho na folha gerada para manter o mesmo layout original com logo
           sheet.cell("B7").value("X");
           sheet.cell("A10").value(nomeLoja);
           sheet.cell("A12").value(dataTroca);
@@ -1320,7 +1321,7 @@
           
           paginaItens.forEach((item, index) => {
             const row = 16 + index;
-            if (row <= 38) {
+            if (row <= 54) {
               sheet.cell(`A${row}`).value(String(item.codigo).trim());
               sheet.cell(`B${row}`).value(formatarTextoPadrao(String(item.descricao)).replace(/\s+/g, ' ').trim());
               sheet.cell(`C${row}`).value(item.quantidade);
