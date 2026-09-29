@@ -1324,7 +1324,6 @@
         const responsavel = el('trc_digitou').value;
         const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        // CORREÇÃO APLICADA: Pulando a linha 16 e começando a partir da linha 17 até a 54 (38 itens por página)
         const itensPorPaginaTrc = 38; 
         const totalPaginas = Math.ceil(listaData.length / itensPorPaginaTrc);
         
@@ -1341,7 +1340,7 @@
           const paginaItens = listaData.slice(inicio, fim);
           
           paginaItens.forEach((item, index) => {
-            // Começa na linha 17 em diante para evitar qualquer desalinhamento da linha 16
+            // Começa rigorosamente na linha 17 para evitar a linha 16
             const row = 17 + index;
             if (row <= 54) {
               sheet.cell(`A${row}`).value(String(item.codigo).trim());
