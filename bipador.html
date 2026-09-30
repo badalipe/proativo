@@ -1,1 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leitor Rápido Pró-Ativo</title>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        body { margin: 0; background: #111; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; justify-content: space-between; align-items: center; padding: 20px; box-sizing: border-box; }
+        #reader { width: 100%; max-width: 400px; height: 300px; border-radius: 12px; overflow: hidden; }
+        .historico { width: 100%; max-width: 400px; background: #222; padding: 10px; border-radius: 8px; max-height: 150px; overflow-y: auto; font-size: 14px; }
+        .item-hist { padding: 6px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .btn-copiar { background: #007bff; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>📷 Leitor Pró-Ativo</h2>
+    <div id="reader"></div>
+    <div class="historico" id="lista">
+        <div style="color: #888; text-align: center;">Últimos códigos lidos aparecerão aqui</div>
+    </div>
+
+    <script>
+        function onScanSuccess(decodedText) {
+            navigator.clipboard.writeText(decodedText);
+            
+            const lista = document.getElementById('lista');
+            if(lista.innerText.includes('Últimos códigos')) lista.innerHTML = '';
+            
+            const div = document.createElement('div');
+            div.className = 'item-hist';
+            div.innerHTML = `<span><b>${decodedText}</b> (Copiado!)</span>`;
+            lista.prepend(div);
+            
+            // Vibração curta para confirmar a leitura rápida
+            if (navigator.vibrate) navigator.vibrate(100);
+        }
+
+        const html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 30, qrbox: { width: 250, height: 150 } },
+            onScanSuccess,
+            (errorMessage) => {}
+        ).catch(err => {
+            alert("Erro ao iniciar a câmera: " + err);
+        });
+    </script>
+</body>
+</html>
 
