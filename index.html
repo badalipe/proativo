@@ -1,460 +1,1385 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rede Market - Gestão de Perdas, Trocas e Pró-Ativo</title>
-    <!-- Biblioteca do Leitor de Código de Barras -->
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <!-- Biblioteca para manipulação de planilhas Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx-populate/1.21.0/xlsx-populate.min.js"></script>
-    
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#090d16">
+  <title>Sistema de Gestão - Rede Market</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  
+  <style>
+  :root {
+    --primary: #0066b2;
+    --primary-hover: #004d87;
+    --accent-red: #e30613;
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --accent-green: #10b981;
+    --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.05);
+    --shadow-md: 0 10px 25px rgba(15, 23, 42, 0.08);
+  }
+  
+  * { 
+    margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent;
+  }
+  
+  html, body {
+    width: 100%; height: 100%;
+    background-color: #090d16 !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-main);
+    overflow: hidden;
+  }
 
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            color: #333;
-        }
+  .hidden { display: none !important; }
 
-        header {
-            background-color: #1b263b;
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+  #login-screen {
+    position: fixed; inset: 0; background: #090d16;
+    display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 16px;
+    flex-direction: column;
+  }
 
-        header h1 {
-            font-size: 1.25rem;
-        }
+  .login-card {
+    background: #ffffff; width: 100%; max-width: 380px;
+    padding: 28px 24px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); text-align: center;
+  }
+  .login-logo { height: 50px; margin-bottom: 12px; }
 
-        .container {
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 20px;
-            width: 100%;
-        }
+  .login-card h2 { margin: 0 0 6px; font-size: 20px; font-weight: 700; color: var(--text-main); }
+  .login-card p { color: var(--text-muted); font-size: 12px; margin-bottom: 20px; }
+  .login-error { background: #fef2f2; color: var(--accent-red); padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 16px; font-weight: 600; }
 
-        /* Tela de Login Simples */
-        #loginScreen {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 80vh;
-        }
+  .global-footer {
+    position: absolute; bottom: 10px; left: 0; right: 0;
+    text-align: center; z-index: 10000;
+  }
+  .global-footer span {
+    font-size: 11px; color: #94a3b8; font-weight: 600; letter-spacing: 0.3px;
+    background: rgba(9, 13, 22, 0.7); padding: 6px 12px; border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
 
-        .login-card, .painel-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            width: 100%;
-            max-width: 450px;
-            border: 1px solid rgba(255,255,255,0.4);
-        }
+  .custom-modal-overlay {
+    position: fixed; inset: 0; background: rgba(9, 13, 22, 0.85);
+    backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center;
+    z-index: 99999; padding: 16px; animation: fadeIn 0.2s ease-out;
+  }
+  .custom-modal-card {
+    background: #ffffff; width: 100%; max-width: 340px;
+    padding: 24px 20px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    text-align: center; animation: scaleUp 0.2s ease-out;
+  }
+  .custom-modal-card h3 { font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 6px; }
+  .custom-modal-card p { color: var(--text-muted); font-size: 12px; margin-bottom: 16px; }
+  .custom-modal-error { background: #fef2f2; color: var(--accent-red); padding: 8px; border-radius: 8px; font-size: 11px; margin-bottom: 12px; font-weight: 600; }
+  .custom-modal-buttons { display: flex; gap: 10px; margin-top: 16px; }
 
-        .login-card h2, .painel-card h2 {
-            margin-bottom: 20px;
-            color: #1b263b;
-            text-align: center;
-        }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        .form-group {
-            margin-bottom: 15px;
-        }
+  #menu-screen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 100%; height: 100vh; max-width: 400px; text-align: center; padding: 16px; margin: auto; overflow-y: auto;
+  }
+  .menu-title { color: #ffffff; font-size: 20px; font-weight: 800; margin-bottom: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+  .btn-row { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+  
+  .glass-btn {
+    width: 100%; position: relative; padding: 20px; border: 1.5px solid rgba(255, 255, 255, 0.25);
+    border-radius: 20px; color: #ffffff; cursor: pointer; overflow: hidden;
+    display: flex; align-items: center; justify-content: flex-start; gap: 20px; min-height: 80px; text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .glass-btn:active { transform: scale(0.98); }
+  .glass-shine {
+    position: absolute; top: -35%; left: -35%; width: 70%; height: 70%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%); pointer-events: none; z-index: 1;
+  }
+  .glass-content { position: relative; z-index: 2; display: flex; align-items: center; gap: 16px; width: 100%; }
+  .btn-svg { width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)); flex-shrink: 0; }
+  .btn-text { font-size: 18px; font-weight: 800; letter-spacing: 1.5px; color: #ffffff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); text-align: left; }
+  
+  .glass-1 { background: linear-gradient(145deg, rgba(6,182,212,0.85) 0%, rgba(29,78,216,0.95) 100%); box-shadow: 0 10px 25px rgba(6,182,212,0.3); }
+  .glass-2 { background: linear-gradient(145deg, rgba(37,99,235,0.85) 0%, rgba(79,70,229,0.95) 100%); box-shadow: 0 10px 25px rgba(99,102,241,0.3); }
+  .glass-3 { background: linear-gradient(145deg, rgba(124,58,237,0.85) 0%, rgba(147,51,234,0.95) 100%); box-shadow: 0 10px 25px rgba(139,92,246,0.3); }
+  .glass-4 { background: linear-gradient(145deg, rgba(217,119,6,0.85) 0%, rgba(180,83,9,0.95) 100%); box-shadow: 0 10px 25px rgba(217,119,6,0.3); }
+  
+  .system-modal { 
+    position: fixed; inset: 0; z-index: 999; background: var(--bg-main); 
+    display: flex; flex-direction: column; overflow: hidden; 
+  }
+  
+  .top {
+    background: linear-gradient(135deg, #090d16 0%, #1e293b 100%);
+    color: #fff; padding: 14px 16px; flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 100;
+  }
+  .header-content-wrapper { width: 100%; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+  .header-main-row { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 12px; }
+  .header-brand-group { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  
+  .logo-container { background: rgba(255, 255, 255, 0.98); padding: 6px 12px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .header-logo { height: 38px; width: auto; object-fit: contain; display: block; }
+  
+  .header-text h1 { font-size: 15px; font-weight: 700; margin: 0; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .header-text .sub { color: #38bdf8; font-size: 11px; font-weight: 500; margin-top: 1px; text-transform: uppercase; letter-spacing: 0.5px; }
+  
+  .btn-menu-pro { background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
+  
+  .header-sub-row { width: 100%; display: flex; align-items: center; }
+  .select-loja-pro {
+    appearance: none; -webkit-appearance: none; width: 100%;
+    background-color: rgba(15, 23, 42, 0.8) !important; border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    color: #f8fafc !important; font-size: 12px; font-weight: 600; padding: 9px 32px 9px 12px; border-radius: 10px; cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat; background-position: right 12px center; background-size: 14px;
+  }
+  .select-loja-pro option { background: #0f172a !important; color: #ffffff !important; }
+  
+  .wrap { 
+    width: 100%; max-width: 600px; margin: 0 auto; padding: 14px 12px 100px; 
+    flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            color: #495057;
-        }
+  .system-footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #090d16; border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 10px 16px; text-align: center; z-index: 105;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+  }
+  .footer-inner {
+    max-width: 600px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+  }
+  .footer-text {
+    font-size: 10px; color: #cbd5e1; font-weight: 600; letter-spacing: 0.3px;
+  }
+  
+  .card { 
+    background: var(--card-bg); border-radius: 18px; padding: 18px 16px; margin-bottom: 14px; 
+    border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); 
+  }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .card-header h3 { margin: 0; font-size: 15px; font-weight: 700; color: var(--text-main); }
+  .card-icon { width: 32px; height: 32px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
+  .icon-scan { background: #e0f2fe; }
+  .icon-conf { background: #f3e8ff; }
+  .icon-list { background: #d1fae5; }
+  
+  label { display: block; font-size: 11px; font-weight: 700; margin: 10px 0 5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  
+  input, select { 
+    font: inherit; width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); 
+    border-radius: 12px; background: #fafafa; color: var(--text-main); font-size: 15px;
+    transition: all 0.2s ease;
+  }
+  input:focus, select:focus { 
+    outline: none; border-color: var(--primary); background: #ffffff; 
+    box-shadow: 0 0 0 4px rgba(0, 102, 178, 0.12); 
+  }
+  .input-codigo { font-family: 'Courier New', monospace; font-size: 18px !important; letter-spacing: 1px; font-weight: 700; }
+  
+  .product-img-container {
+    width: 100%; height: 180px; border: 1.5px solid var(--border-color); border-radius: 14px;
+    background: #ffffff; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 12px 0; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+  .product-img-container img { 
+    max-width: 100%; 
+    max-height: 100%; 
+    object-fit: contain; 
+    object-position: center;
+  }
+  .product-img-placeholder { font-size: 13px; color: #94a3b8; text-align: center; padding: 4px; font-weight: 500; }
 
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ced4da;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
+  .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; background: #fdfdfd; }
+  
+  button { font: inherit; border: 0; border-radius: 12px; padding: 13px 16px; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: transform 0.1s ease, background 0.15s ease; }
+  button:active { transform: scale(0.98); }
+  .primary { background: var(--primary); color: #fff; width: 100%; box-shadow: 0 4px 12px rgba(0, 102, 178, 0.25); }
+  .primary:hover { background: var(--primary-hover); }
+  .secondary { background: #f0f7ff; color: var(--primary); width: 100%; }
+  .danger { background: #fef2f2; color: var(--accent-red); width: 100%; }
+  
+  .row { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media(min-width: 480px) {
+    .row { grid-template-columns: 1fr 1fr; }
+    .row-ident { grid-template-columns: 1fr 1fr; }
+  }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  
+  .fab-camera {
+    position: fixed !important; bottom: 58px !important; right: 20px !important;
+    width: 58px !important; height: 58px !important;
+    background: linear-gradient(135deg, var(--primary) 0%, #004d87 100%) !important;
+    color: #ffffff !important; border-radius: 50% !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 102, 178, 0.5) !important;
+    border: 2px solid rgba(255, 255, 255, 0.4) !important; cursor: grab !important;
+    z-index: 110 !important; font-size: 24px !important; touch-action: none !important; user-select: none !important;
+  }
+  .fab-camera:active { cursor: grabbing !important; transform: scale(0.95); }
 
-        .form-group input:focus, .form-group select:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-        }
+  #beep-scanner-overlay {
+    position: fixed; inset: 0; background: #000; z-index: 99999;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .beep-top-bar { 
+    display: flex; align-items: center; justify-content: space-between; 
+    padding: 16px 20px; background: rgba(0,0,0,0.6); color: #fff; font-size: 16px; font-weight: 500; z-index: 30; 
+  }
+  .beep-back-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; }
+  .beep-manual-btn { 
+    background: rgba(255, 255, 255, 0.25); border: 1px solid rgba(255, 255, 255, 0.4); 
+    color: #fff; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px; cursor: pointer; letter-spacing: 0.5px;
+  }
+  
+  .beep-viewport { position: absolute; inset: 0; background: #000; z-index: 10; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  #beep-reader { width: 100% !important; height: 100% !important; border: none !important; background: transparent !important; position: relative; }
+  #beep-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; position: absolute !important; inset: 0 !important; display: block !important; }
+  
+  #html5-qrcode-anchor-scan-box-whats-this, #beep-reader__dashboard, #beep-reader__dashboard_section_csr, #beep-reader div[style*="background"], #beep-reader img, div[id^="html5-qrcode-button-camera-permission"] { display: none !important; }
+  #beep-reader__scan_region { background: transparent !important; width: 100% !important; height: 100% !important; }
+  
+  .beep-target-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 20; }
+  
+  .beep-scanner-frame {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 78%; height: 38%; border: 2px solid transparent; box-sizing: border-box; pointer-events: none; z-index: 20;
+  }
+  .beep-scanner-frame::before, .beep-scanner-frame::after {
+    content: ''; position: absolute; width: 36px; height: 36px; border-color: #ffffff; border-style: solid;
+  }
+  .beep-scanner-frame::before { top: 0; left: 0; border-width: 4px 0 0 4px; }
+  .beep-scanner-frame::after { top: 0; right: 0; border-width: 4px 4px 0 0; }
+  .beep-scanner-frame-bottom-left, .beep-scanner-frame-bottom-right {
+    position: absolute; width: 36px; height: 36px; border-color: #ffffff; border-style: solid;
+  }
+  .beep-scanner-frame-bottom-left { bottom: 0; left: 0; border-width: 0 0 4px 4px; }
+  .beep-scanner-frame-bottom-right { bottom: 0; right: 0; border-width: 0 4px 4px 0; }
 
-        .btn-primary {
-            width: 100%;
-            background-color: #0d6efd;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.2s;
-        }
+  .scan-flash { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.4); opacity: 0; transition: opacity 0.15s ease; z-index: 25; pointer-events: none; }
+  .scan-flash.active { opacity: 1; }
+  
+  .beep-bottom-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 20px 24px calc(30px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 40%, transparent); z-index: 30; display: flex; justify-content: center;
+  }
+  .beep-btn-bottom-action { 
+    background: rgba(90, 90, 90, 0.85); border: 1px solid rgba(255, 255, 255, 0.2); 
+    color: #fff; border-radius: 99px; padding: 14px 0; font-size: 16px; font-weight: 600; cursor: pointer; 
+    width: 100%; max-width: 320px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  }
+  
+  .notice { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+  .ok { color: var(--accent-green); font-weight: 700; }
+  .warn { color: #d97706; }
+  
+  .item { 
+    border: 1px solid var(--border-color); border-left: 4px solid var(--primary); 
+    border-radius: 14px; padding: 12px 14px; margin-top: 10px; display: flex; 
+    flex-direction: column; gap: 10px; background: #fff; 
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: transform 0.1s ease;
+  }
+  .item-main-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
+  .item-thumb { width: 48px; height: 48px; border-radius: 10px; border: 1px solid var(--border-color); object-fit: cover; flex-shrink: 0; background: #f8fafc; display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--text-muted); text-align: center; overflow: hidden; }
+  .item-thumb img { width: 100%; height: 100%; object-fit: contain; }
+  .item-info { min-width: 0; flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
+  
+  .item-desc-input {
+    width: 100%; font-size: 13px; font-weight: 700; color: var(--text-main);
+    background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px;
+    padding: 6px 8px; outline: none; font-family: inherit;
+  }
+  .item-desc-input:focus { background: #fff; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,102,178,0.1); }
+  
+  .item small { color: var(--text-muted); font-size: 11px; display: block; line-height: 1.3; }
+  .item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .item-total { font-weight: 700; font-size: 13px; color: var(--primary); white-space: nowrap; }
+  
+  .item-controls-row {
+    display: flex; align-items: center; justify-content: space-between; 
+    background: #f8fafc; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border-color);
+    gap: 8px; flex-wrap: wrap;
+  }
+  .qty-adjuster { display: flex; align-items: center; gap: 6px; }
+  .qty-btn { 
+    background: #e2e8f0; color: var(--text-main); border: none; width: 26px; height: 26px; 
+    border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; 
+    align-items: center; justify-content: center; padding: 0; 
+  }
+  .qty-btn:active { background: var(--primary); color: #fff; }
+  .qty-val { font-size: 13px; font-weight: 700; min-width: 24px; text-align: center; }
 
-        .btn-primary:hover {
-            background-color: #0b5ed7;
-        }
+  .item-select-motivo {
+    font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 8px;
+    border: 1px solid var(--border-color); background: #fff; color: var(--text-main);
+  }
 
-        /* Sistema Principal Oculto Inicialmente */
-        #mainApp {
-            display: none;
-        }
+  .empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
+  .pill { display: inline-block; padding: 4px 10px; border-radius: 99px; background: #e0f2fe; color: var(--primary); font-size: 11px; font-weight: 700; }
 
-        /* Card do Produto Pós-Bip (Com Imagem Grande e Destaque) */
-        .produto-bipado-card {
-            display: flex;
-            flex-direction: column;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(12px);
-            border-radius: 16px;
-            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 2px solid #0d6efd;
-        }
-
-        @media (min-width: 768px) {
-            .produto-bipado-card {
-                flex-direction: row;
-                align-items: center;
-            }
-        }
-
-        .produto-imagem-container {
-            flex: 0 0 200px;
-            height: 200px;
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            border: 2px solid #dee2e6;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .produto-imagem-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            padding: 8px;
-        }
-
-        @media (min-width: 768px) {
-            .produto-imagem-container {
-                margin-bottom: 0;
-                margin-right: 20px;
-            }
-        }
-
-        .produto-info-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .badge-codigo {
-            font-size: 0.85rem;
-            color: #495057;
-            background: #e9ecef;
-            padding: 4px 10px;
-            border-radius: 6px;
-            align-self: flex-start;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-
-        .nome-produto-destaque {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: #111;
-            line-height: 1.25;
-            margin-bottom: 15px;
-        }
-
-        .inputs-lancamento {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .input-grupo-full {
-            margin-bottom: 15px;
-        }
-
-        .input-grupo label, .input-grupo-full label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-        }
-
-        .input-grupo input, .input-grupo-full input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-        }
-
-        .botoes-acao-card {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-confirmar {
-            flex: 2;
-            background-color: #198754;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .btn-confirmar:hover {
-            background-color: #157347;
-        }
-
-        .btn-cancelar {
-            flex: 1;
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        /* Leitor e Scanner */
-        #reader {
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto 20px auto;
-            border-radius: 12px;
-            overflow: hidden;
-            display: none;
-        }
-
-        .painel-controles {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-    </style>
+  /* ADICIONADO: REGRAS DE IMPRESSÃO EM GRADE 2x2 (PAISAGEM A4) */
+  @media print {
+    @page {
+      size: A4 landscape;
+      margin: 10mm;
+    }
+    body {
+      background: #ffffff !important;
+      color: #000000 !important;
+      overflow: visible !important;
+    }
+    .system-modal, #login-screen, #menu-screen, .top, .system-footer, .fab-camera {
+      display: none !important;
+    }
+  }
+  </style>
 </head>
 <body>
 
-    <header>
-        <h1>Rede Market - Gestão Operacional</h1>
-        <span id="userInfo" style="font-size: 0.9rem;"></span>
-    </header>
+  <!-- TELA DE LOGIN -->
+  <div id="login-screen">
+    <div class="login-card">
+      <svg class="login-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 30,120 L 30,55 C 30,35 45,20 65,20 L 115,20 C 145,20 165,40 165,70 C 165,95 145,115 120,120 L 155,160 L 125,160 L 95,120 L 65,120 L 65,160 L 30,160 Z M 65,50 L 65,95 L 110,95 C 125,95 135,85 135,72 C 135,60 125,50 110,50 Z" fill="#0066b2"/>
+        <circle cx="30" cy="35" r="14" fill="#0066b2"/>
+        <circle cx="30" cy="145" r="14" fill="#0066b2"/>
+        <text x="175" y="68" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#0066b2" letter-spacing="-1">rede</text>
+        <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
+      </svg>
 
-    <div class="container">
-        <!-- TELA DE LOGIN -->
-        <div id="loginScreen">
-            <div class="login-card">
-                <h2>Identificação da Loja</h2>
-                <div class="form-group">
-                    <label for="selectLoja">Selecione a Unidade / Loja:</label>
-                    <select id="selectLoja">
-                        <option value="Patitiba">Patitiba</option>
-                        <option value="Bananal">Bananal</option>
-                        <option value="Lapa">Lapa</option>
-                        <option value="Centro">Centro</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="inputGerente">Nome do Gestor / Operador:</label>
-                    <input type="text" id="inputGerente" placeholder="Digite seu nome...">
-                </div>
-                <button class="btn-primary" onclick="entrarSistema()">Acessar Sistema</button>
-            </div>
+      <h2>Acesso ao Sistema</h2>
+      <p>Insira suas credenciais para continuar</p>
+      
+      <div id="loginError" class="login-error hidden">Usuário ou senha incorretos!</div>
+      
+      <form id="loginForm" onsubmit="realizarLogin(event)">
+        <div style="text-align: left;">
+          <label>Usuário</label>
+          <input id="usuarioInput" type="text" placeholder="Digite seu usuário" required autocomplete="username">
+          
+          <label>Senha</label>
+          <input id="senhaInput" type="password" placeholder="••••••••" required autocomplete="current-password">
         </div>
-
-        <!-- TELA PRINCIPAL DO SISTEMA -->
-        <div id="mainApp">
-            <div class="painel-controles">
-                <button class="btn-primary" onclick="iniciarScannerCamera()">Abrir Câmera (Bipar)</button>
-                <button class="btn-primary" style="background-color: #6c757d;" onclick="simularBipProduto()">Simular Leitura de Produto</button>
-            </div>
-
-            <!-- Área da Câmera -->
-            <div id="reader"></div>
-
-            <!-- CARD PÓS-BIP: Imagem grande, Nome destacado, Quantidade, Preço e Data de Hoje Automática -->
-            <div id="produtoBipadoCard" class="produto-bipado-card" style="display: none;">
-                <div class="produto-imagem-container">
-                    <img id="imgProdutoBipado" src="" alt="Foto do Produto" onerror="this.src='https://via.placeholder.com/180?text=Sem+Foto'">
-                </div>
-                
-                <div class="produto-info-container">
-                    <span id="txtCodigoBarras" class="badge-codigo">Cód: 00000000</span>
-                    <h2 id="txtNomeProduto" class="nome-produto-destaque">Nome do Produto em Destaque</h2>
-                    
-                    <div class="inputs-lancamento">
-                        <div class="input-grupo">
-                            <label for="qtdLancamento">Quantidade</label>
-                            <input type="number" id="qtdLancamento" min="1" value="1">
-                        </div>
-                        <div class="input-grupo">
-                            <label for="precoLancamento">Preço Unitário (R$)</label>
-                            <input type="number" id="precoLancamento" step="0.01" placeholder="0,00">
-                        </div>
-                    </div>
-
-                    <div class="input-grupo-full">
-                        <label for="dataValidadeLancamento">Validade (Dia / Mês / Ano)</label>
-                        <input type="date" id="dataValidadeLancamento">
-                    </div>
-
-                    <div class="botoes-acao-card">
-                        <button class="btn-confirmar" onclick="salvarItemColetado()">Salvar Lançamento</button>
-                        <button class="btn-cancelar" onclick="fecharCardProduto()">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-
+        <div style="margin-top: 24px;">
+          <button type="submit" class="primary">Entrar no Sistema</button>
         </div>
+      </form>
     </div>
 
-    <script>
-        let lojaAtual = "";
-        let operadorAtual = "";
-        let html5QrCode = null;
+    <div class="global-footer">
+      <span>Desenvolvido por BD Tecnologia by Encarregado Felipe Farizeli</span>
+    </div>
+  </div>
 
-        function entrarSistema() {
-            lojaAtual = document.getElementById('selectLoja').value;
-            operadorAtual = document.getElementById('inputGerente').value.trim();
+  <!-- MODAL DE SENHA DO CARTAZ -->
+  <div id="cartaz-modal-senha" class="custom-modal-overlay hidden">
+    <div class="custom-modal-card">
+      <h3>Módulo Cartaz</h3>
+      <p>Digite a senha de acesso:</p>
+      <div id="cartazError" class="custom-modal-error hidden">Senha incorreta! Acesso negado.</div>
+      <div style="text-align: left;">
+        <input id="cartazSenhaInput" type="password" placeholder="••••••" autocomplete="current-password">
+      </div>
+      <div class="custom-modal-buttons">
+        <button type="button" class="secondary" onclick="fecharModalCartaz()">Cancelar</button>
+        <button type="button" class="primary" onclick="validarSenhaCartaz()">Entrar</button>
+      </div>
+    </div>
+  </div>
 
-            if (!operadorAtual) {
-                alert("Por favor, digite o nome do operador.");
-                return;
-            }
+  <!-- MENU PRINCIPAL -->
+  <div id="menu-screen" class="hidden">
+    <div class="menu-title">Selecione o Módulo Desejado</div>
+    <div class="btn-row">
+      <button type="button" onclick="abrirModulo('proativo')" class="glass-btn glass-1">
+        <div class="glass-shine"></div>
+        <div class="glass-content">
+          <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>
+          </svg>
+          <span class="btn-text">PRÓATIVO</span>
+        </div>
+      </button>
+      
+      <button type="button" onclick="abrirModulo('trocas')" class="glass-btn glass-2">
+        <div class="glass-shine"></div>
+        <div class="glass-content">
+          <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 10h14l-4-4"/><path d="M17 14H3l4 4"/>
+          </svg>
+          <span class="btn-text">TROCAS</span>
+        </div>
+      </button>
+      
+      <button type="button" onclick="abrirModulo('perdas')" class="glass-btn glass-3">
+        <div class="glass-shine"></div>
+        <div class="glass-content">
+          <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14"/><path d="m5 12 7 7 7-7"/>
+          </svg>
+          <span class="btn-text">PERDAS</span>
+        </div>
+      </button>
 
-            document.getElementById('userInfo').innerText = `Loja: ${lojaAtual} | Operador: ${operadorAtual}`;
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
+      <button type="button" onclick="abrirModulo('cartaz')" class="glass-btn glass-4">
+        <div class="glass-shine"></div>
+        <div class="glass-content">
+          <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+          </svg>
+          <span class="btn-text">CARTAZ</span>
+        </div>
+      </button>
+    </div>
+    <div style="margin: 28px 0;">
+      <button type="button" class="danger" onclick="fazerLogout()" style="width: auto; padding: 10px 20px; font-size: 13px;">Sair do Sistema</button>
+    </div>
+  </div>
+  
+  <!-- MÓDULO PRÓATIVO -->
+  <div id="proativo-modal" class="system-modal hidden">
+    <div id="app-proativo" style="display:flex; flex-direction:column; height:100%; position:relative;">
+      <header class="top">
+        <div class="header-content-wrapper">
+          <div class="header-main-row">
+            <div class="header-brand-group">
+              <div class="logo-container">
+                <svg class="header-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M 30,120 L 30,55 C 30,35 45,20 65,20 L 115,20 C 145,20 165,40 165,70 C 165,95 145,115 120,120 L 155,160 L 125,160 L 95,120 L 65,120 L 65,160 L 30,160 Z M 65,50 L 65,95 L 110,95 C 125,95 135,85 135,72 C 135,60 125,50 110,50 Z" fill="#0066b2"/>
+                  <circle cx="30" cy="35" r="14" fill="#0066b2"/>
+                  <circle cx="30" cy="145" r="14" fill="#0066b2"/>
+                  <text x="175" y="68" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#0066b2" letter-spacing="-1">rede</text>
+                  <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
+                </svg>
+              </div>
+              <div class="header-text">
+                <h1>Pró Ativos • Frios</h1>
+                <div class="sub">Validades e Estoque</div>
+              </div>
+            </div>
+            <button type="button" class="btn-menu-pro" onclick="voltarAoMenu()">Menu</button>
+          </div>
+          <div class="header-sub-row">
+            <select id="lblLojaPro" class="select-loja-pro" onchange="mudarLojaSelect(this.value)">
+              <option value="PATITIBA">PATITIBA</option>
+              <option value="BANANAL">BANANAL</option>
+              <option value="LAPA">LAPA</option>
+              <option value="CAIS">CAIS</option>
+              <option value="TEXACO">TEXACO</option>
+              <option value="BALNEÁRIO">BALNEÁRIO</option>
+              <option value="ENSEADA">ENSEADA</option>
+              <option value="JAPUÍBA">JAPUÍBA</option>
+              <option value="NOVA ANGRA">NOVA ANGRA</option>
+              <option value="RIBEIRA">RIBEIRA</option>
+              <option value="FRADE">FRADE</option>
+              <option value="PARQUE MAMBUCABA">PARQUE MAMBUCABA</option>
+              <option value="CENTRO">CENTRO</option>
+            </select>
+          </div>
+        </div>
+      </header>
+      
+      <main class="wrap">
+        <section class="card">
+          <div class="row row-ident">
+            <div><label>Quem digitou?</label><input id="pro_digitou" placeholder="Seu nome"></div>
+            <div><label>Gerente / avaliação</label><input id="pro_gerente"></div>
+            <div><label>Comprador</label><input id="pro_comprador"></div>
+            <div><label>Data do levantamento</label><input id="pro_data" type="date"></div>
+          </div>
+        </section>
+        
+        <section class="card">
+          <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
+          <div class="scan-zone"><button type="button" class="primary" onclick="abrirScanner('proativo')">📷 Abrir câmera para escanear</button></div>
+          <label>Código de barras</label>
+          <input id="pro_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789..." onkeydown="checarEnterBusca(event, 'proativo')">
+          <div class="actions"><button type="button" class="primary" onclick="buscarProduto('proativo')" style="width:auto">🔍 Buscar produto</button></div>
+          <div id="pro_status" class="notice" style="margin-top:8px"></div>
+        </section>
+        
+        <section class="card">
+          <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
+          
+          <div class="product-img-container" id="pro_foto_box">
+            <span class="product-img-placeholder">Sem foto</span>
+          </div>
+
+          <label>Descrição do produto</label><input id="pro_descricao" placeholder="Descrição do produto" onblur="aplicarPadraoDescricao(this)">
+          <div class="row">
+            <div><label>Quantidade *</label><input id="pro_quantidade" inputmode="decimal" placeholder="Ex.: 12"></div>
+            <div><label>Unidade</label><input id="pro_unidade" value="und"></div>
+          </div>
+          <div class="row">
+            <div><label>Data de validade *</label><input id="pro_validade" type="date"></div>
+            <div><label>Valor unitário (R$)</label><input id="pro_valor" inputmode="decimal" value="0.00"></div>
+          </div>
+          <div class="actions"><button type="button" class="primary" onclick="adicionarItem('proativo')" style="width:auto">➕ Adicionar à lista</button></div>
+        </section>
+        
+        <section class="card">
+          <div class="card-header" style="justify-content: space-between;">
+            <div style="display:flex;align-items:center;gap:8px;"><span class="card-icon icon-list">📋</span><h3>3. Produtos lançados</h3></div>
+            <span id="pro_contador" class="pill">0</span>
+          </div>
+          <div id="pro_lista" class="empty"></div>
+          <div class="actions" style="margin-top: 14px;">
+            <button type="button" class="primary" onclick="gerarExcel('proativo')" style="width:auto">📊 Gerar Excel Pró Ativo</button>
+            <button type="button" class="danger" onclick="limparLista('proativo')" style="width:auto">Limpar</button>
+          </div>
+        </section>
+      </main>
+
+      <footer class="system-footer">
+        <div class="footer-inner">
+          <span class="footer-text">Desenvolvido por BD Tecnologia by Encarregado Felipe Farizeli</span>
+        </div>
+      </footer>
+
+      <button type="button" class="fab-camera drag-fab" onclick="abrirScanner('proativo')" title="Escanear com Câmera">📷</button>
+    </div>
+  </div>
+  
+  <!-- MÓDULO TROCAS -->
+  <div id="trocas-modal" class="system-modal hidden">
+    <div id="app-trocas" style="display:flex; flex-direction:column; height:100%; position:relative;">
+      <header class="top">
+        <div class="header-content-wrapper">
+          <div class="header-main-row">
+            <div class="header-brand-group">
+              <div class="logo-container">
+                <svg class="header-logo" viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M 30,120 L 30,55 C 30,35 45,20 65,20 L 115,20 C 145,20 165,40 165,70 C 165,95 145,115 120,120 L 155,160 L 125,160 L 95,120 L 65,120 L 65,160 L 30,160 Z M 65,50 L 65,95 L 110,95 C 125,95 135,85 135,72 C 135,60 125,50 110,50 Z" fill="#0066b2"/>
+                  <circle cx="30" cy="35" r="14" fill="#0066b2"/>
+                  <circle cx="30" cy="145" r="14" fill="#0066b2"/>
+                  <text x="175" y="68" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#0066b2" letter-spacing="-1">rede</text>
+                  <text x="170" y="145" font-family="Arial, sans-serif" font-weight="900" font-size="82" fill="#e30613" letter-spacing="-2">market</text>
+                </svg>
+              </div>
+              <div class="header-text">
+                <h1>Gestão de Trocas</h1>
+                <div class="sub">Devoluções</div>
+              </div>
+            </div>
+            <button type="button" class="btn-menu-pro" onclick="voltarAoMenu()">Menu</button>
+          </div>
+          <div class="header-sub-row">
+            <select id="lblLojaTrc" class="select-loja-pro" onchange="mudarLojaSelect(this.value)">
+              <option value="PATITIBA">PATITIBA</option>
+              <option value="BANANAL">BANANAL</option>
+              <option value="LAPA">LAPA</option>
+              <option value="CAIS">CAIS</option>
+              <option value="TEXACO">TEXACO</option>
+              <option value="BALNEÁRIO">BALNEÁRIO</option>
+              <option value="ENSEADA">ENSEADA</option>
+              <option value="JAPUÍBA">JAPUÍBA</option>
+              <option value="NOVA ANGRA">NOVA ANGRA</option>
+              <option value="RIBEIRA">RIBEIRA</option>
+              <option value="FRADE">FRADE</option>
+              <option value="PARQUE MAMBUCABA">PARQUE MAMBUCABA</option>
+              <option value="CENTRO">CENTRO</option>
+            </select>
+          </div>
+        </div>
+      </header>
+      
+      <main class="wrap">
+        <section class="card">
+          <div class="row row-ident">
+            <div><label>Conferente / Responsável</label><input id="trc_digitou" placeholder="Seu nome"></div>
+            <div><label>Fornecedor</label><input id="trc_fornecedor" placeholder="Ex: Ambev, Nestlé"></div>
+            <div>
+              <label>Motivo Padrão *</label>
+              <select id="trc_motivo">
+                <option value="1">1 - Avaria</option>
+                <option value="2">2 - Vencido</option>
+              </select>
+            </div>
+            <div><label>Data da Troca</label><input id="trc_data" type="date"></div>
+          </div>
+        </section>
+        
+        <section class="card">
+          <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
+          <div class="scan-zone"><button type="button" class="primary" onclick="abrirScanner('trocas')">📷 Abrir câmera para escanear</button></div>
+          <label>Código de barras</label>
+          <input id="trc_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789..." onkeydown="checarEnterBusca(event, 'trocas')">
+          <div class="actions"><button type="button" class="primary" onclick="buscarProduto('trocas')" style="width:auto">🔍 Buscar produto</button></div>
+          <div id="trc_status" class="notice" style="margin-top:8px"></div>
+        </section>
+        
+        <section class="card">
+          <div class="card-header"><span class="card-icon icon-conf">✏️️</span><h3>2. Dados da Troca</h3></div>
+          
+          <div class="product-img-container" id="trc_foto_box">
+            <span class="product-img-placeholder">Sem foto</span>
+          </div>
+
+          <label>Descrição do produto</label><input id="trc_descricao" placeholder="Descrição do produto" onblur="aplicarPadraoDescricao(this)">
+          <div class="row">
+            <div><label>Quantidade a trocar *</label><input id="trc_quantidade" inputmode="decimal" placeholder="Ex.: 5"></div>
+            <div><label>Unidade</label><input id="trc_unidade" value="und"></div>
+          </div>
+          <div class="row">
+            <div><label>Data de Validade *</label><input id="trc_validade" type="date"></div>
+            <div><label>Custo Unitário (R$)</label><input id="trc_valor" inputmode="decimal" value="0.00"></div>
+          </div>
+          <div class="actions"><button type="button" class="primary" onclick="adicionarItem('trocas')" style="width:auto">➕ Registrar para Troca</button></div>
+        </section>
+        
+        <section class="card">
+          <div class="card-header" style="justify-content: space-between;">
+            <div style="display:flex;align-items:center;gap:8px;"><span class="card-icon icon-list">📋</span><h3>3. Itens na Lista</h3></div>
+            <span id="trc_contador" class="pill">0</span>
+          </div>
+          <div id="trc_lista" class="empty"></div>
+          <div class="actions" style="margin-top: 14px;">
+            <button type="button" class="primary" onclick="gerarExcel('trocas')" style="width:auto">📊 Exportar Planilha de Trocas</button>
+            <button type="button" class="danger" onclick="limparLista('trocas')" style="width:auto">Limpar</button>
+          </div>
+        </section>
+      </main>
+
+      <footer class="system-footer">
+        <div class="footer-inner">
+          <span class="footer-text">Desenvolvido por BD Tecnologia by Encarregado Felipe Farizeli</span>
+        </div>
+      </footer>
+
+      <button type="button" class="fab-camera drag-fab" onclick="abrirScanner('trocas')" title="Escanear com Câmera">📷</button>
+    </div>
+  </div>
+  
+  <!-- SCANNER -->
+  <div id="beep-scanner-overlay" class="hidden">
+    <div class="beep-top-bar">
+      <button type="button" class="beep-back-btn" onclick="pararScanner()">←</button>
+      <span>Escanear código...</span>
+      <button type="button" class="beep-manual-btn" onclick="fecharScannerSemCodigo()">MANUAL</button>
+    </div>
+    <div class="beep-viewport"><div id="beep-reader"></div></div>
+    
+    <div class="beep-target-container">
+      <div class="beep-scanner-frame">
+        <div class="beep-scanner-frame-bottom-left"></div>
+        <div class="beep-scanner-frame-bottom-right"></div>
+      </div>
+      <div class="scan-flash" id="scanFlash"></div>
+    </div>
+
+    <div class="beep-bottom-bar">
+      <button type="button" class="beep-btn-bottom-action" onclick="pararScanner()">Fechar Câmera</button>
+    </div>
+  </div>
+  
+  <script>
+  const usuariosPermitidos = {
+    "felipe": "2026",
+    "admin": "market123",
+    "patitiba": "frios2026"
+  };
+  
+  const produtosPreCadastrados = {
+    "7896419730705": { nome: "Produto Cadastrado Rede Market", img: "" },
+    "7898996002190": { nome: "Açúcar Cristal Carioca 1kg", img: "https://images.openfoodfacts.org/images/products/789/899/600/2190/front_pt.3.400.jpg" },
+    "7896030902341": { nome: "Açúcar Refinado União 1kg", img: "https://images.openfoodfacts.org/images/products/789/603/090/2341/front_pt.3.400.jpg" },
+    "7896081800034": { nome: "Café Pimpinela Tradicional 500g", img: "https://images.openfoodfacts.org/images/products/789/608/180/0034/front_pt.3.400.jpg" },
+    "7896089011357": { nome: "Café Pilão Tradicional A Vácuo 500g", img: "https://images.openfoodfacts.org/images/products/789/608/901/1357/front_pt.3.400.jpg" },
+    "7896005801017": { nome: "Arroz Tio João Tipo 1 5kg", img: "https://images.openfoodfacts.org/images/products/789/600/580/1017/front_pt.3.400.jpg" },
+    "7896018400038": { nome: "Óleo de Soja Liza 900ml", img: "https://images.openfoodfacts.org/images/products/789/601/840/0038/front_pt.3.400.jpg" },
+    "7891025101016": { nome: "Feijão Carioca Camil 1kg", img: "https://images.openfoodfacts.org/images/products/789/102/510/1016/front_pt.3.400.jpg" },
+    "7896004701233": { nome: "Farinha de Trigo Dona Benta 1kg", img: "https://images.openfoodfacts.org/images/products/789/600/470/1233/front_pt.3.400.jpg" },
+    "7896003704013": { nome: "Macarrão Espaguete Petybon 500g", img: "https://images.openfoodfacts.org/images/products/789/600/370/4013/front_pt.3.400.jpg" },
+    "7896098900122": { nome: "Leite Longa Vida Italac Integral 1L", img: "https://images.openfoodfacts.org/images/products/789/609/890/0122/front_pt.3.400.jpg" },
+    "7896051101112": { nome: "Manteiga Qualy com Sal 500g", img: "https://images.openfoodfacts.org/images/products/789/605/110/1112/front_pt.3.400.jpg" },
+    "7891000100103": { nome: "Leite Condensado Nestlé Moça 395g", img: "https://images.openfoodfacts.org/images/products/789/100/010/0103/front_pt.3.400.jpg" },
+    "7891000245209": { nome: "Creme de Leite Nestlé 200g", img: "https://images.openfoodfacts.org/images/products/789/100/024/5209/front_pt.3.400.jpg" },
+    "7891910000197": { nome: "Refrigerante Coca-Cola 2L", img: "https://images.openfoodfacts.org/images/products/789/191/000/0197/front_pt.3.400.jpg" },
+    "7894900010015": { nome: "Refrigerante Coca-Cola Lata 350ml", img: "https://images.openfoodfacts.org/images/products/789/490/001/0015/front_pt.3.400.jpg" },
+    "7896036081125": { nome: "Detergente Líquido Ypê Neutro 500ml", img: "https://images.openfoodfacts.org/images/products/789/603/608/1125/front_pt.3.400.jpg" },
+    "7896011400212": { nome: "Biscoito Recheado Negresco 90g", img: "https://images.openfoodfacts.org/images/products/789/601/140/0212/front_pt.3.400.jpg" },
+    "7896009501145": { nome: "Achocolatado em Pó Nescau 400g", img: "https://images.openfoodfacts.org/images/products/789/600/950/1145/front_pt.3.400.jpg" },
+    "7896045112098": { nome: "Refresco em Pó Frisco Abacaxi 18g", img: "https://images.openfoodfacts.org/images/products/789/604/511/2098/front_pt.3.400.jpg" }
+  };
+  
+  let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
+  let itensProAtivo = JSON.parse(localStorage.getItem('sys_proative_itens') || '[]');
+  let itensTrocas = JSON.parse(localStorage.getItem('sys_trocas_itens') || '[]');
+  
+  const listaLojas = [
+    "PATITIBA", "BANANAL", "LAPA", "CAIS", "TEXACO", 
+    "BALNEÁRIO", "ENSEADA", "JAPUÍBA", "NOVA ANGRA", 
+    "RIBEIRA", "FRADE", "PARQUE MAMBUCABA", "CENTRO"
+  ];
+  let lojaAtualIndex = 0;
+
+  function mudarLojaSelect(novaLoja) {
+    const idx = listaLojas.indexOf(novaLoja);
+    if (idx !== -1) lojaAtualIndex = idx;
+    if (el('lblLojaPro')) el('lblLojaPro').value = novaLoja;
+    if (el('lblLojaTrc')) el('lblLojaTrc').value = novaLoja;
+  }
+
+  let moduloAtual = null;
+  let html5QrCode = null;
+  let travadoCamera = false;
+  
+  const el = id => document.getElementById(id);
+  
+  window.addEventListener('DOMContentLoaded', () => {
+    const estaLogado = sessionStorage.getItem('sys_logado') === 'true';
+    if (estaLogado) {
+      el('login-screen').classList.add('hidden');
+      el('menu-screen').classList.remove('hidden');
+    } else {
+      el('login-screen').classList.remove('hidden');
+      el('menu-screen').classList.add('hidden');
+    }
+    const hoje = new Date().toISOString().split('T')[0];
+    if (el('pro_data')) el('pro_data').value = hoje;
+    if (el('trc_data')) el('trc_data').value = hoje;
+
+    inicializarBotoesArrastaveis();
+  });
+
+  function inicializarBotoesArrastaveis() {
+    const botoes = document.querySelectorAll('.drag-fab');
+    botoes.forEach(btn => {
+      let isDragging = false;
+      let startX, startY, initialX, initialY;
+
+      const dragStart = (e) => {
+        isDragging = true;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const rect = btn.getBoundingClientRect();
+        initialX = rect.left;
+        initialY = rect.top;
+        startX = clientX - initialX;
+        startY = clientY - initialY;
+        btn.style.bottom = 'auto';
+        btn.style.right = 'auto';
+        btn.style.left = initialX + 'px';
+        btn.style.top = initialY + 'px';
+      };
+
+      const dragMove = (e) => {
+        if (!isDragging) return;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        let newX = clientX - startX;
+        let newY = clientY - startY;
+        const maxX = window.innerWidth - btn.offsetWidth;
+        const maxY = window.innerHeight - btn.offsetHeight;
+        newX = Math.max(10, Math.min(newX, maxX - 10));
+        newY = Math.max(10, Math.min(newY, maxY - 10));
+        btn.style.left = newX + 'px';
+        btn.style.top = newY + 'px';
+      };
+
+      const dragEnd = () => { isDragging = false; };
+
+      btn.addEventListener('touchstart', dragStart, { passive: false });
+      window.addEventListener('touchmove', dragMove, { passive: false });
+      window.addEventListener('touchend', dragEnd);
+      btn.addEventListener('mousedown', dragStart);
+      window.addEventListener('mousemove', dragMove);
+      window.addEventListener('mouseup', dragEnd);
+    });
+  }
+  
+  function realizarLogin(e) {
+    e.preventDefault();
+    const user = el('usuarioInput').value.trim().toLowerCase();
+    const pass = el('senhaInput').value;
+    if (usuariosPermitidos[user] && usuariosPermitidos[user] === pass) {
+      sessionStorage.setItem('sys_logado', 'true');
+      sessionStorage.setItem('sys_user', user);
+      el('loginError').classList.add('hidden');
+      el('login-screen').classList.add('hidden');
+      el('menu-screen').classList.remove('hidden');
+    } else {
+      el('loginError').classList.remove('hidden');
+    }
+  }
+  
+  function fazerLogout() {
+    sessionStorage.removeItem('sys_logado');
+    el('proativo-modal').classList.add('hidden');
+    el('trocas-modal').classList.add('hidden');
+    el('menu-screen').classList.add('hidden');
+    el('login-screen').classList.remove('hidden');
+    el('usuarioInput').value = '';
+    el('senhaInput').value = '';
+  }
+  
+  function abrirModulo(modulo) {
+    if (modulo === 'perdas') {
+      alert("⚠️ Área em desenvolvimento! Em breve esta funcionalidade estará disponível.");
+      return;
+    }
+    if (modulo === 'cartaz') {
+      el('cartazSenhaInput').value = '';
+      el('cartazError').classList.add('hidden');
+      el('cartaz-modal-senha').classList.remove('hidden');
+      setTimeout(() => el('cartazSenhaInput').focus(), 100);
+      return;
+    }
+    moduloAtual = modulo;
+    el('menu-screen').classList.add('hidden');
+    if (modulo === 'proativo') {
+      el('proativo-modal').classList.remove('hidden');
+      renderizarLista('proativo');
+    } else if (modulo === 'trocas') {
+      el('trocas-modal').classList.remove('hidden');
+      renderizarLista('trocas');
+    }
+  }
+
+  function fecharModalCartaz() {
+    el('cartaz-modal-senha').classList.add('hidden');
+  }
+
+  function validarSenhaCartaz() {
+    const senhaDigitada = el('cartazSenhaInput').value;
+    if (senhaDigitada === "190505") {
+      fecharModalCartaz();
+      window.open('https://rmarket.cartazfacil.pro/unitario.php', '_blank');
+    } else {
+      el('cartazError').classList.remove('hidden');
+      el('cartazSenhaInput').focus();
+    }
+  }
+
+  function voltarAoMenu() {
+    pararScanner();
+    el('proativo-modal').classList.add('hidden');
+    el('trocas-modal').classList.add('hidden');
+    el('menu-screen').classList.remove('hidden');
+  }
+  
+  function tocarBipe() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(1200, ctx.currentTime);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.12);
+    } catch (e) {}
+  }
+  
+  function dispararFlashScan() {
+    const flash = el('scanFlash');
+    if (!flash) return;
+    flash.classList.add('active');
+    setTimeout(() => flash.classList.remove('active'), 350);
+  }
+  
+  async function abrirScanner(modulo) {
+    if (travadoCamera) return;
+    travadoCamera = true;
+    moduloAtual = modulo;
+    el('beep-scanner-overlay').classList.remove('hidden');
+
+    if (html5QrCode) {
+      try {
+        if (html5QrCode.isScanning) await html5QrCode.stop();
+        await html5QrCode.clear();
+      } catch (err) {}
+      html5QrCode = null;
+    }
+
+    const viewport = document.querySelector('.beep-viewport');
+    if (viewport) viewport.innerHTML = '<div id="beep-reader"></div>';
+
+    html5QrCode = new Html5Qrcode("beep-reader");
+    const config = {
+      fps: 30,
+      qrbox: { width: 320, height: 180 },
+      aspectRatio: window.innerWidth / window.innerHeight,
+      videoConstraints: {
+        facingMode: "environment",
+        width: { ideal: 3840 },
+        height: { ideal: 2160 },
+        advanced: [{ zoom: 2.8 }, { focusMode: "continuous" }]
+      }
+    };
+
+    try {
+      await html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        (decodedText) => {
+          tocarBipe();
+          dispararFlashScan();
+          const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+          el(prefix + 'codigo').value = decodedText;
+          buscarProduto(modulo);
+          pararScanner();
+        },
+        () => {}
+      );
+    } catch (e1) {
+      try {
+        await html5QrCode.start(true, config, (decodedText) => {
+          tocarBipe();
+          dispararFlashScan();
+          const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+          el(prefix + 'codigo').value = decodedText;
+          buscarProduto(modulo);
+          pararScanner();
+        }, () => {});
+      } catch (err) {
+        alert("Não foi possível acessar a câmera.");
+        pararScanner();
+      }
+    } finally {
+      travadoCamera = false;
+    }
+  }
+  
+  async function pararScanner() {
+    if (travadoCamera) return;
+    travadoCamera = true;
+    if (html5QrCode) {
+      try {
+        if (html5QrCode.isScanning) await html5QrCode.stop();
+        await html5QrCode.clear();
+      } catch (e) {}
+      html5QrCode = null;
+    }
+    el('beep-scanner-overlay').classList.add('hidden');
+    travadoCamera = false;
+  }
+  
+  function fecharScannerSemCodigo() {
+    const prefix = moduloAtual === 'proativo' ? 'pro_' : 'trc_';
+    pararScanner();
+    el(prefix + 'codigo').value = "";
+    el(prefix + 'descricao').focus();
+  }
+
+  function checarEnterBusca(e, modulo) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      buscarProduto(modulo);
+    }
+  }
+  
+  function formatarTextoPadrao(texto) {
+    if (!texto) return '';
+    const minusculas = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'no', 'na', 'nos', 'nas', 'por', 'para', 'com']);
+    let palavras = texto.toLowerCase().trim().split(/\s+/);
+    return palavras.map((palavra, index) => {
+      if (!palavra) return '';
+      if (index > 0 && minusculas.has(palavra)) return palavra;
+      return palavra.charAt(0).toUpperCase() + palavra.slice(1);
+    }).join(' ');
+  }
+
+  function aplicarPadraoDescricao(inputElem) {
+    let cursorPos = inputElem.selectionStart;
+    let textoFormatado = formatarTextoPadrao(inputElem.value);
+    if (inputElem.value !== textoFormatado) {
+      inputElem.value = textoFormatado;
+      inputElem.setSelectionRange(cursorPos, cursorPos);
+    }
+  }
+
+  function atualizarFotoProduto(modulo, imageUrl) {
+    const boxId = modulo === 'proativo' ? 'pro_foto_box' : 'trc_foto_box';
+    const box = el(boxId);
+    if (!box) return;
+
+    if (imageUrl && imageUrl.startsWith('http')) {
+      box.innerHTML = `<img src="${imageUrl}" alt="Produto" onerror="this.onerror=null; this.parentNode.innerHTML='<span class=\'product-img-placeholder\'>Sem foto</span>';">`;
+      box.setAttribute('data-img', imageUrl);
+    } else {
+      box.innerHTML = `<span class="product-img-placeholder">Sem foto</span>`;
+      box.removeAttribute('data-img');
+    }
+  }
+
+  async function buscarProduto(modulo) {
+    const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+    const code = el(prefix + 'codigo').value.trim();
+    const statusEl = el(prefix + 'status');
+    
+    if (!code) {
+      statusEl.innerHTML = '<span class="warn">Informe um código.</span>';
+      atualizarFotoProduto(modulo, null);
+      return;
+    }
+    
+    statusEl.innerHTML = '⚡ Buscando produto...';
+    atualizarFotoProduto(modulo, null);
+    
+    if (catalogoLocal[code]) {
+      const itemCat = catalogoLocal[code];
+      const nome = typeof itemCat === 'object' ? itemCat.nome : itemCat;
+      const img = typeof itemCat === 'object' ? itemCat.img : '';
+      el(prefix + 'descricao').value = formatarTextoPadrao(nome);
+      atualizarFotoProduto(modulo, img);
+      statusEl.innerHTML = '<span class="ok">⚡ Encontrado na memória local!</span>';
+      focarCalendario(prefix);
+      return;
+    }
+    
+    if (produtosPreCadastrados[code]) {
+      const itemPre = produtosPreCadastrados[code];
+      const nome = typeof itemPre === 'object' ? itemPre.nome : itemPre;
+      const img = typeof itemPre === 'object' ? itemPre.img : '';
+      el(prefix + 'descricao').value = formatarTextoPadrao(nome);
+      atualizarFotoProduto(modulo, img);
+      statusEl.innerHTML = '<span class="ok">⚡ Encontrado na base de mercado!</span>';
+      focarCalendario(prefix);
+      return;
+    }
+    
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      const data = await res.json();
+      
+      if (data.status === 1 && data.product) {
+        const prod = data.product;
+        const nomeProd = formatarTextoPadrao(prod.product_name_pt || prod.product_name || prod.generic_name || '');
+        
+        if (nomeProd) {
+          el(prefix + 'descricao').value = nomeProd;
+          const imgUrl = prod.image_front_url || prod.image_front_small_url || prod.image_url || '';
+          atualizarFotoProduto(modulo, imgUrl);
+          statusEl.innerHTML = '<span class="ok">⚡ Encontrado online!</span>';
+          
+          catalogoLocal[code] = { nome: nomeProd, img: imgUrl };
+          localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
+          focarCalendario(prefix);
+          return;
         }
+      }
+    } catch (e) {}
 
-        function iniciarScannerCamera() {
-            const readerDiv = document.getElementById('reader');
-            readerDiv.style.display = 'block';
+    statusEl.innerHTML = '<span class="ok">💡 Digite o nome do produto uma vez. Ele ficará salvo para sempre no sistema!</span>';
+    el(prefix + 'descricao').focus();
+  }
 
-            if (!html5QrCode) {
-                html5QrCode = new Html5Qrcode("reader");
-            }
+  function focarCalendario(prefix) {
+    setTimeout(() => {
+      const campoData = el(prefix + 'validade');
+      if (campoData) {
+        campoData.focus();
+        if (typeof campoData.showPicker === 'function') campoData.showPicker();
+      }
+    }, 250);
+  }
+  
+  function adicionarItem(modulo) {
+    const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+    const code = el(prefix + 'codigo').value.trim() || 'S/C';
+    const desc = formatarTextoPadrao(el(prefix + 'descricao').value.trim());
+    const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
+    const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
+    const validade = el(prefix + 'validade').value;
+    const boxId = modulo === 'proativo' ? 'pro_foto_box' : 'trc_foto_box';
+    const fotoBox = el(boxId);
+    const imgUrl = fotoBox ? (fotoBox.getAttribute('data-img') || '') : '';
+    
+    if (!desc || isNaN(qtd) || !validade) {
+      alert("Preencha descrição, quantidade e validade.");
+      return;
+    }
+    
+    const item = {
+      id: Date.now(),
+      codigo: code,
+      descricao: desc,
+      quantidade: qtd,
+      unidade: el(prefix + 'unidade').value || 'und',
+      validade: validade,
+      valor: val,
+      total: qtd * val,
+      imagem: imgUrl
+    };
 
-            html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                (decodedText) => {
-                    // Sucesso ao ler o código de barras
-                    html5QrCode.stop();
-                    readerDiv.style.display = 'none';
-                    processarCodigoLido(decodedText);
-                },
-                (errorMessage) => {
-                    // Erros de leitura quadro a quadro são ignorados para manter a fluidez
-                }
-            ).catch(err => {
-                alert("Erro ao iniciar a câmera: " + err);
-            });
-        }
+    if (code !== 'S/C') {
+      catalogoLocal[code] = { nome: desc, img: imgUrl };
+      localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
+    }
+    
+    if (modulo === 'trocas') {
+      item.motivo = parseInt(el('trc_motivo').value);
+      itensTrocas.unshift(item);
+      localStorage.setItem('sys_trocas_itens', JSON.stringify(itensTrocas));
+    } else {
+      itensProAtivo.unshift(item);
+      localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
+    }
+    
+    renderizarLista(modulo);
+    
+    el(prefix + 'codigo').value = '';
+    el(prefix + 'descricao').value = '';
+    el(prefix + 'quantidade').value = '';
+    el(prefix + 'validade').value = '';
+    el(prefix + 'valor').value = '0.00';
+    el(prefix + 'status').innerHTML = '';
+    atualizarFotoProduto(modulo, null);
+  }
+  
+  function renderizarLista(modulo) {
+    const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+    const listContainer = el(prefix + 'lista');
+    const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
+    
+    el(prefix + 'contador').innerText = listaData.length;
+    
+    if (listaData.length === 0) {
+      listContainer.className = 'empty';
+      listContainer.innerHTML = 'Nenhum item registrado.';
+      return;
+    }
+    
+    listContainer.className = '';
+    listContainer.innerHTML = '';
+    
+    listaData.forEach(item => {
+      const itemEl = document.createElement('div');
+      itemEl.className = 'item';
+      const dataFmt = item.validade.split('-').reverse().join('/');
+      
+      const thumbHtml = item.imagem && item.imagem.startsWith('http') 
+        ? `<div class="item-thumb"><img src="${item.imagem}" alt="Prod"></div>` 
+        : `<div class="item-thumb"><span>Sem foto</span></div>`;
 
-        // Função de simulação para testar o card instantaneamente sem precisar da câmera física
-        function simularBipProduto() {
-            const produtoExemplo = {
-                codigo: "7891000100103",
-                nome: "Leite Condensado Integral Moça 395g",
-                preco: 6.49,
-                imagem: "https://images.tcdn.com.br/img/img_prod/851411/leite_condensado_integral_moca_lata_395g_nestle_6097_1_15d0bbfd9b97282cb90a212354c5e3d1.jpg"
-            };
-            exibirCardProdutoBipado(produtoExemplo);
-        }
+      let controlesExtraHtml = '';
+      if (modulo === 'trocas') {
+        controlesExtraHtml = `
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">MOTIVO:</span>
+            <select class="item-select-motivo" id="motivo_${item.id}">
+              <option value="1" ${item.motivo === 1 ? 'selected' : ''}>1 - Avaria</option>
+              <option value="2" ${item.motivo === 2 ? 'selected' : ''}>2 - Vencido</option>
+            </select>
+          </div>
+        `;
+      }
+      
+      itemEl.innerHTML = `
+        <div class="item-main-row">
+          ${thumbHtml}
+          <div class="item-info">
+            <input type="text" class="item-desc-input" id="desc_${item.id}" value="${item.descricao}">
+            <small>Cód: ${item.codigo} | Val: ${dataFmt}</small>
+          </div>
+          <div class="item-right">
+            <span class="item-total" id="total_${item.id}">R$ ${item.total.toFixed(2)}</span>
+            <button type="button" class="danger" style="padding: 6px 10px; font-size: 11px; border-radius: 8px;" onclick="removerItem('${modulo}', ${item.id})">🗑️</button>
+          </div>
+        </div>
+        <div class="item-controls-row">
+          <div class="qty-adjuster">
+            <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">QTD:</span>
+            <button type="button" class="qty-btn" onclick="ajustarQtdItem('${modulo}', ${item.id}, -1)">-</button>
+            <span class="qty-val" id="qtd_val_${item.id}">${item.quantidade}</span>
+            <button type="button" class="qty-btn" onclick="ajustarQtdItem('${modulo}', ${item.id}, 1)">+</button>
+            <span style="font-size: 11px; font-weight: 600; color: var(--text-muted);">${item.unidade}</span>
+          </div>
+          ${controlesExtraHtml}
+          <button type="button" class="primary" style="padding: 6px 14px; font-size: 12px; width: auto;" onclick="salvarItemEditado('${modulo}', ${item.id})">✔ Salvar</button>
+        </div>
+      `;
+      listContainer.appendChild(itemEl);
+    });
+  }
 
-        function processarCodigoLido(codigo) {
-            // Aqui você faria a busca na sua API ou base local. Exemplo simulado:
-            const produtoMock = {
-                codigo: codigo,
-                nome: "Produto Escaneado via Código de Barras",
-                preco: 5.99,
-                imagem: "" // Se não tiver imagem, vai cair no placeholder configurado
-            };
-            exibirCardProdutoBipado(produtoMock);
-        }
+  function ajustarQtdItem(modulo, id, delta) {
+    const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
+    const item = listaData.find(i => i.id === id);
+    if (!item) return;
 
-        function exibirCardProdutoBipado(produto) {
-            // 1. Preenche dados visuais principais
-            document.getElementById('txtCodigoBarras').innerText = `Cód: ${produto.codigo}`;
-            document.getElementById('txtNomeProduto').innerText = produto.nome;
+    let novaQtd = item.quantidade + delta;
+    if (novaQtd < 0.1) novaQtd = 1;
+    
+    item.quantidade = Number(novaQtd.toFixed(2));
+    item.total = item.quantidade * item.valor;
+
+    const qtdSpan = el(`qtd_val_${id}`);
+    if (qtdSpan) qtdSpan.innerText = item.quantidade;
+
+    const totalSpan = el(`total_${id}`);
+    if (totalSpan) totalSpan.innerText = `R$ ${item.total.toFixed(2)}`;
+  }
+
+  function salvarItemEditado(modulo, id) {
+    const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
+    const item = listaData.find(i => i.id === id);
+    if (!item) return;
+
+    const inputDesc = el(`desc_${id}`);
+    if (inputDesc) {
+      item.descricao = formatarTextoPadrao(inputDesc.value.trim());
+    }
+
+    if (modulo === 'trocas') {
+      const selectMotivo = el(`motivo_${id}`);
+      if (selectMotivo) {
+        item.motivo = parseInt(selectMotivo.value);
+      }
+      localStorage.setItem('sys_trocas_itens', JSON.stringify(itensTrocas));
+    } else {
+      localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
+    }
+
+    renderizarLista(modulo);
+    alert("Alterações salvas com sucesso!");
+  }
+  
+  function removerItem(modulo, id) {
+    if (modulo === 'proativo') {
+      itensProAtivo = itensProAtivo.filter(i => i.id !== id);
+      localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
+    } else {
+      itensTrocas = itensTrocas.filter(i => i.id !== id);
+      localStorage.setItem('sys_trocas_itens', JSON.stringify(itensTrocas));
+    }
+    renderizarLista(modulo);
+  }
+  
+  function limparLista(modulo) {
+    if (confirm("Deseja apagar todos os lançamentos deste módulo?")) {
+      if (modulo === 'proativo') {
+        itensProAtivo = [];
+        localStorage.removeItem('sys_proative_itens');
+      } else {
+        itensTrocas = [];
+        localStorage.removeItem('sys_trocas_itens');
+      }
+      renderizarLista(modulo);
+    }
+  }
+  
+  function getModeloPlanilha(modulo) {
+    return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './planilha_padrao_original.xlsx';
+  }
+  
+  async function gerarExcel(modulo) {
+    const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
+    if (listaData.length === 0) {
+      alert("Adicione itens para exportar.");
+      return;
+    }
+    
+    const urlModelo = getModeloPlanilha(modulo);
+    
+    try {
+      let workbook;
+      try {
+        const response = await fetch(urlModelo);
+        const arrayBuffer = await response.arrayBuffer();
+        workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
+      } catch (e) {
+        workbook = await XlsxPopulate.fromBlankAsync();
+      }
+      
+      const nomeModulo = modulo === 'proativo' ? "Pró Ativo Frios" : "Relatório de Trocas";
+      const nomeLoja = listaLojas[lojaAtualIndex];
+      let sheetOriginal = workbook.sheet(0);
+      
+      if (modulo === 'proativo') {
+        const digitou = el('pro_digitou').value;
+        const gerente = el('pro_gerente').value;
+        const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
+        
+        const itensPorPagina = 24; 
+        const totalPaginas = Math.ceil(listaData.length / itensPorPagina);
+        
+        for (let pagina = 0; pagina < totalPaginas; pagina++) {
+          let sheet = pagina === 0 ? sheetOriginal : workbook.addSheet(`Página_${pagina + 1}`, sheetOriginal);
+          
+          sheet.cell("H1").value(nomeLoja);
+          sheet.cell("H2").value(gerente);
+          sheet.cell("H3").value(dataLev);
+          sheet.cell("H4").value(digitou);
+          
+          const inicio = pagina * itensPorPagina;
+          const fim = Math.min(inicio + itensPorPagina, listaData.length);
+          const paginaItens = listaData.slice(inicio, fim);
+          
+          paginaItens.forEach((item, index) => {
+            const row = 7 + index;
+            const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
             
-            const imgElement = document.getElementById('imgProdutoBipado');
-            imgElement.src = produto.imagem ? produto.imagem : 'https://via.placeholder.com/180?text=Sem+Foto';
-
-            // 2. Reseta quantidade e preço
-            document.getElementById('qtdLancamento').value = 1;
-            document.getElementById('precoLancamento').value = produto.preco ? produto.preco.toFixed(2) : '';
-
-            // 3. AUTOMÁTICO: Preenche a data de validade com o dia/mês/ano atual (AAAA-MM-DD)
-            const hoje = new Date();
-            const ano = hoje.getFullYear();
-            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-            const dia = String(hoje.getDate()).padStart(2, '0');
-            document.getElementById('dataValidadeLancamento').value = `${ano}-${mes}-${dia}`;
-
-            // 4. Exibe o card na tela e foca na quantidade
-            document.getElementById('produtoBipadoCard').style.display = 'flex';
-            document.getElementById('qtdLancamento').focus();
-            document.getElementById('qtdLancamento').select();
+            sheet.cell(`A${row}`).value(inicio + index + 1);
+            sheet.cell(`B${row}`).value("");
+            sheet.cell(`C${row}`).value(nomeLoja);
+            sheet.cell(`D${row}`).value(item.codigo);
+            sheet.cell(`E${row}`).value(formatarTextoPadrao(item.descricao));
+            sheet.cell(`F${row}`).value(item.quantidade);
+            sheet.cell(`G${row}`).value(String(item.unidade || 'und').trim());
+            sheet.cell(`H${row}`).value(dataFmt);
+            sheet.cell(`I${row}`).value(item.valor);
+          });
         }
-
-        function fecharCardProduto() {
-            document.getElementById('produtoBipadoCard').style.display = 'none';
-        }
-
-        function salvarItemColetado() {
-            const quantidade = document.getElementById('qtdLancamento').value;
-            const preco = document.getElementById('precoLancamento').value;
-            const validade = document.getElementById('dataValidadeLancamento').value;
-
-            if (!quantidade || !validade) {
-                alert("Preencha a quantidade e a validade.");
-                return;
+        
+      } else {
+        const responsavel = el('trc_digitou').value;
+        const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
+        
+        const itensPorPaginaTrc = 38; 
+        const totalPaginas = Math.ceil(listaData.length / itensPorPaginaTrc);
+        
+        for (let pagina = 0; pagina < totalPaginas; pagina++) {
+          let sheet = pagina === 0 ? sheetOriginal : workbook.addSheet(`Trocas_${pagina + 1}`, sheetOriginal);
+          
+          sheet.cell("B7").value("X");
+          sheet.cell("A10").value(nomeLoja);
+          sheet.cell("A12").value(dataTroca);
+          sheet.cell("A41").value(responsavel);
+          
+          const inicio = pagina * itensPorPaginaTrc;
+          const fim = Math.min(inicio + itensPorPaginaTrc, listaData.length);
+          const paginaItens = listaData.slice(inicio, fim);
+          
+          paginaItens.forEach((item, index) => {
+            // Começa rigorosamente na linha 17 para evitar a linha 16
+            const row = 17 + index;
+            if (row <= 54) {
+              sheet.cell(`A${row}`).value(String(item.codigo).trim());
+              sheet.cell(`B${row}`).value(formatarTextoPadrao(String(item.descricao)).replace(/\s+/g, ' ').trim());
+              sheet.cell(`C${row}`).value(item.quantidade);
+              sheet.cell(`D${row}`).value(item.motivo);
             }
-
-            alert(`Lançamento salvo com sucesso!\nQtd: ${quantidade} | Preço: R$ ${preco} | Validade: ${validade}`);
-            fecharCardProduto();
+          });
         }
-    </script>
+      }
+      
+      const blob = await workbook.outputAsync();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      alert("Relatório gerado com sucesso!");
+    } catch (e) {
+      alert("Erro ao exportar Excel: " + e.message);
+    }
+  }
+  </script>
 </body>
 </html>
