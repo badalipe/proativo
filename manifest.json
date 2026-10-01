@@ -2,33 +2,24 @@
   "name": "RedeMarket Proativo",
   "short_name": "Proativo",
   "description": "Aplicativo de gestão de perdas, trocas e controle de inventário para o RedeMarket.",
-  "start_url": "./index.html",
-  "scope": "./",
+  "start_url": "https://badalipe.github.io/proativo/index.html",
+  "scope": "https://badalipe.github.io/proativo/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#0284c7",
   "icons": [
     {
-      "src": "./icon-192.png",
+      "src": "https://badalipe.github.io/proativo/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "./icon-512.png",
+      "src": "https://badalipe.github.io/proativo/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "./screenshot1.png",
-      "sizes": "540x720",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Tela de Inventário e Perdas"
     }
   ]
 }
