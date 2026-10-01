@@ -1,0 +1,15 @@
+{
+  "name": "Rede Market Pró-Ativo",
+  "short_name": "RedeMarket",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f7f6",
+  "theme_color": "#0d6efd",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
