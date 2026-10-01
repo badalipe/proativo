@@ -6,6 +6,16 @@
   <meta name="theme-color" content="#090d16">
   <title>Sistema de Gestão - Rede Market</title>
   
+  <!-- Configurações de PWA adicionadas -->
+  <link rel="manifest" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log("Service Worker registrado com sucesso!"))
+        .catch((err) => console.log("Erro ao registrar Service Worker: ", err));
+    }
+  </script>
+  
   <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   
@@ -616,7 +626,7 @@
         </section>
         
         <section class="card">
-          <div class="card-header"><span class="card-icon icon-conf">✏️️</span><h3>2. Dados da Troca</h3></div>
+          <div class="card-header"><span class="card-icon icon-conf">✏</span><h3>2. Dados da Troca</h3></div>
           
           <div class="product-img-container" id="trc_foto_box">
             <span class="product-img-placeholder">Sem foto</span>
@@ -1356,7 +1366,6 @@
           const paginaItens = listaData.slice(inicio, fim);
           
           paginaItens.forEach((item, index) => {
-            // Começa rigorosamente na linha 17 para evitar a linha 16
             const row = 17 + index;
             if (row <= 54) {
               sheet.cell(`A${row}`).value(String(item.codigo).trim());
@@ -1383,4 +1392,3 @@
   </script>
 </body>
 </html>
-
