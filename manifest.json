@@ -1,14 +1,27 @@
-"icons": [
+{
+  "name": "Pró-Ativo Rede Market",
+  "short_name": "Pró-Ativo",
+  "description": "Aplicativo para gestão de estoque, validades e trocas da Rede Market.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0056b3",
+  "icons": [
     {
-      "src": "./launchericon-512x512.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "./launchericon-512x512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "googleplay",
+      "url": "https://play.google.com/store/apps/details?id=com.seudominio.proativo"
     }
   ]
+}
