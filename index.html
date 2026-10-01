@@ -22,11 +22,19 @@
             .no-print { display: none !important; }
             body { background: white !important; }
         }
+        /* Estilo para o Botão Flutuante (FAB) Arrastável */
+        #fab-scanner {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 99;
+            touch-action: none;
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between">
 
-    <!-- Tela de Login / Autenticação -->
+    <!-- Tela de Login / Autenticação original -->
     <div id="login-screen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-md p-8 rounded-2xl shadow-2xl">
             <div class="text-center mb-6">
@@ -61,7 +69,7 @@
                 <span id="header-user-info" class="font-semibold text-sm">Operador</span>
             </div>
             <button onclick="logout()" class="text-xs bg-red-700 hover:bg-red-800 px-3 py-1.5 rounded transition-colors">
-                <i class="fa-solid fa-right-from-bracket mr-1">}</i> Sair
+                <i class="fa-solid fa-right-from-bracket mr-1"></i> Sair
             </button>
         </header>
 
@@ -87,9 +95,16 @@
 
             <!-- Seção Dinâmica do Módulo Ativo -->
             <div id="module-content" class="glass-card p-6 rounded-xl shadow">
-                <!-- O conteúdo do módulo injetado via JS aparecerá aqui -->
+                <!-- Conteúdo dos módulos -->
             </div>
         </main>
+
+        <!-- Botão Flutuante (FAB) para Leitura Rápida via Câmera -->
+        <div id="fab-scanner" class="no-print">
+            <button onclick="openScannerModal()" class="bg-red-600 hover:bg-red-700 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl transition-transform hover:scale-110 focus:outline-none">
+                <i class="fa-solid fa-barcode"></i>
+            </button>
+        </div>
 
         <!-- Rodapé -->
         <footer class="bg-white border-t py-4 text-center text-xs text-slate-500 no-print">
@@ -97,9 +112,25 @@
         </footer>
     </div>
 
+    <!-- Modal do Leitor de Câmera (Otimizado) -->
+    <div id="scanner-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+            <div class="bg-red-600 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold"><i class="fa-solid fa-barcode mr-2"></i> Leitor de Código de Barras</h3>
+                <button onclick="closeScannerModal()" class="text-white hover:text-slate-200 text-lg font-bold px-2">&times;</button>
+            </div>
+            <div class="p-4 flex flex-col items-center">
+                <!-- Contêiner onde o leitor da câmera será renderizado -->
+                <div id="reader" class="w-full rounded-lg overflow-hidden border bg-slate-100 min-h-[250px]"></div>
+                <p class="text-xs text-slate-500 mt-3 text-center">Posicione o código de barras no interior da câmera. O foco foi otimizado para leitura rápida.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Script de Controle -->
     <script>
         let currentUser = null;
+        let html5QrCode = null;
 
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -123,11 +154,11 @@
                 container.innerHTML = `
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold text-red-600"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Módulo Pró-Ativo</h2>
-                        <button onclick="alert('Funcionalidade de leitura pronta para uso!')" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700">
+                        <button onclick="openScannerModal()" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700">
                             <i class="fa-solid fa-barcode mr-1"></i> Ler Código de Barras
                         </button>
                     </div>
-                    <p class="text-slate-600 text-sm">Painel de controle de produtos próximos ao vencimento ativo. Utilize os botões acima para iniciar a leitura por câmera ou cadastrar manualmente.</p>
+                    <p class="text-slate-600 text-sm">Painel de controle de produtos próximos ao vencimento ativo. Utilize o botão flutuante ou o botão acima para iniciar a leitura por câmera.</p>
                 `;
             } else if (moduleName === 'trocas') {
                 container.innerHTML = `
@@ -139,6 +170,281 @@
                     <h2 class="text-xl font-bold text-amber-600 mb-4"><i class="fa-solid fa-tag mr-2"></i> Gerador de Cartazes</h2>
                     <p class="text-slate-600 text-sm">Integração pronta com modelos de cartazes de oferta e formatação de impressão em grade.</p>
                 `;
+            }
+        }
+
+        // Funções do Leitor de Câmera Otimizadas para Dificuldade de Leitura
+        function openScannerModal() {
+            document.getElementById('scanner-modal').classList.remove('hidden');
+            
+            // Pequeno atraso para garantir que o DOM do modal esteja visível antes de iniciar o stream da câmera
+            setTimeout(() => {
+                if (!html5QrCode) {
+                    html5QrCode = new Html5Qrcode("reader");
+                }
+
+                // Configurações otimizadas: alta taxa de quadros (fps), tamanho de box adequado e preferência pela câmera traseira (environment)
+                const qrConfig = { 
+                    fps: 15, 
+                    qrbox: { width: 280, height: 150 },
+                    aspectRatio: 1.777778
+                };
+
+                html5QrCode.start(
+                    { facingMode: "environment" }, 
+                    qrConfig, 
+                    (decodedText, decodedResult) => {
+                        // Sucesso na leitura do código de barras
+                        console.log(`Código Lido: ${decodedText}`, decodedResult);
+                        alert(`Produto Lido com Sucesso: ${decodedText}`);
+                        closeScannerModal();
+                        // Aqui você pode integrar com a lógica de preenchimento do seu app
+                    },
+                    (errorMessage) => {
+                        // Ignora erros de frame contínuos para não poluir o console, mantendo o scanner rodando liso
+                    }
+                ).catch((err) => {
+                    console.error("Erro ao iniciar a câmera:", err);
+                    alert("Não foi possível acessar a câmera traseira. Verifique as permissões do navegador.");
+                    closeScannerModal();
+                });
+            }, 300);
+        }
+
+        function closeScannerModal() {
+            document.getElementById('scanner-modal').classList.add('hidden');
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    console.log("Câmera desligada com sucesso.");
+                }).catch((err) => {
+                    console.error("Erro ao parar a câmera:", err);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão Integrada - Rede Market</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Biblioteca html5-qrcode para leitura de códigos de barra -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <!-- SheetJS para manipulação de planilhas -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+        }
+        /* Estilo para o Botão Flutuante (FAB) Arrastável */
+        #fab-scanner {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 99;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Tela de Login / Autenticação original -->
+    <div id="login-screen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-md p-8 rounded-2xl shadow-2xl">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-red-600">Rede Market</h1>
+                <p class="text-sm text-slate-500">Sistema de Gestão Operacional</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Usuário / Operador</label>
+                    <input type="text" id="username" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Loja</label>
+                    <select id="user-store" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
+                        <option value="Loja 01">Loja 01 - Centro</option>
+                        <option value="Loja 02">Loja 02 - Filial</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition-colors">
+                    Entrar no Sistema
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Aplicação Principal -->
+    <div id="app-container" class="hidden flex-1 flex flex-col">
+        <!-- Cabeçalho -->
+        <header class="bg-red-600 text-white shadow-md p-4 flex justify-between items-center no-print">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-store text-xl"></i>
+                <span id="header-user-info" class="font-semibold text-sm">Operador</span>
+            </div>
+            <button onclick="logout()" class="text-xs bg-red-700 hover:bg-red-800 px-3 py-1.5 rounded transition-colors">
+                <i class="fa-solid fa-right-from-bracket mr-1"></i> Sair
+            </button>
+        </header>
+
+        <!-- Menu / Conteúdo Dinâmico -->
+        <main class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6">
+            <div id="dashboard-menu" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 no-print">
+                <div onclick="switchModule('proativo')" class="glass-card p-6 rounded-xl shadow cursor-pointer hover:border-red-500 transition-all border-l-4 border-l-red-600">
+                    <i class="fa-solid fa-triangle-exclamation text-red-600 text-2xl mb-2"></i>
+                    <h2 class="font-bold text-lg">Pró-Ativo (Frios)</h2>
+                    <p class="text-xs text-slate-500">Controle de vencimentos e ofertas.</p>
+                </div>
+                <div onclick="switchModule('trocas')" class="glass-card p-6 rounded-xl shadow cursor-pointer hover:border-blue-500 transition-all border-l-4 border-l-blue-600">
+                    <i class="fa-solid fa-rotate text-blue-600 text-2xl mb-2"></i>
+                    <h2 class="font-bold text-lg">Trocas e Perdas</h2>
+                    <p class="text-xs text-slate-500">Registro de avarias e devoluções.</p>
+                </div>
+                <div onclick="switchModule('cartaz')" class="glass-card p-6 rounded-xl shadow cursor-pointer hover:border-amber-500 transition-all border-l-4 border-l-amber-500">
+                    <i class="fa-solid fa-tag text-amber-500 text-2xl mb-2"></i>
+                    <h2 class="font-bold text-lg">Gerador de Cartazes</h2>
+                    <p class="text-xs text-slate-500">Criar ofertas e cartazes A4/A5.</p>
+                </div>
+            </div>
+
+            <!-- Seção Dinâmica do Módulo Ativo -->
+            <div id="module-content" class="glass-card p-6 rounded-xl shadow">
+                <!-- Conteúdo dos módulos -->
+            </div>
+        </main>
+
+        <!-- Botão Flutuante (FAB) para Leitura Rápida via Câmera -->
+        <div id="fab-scanner" class="no-print">
+            <button onclick="openScannerModal()" class="bg-red-600 hover:bg-red-700 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl transition-transform hover:scale-110 focus:outline-none">
+                <i class="fa-solid fa-barcode"></i>
+            </button>
+        </div>
+
+        <!-- Rodapé -->
+        <footer class="bg-white border-t py-4 text-center text-xs text-slate-500 no-print">
+            Rede Market &copy; 2026 - Sistema de Gestão Operacional e Automação de Lojas
+        </footer>
+    </div>
+
+    <!-- Modal do Leitor de Câmera (Otimizado) -->
+    <div id="scanner-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+            <div class="bg-red-600 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold"><i class="fa-solid fa-barcode mr-2"></i> Leitor de Código de Barras</h3>
+                <button onclick="closeScannerModal()" class="text-white hover:text-slate-200 text-lg font-bold px-2">&times;</button>
+            </div>
+            <div class="p-4 flex flex-col items-center">
+                <!-- Contêiner onde o leitor da câmera será renderizado -->
+                <div id="reader" class="w-full rounded-lg overflow-hidden border bg-slate-100 min-h-[250px]"></div>
+                <p class="text-xs text-slate-500 mt-3 text-center">Posicione o código de barras no interior da câmera. O foco foi otimizado para leitura rápida.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de Controle -->
+    <script>
+        let currentUser = null;
+        let html5QrCode = null;
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const store = document.getElementById('user-store').value;
+            currentUser = { username, store };
+            
+            document.getElementById('header-user-info').innerText = `${username} (${store})`;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            switchModule('proativo');
+        });
+
+        function logout() {
+            location.reload();
+        }
+
+        function switchModule(moduleName) {
+            const container = document.getElementById('module-content');
+            if (moduleName === 'proativo') {
+                container.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-red-600"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Módulo Pró-Ativo</h2>
+                        <button onclick="openScannerModal()" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700">
+                            <i class="fa-solid fa-barcode mr-1"></i> Ler Código de Barras
+                        </button>
+                    </div>
+                    <p class="text-slate-600 text-sm">Painel de controle de produtos próximos ao vencimento ativo. Utilize o botão flutuante ou o botão acima para iniciar a leitura por câmera.</p>
+                `;
+            } else if (moduleName === 'trocas') {
+                container.innerHTML = `
+                    <h2 class="text-xl font-bold text-blue-600 mb-4"><i class="fa-solid fa-rotate mr-2"></i> Registro de Trocas e Perdas</h2>
+                    <p class="text-slate-600 text-sm">Módulo focado no apontamento de avarias de fornecedores e quebras internas de estoque.</p>
+                `;
+            } else if (moduleName === 'cartaz') {
+                container.innerHTML = `
+                    <h2 class="text-xl font-bold text-amber-600 mb-4"><i class="fa-solid fa-tag mr-2"></i> Gerador de Cartazes</h2>
+                    <p class="text-slate-600 text-sm">Integração pronta com modelos de cartazes de oferta e formatação de impressão em grade.</p>
+                `;
+            }
+        }
+
+        // Funções do Leitor de Câmera Otimizadas para Dificuldade de Leitura
+        function openScannerModal() {
+            document.getElementById('scanner-modal').classList.remove('hidden');
+            
+            // Pequeno atraso para garantir que o DOM do modal esteja visível antes de iniciar o stream da câmera
+            setTimeout(() => {
+                if (!html5QrCode) {
+                    html5QrCode = new Html5Qrcode("reader");
+                }
+
+                // Configurações otimizadas: alta taxa de quadros (fps), tamanho de box adequado e preferência pela câmera traseira (environment)
+                const qrConfig = { 
+                    fps: 15, 
+                    qrbox: { width: 280, height: 150 },
+                    aspectRatio: 1.777778
+                };
+
+                html5QrCode.start(
+                    { facingMode: "environment" }, 
+                    qrConfig, 
+                    (decodedText, decodedResult) => {
+                        // Sucesso na leitura do código de barras
+                        console.log(`Código Lido: ${decodedText}`, decodedResult);
+                        alert(`Produto Lido com Sucesso: ${decodedText}`);
+                        closeScannerModal();
+                        // Aqui você pode integrar com a lógica de preenchimento do seu app
+                    },
+                    (errorMessage) => {
+                        // Ignora erros de frame contínuos para não poluir o console, mantendo o scanner rodando liso
+                    }
+                ).catch((err) => {
+                    console.error("Erro ao iniciar a câmera:", err);
+                    alert("Não foi possível acessar a câmera traseira. Verifique as permissões do navegador.");
+                    closeScannerModal();
+                });
+            }, 300);
+        }
+
+        function closeScannerModal() {
+            document.getElementById('scanner-modal').classList.add('hidden');
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    console.log("Câmera desligada com sucesso.");
+                }).catch((err) => {
+                    console.error("Erro ao parar a câmera:", err);
+                });
             }
         }
     </script>
