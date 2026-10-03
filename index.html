@@ -334,7 +334,7 @@
   .empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
   .pill { display: inline-block; padding: 4px 10px; border-radius: 99px; background: #e0f2fe; color: var(--primary); font-size: 11px; font-weight: 700; }
 
-  /* ADICIONADO: REGRAS DE IMPRESSÃO EM GRADE 2x2 (PAISAGEM A4) */
+  /* REGRAS DE IMPRESSÃO EM GRADE 2x2 (PAISAGEM A4) */
   @media print {
     @page {
       size: A4 landscape;
@@ -1475,100 +1475,75 @@
       let workbook;
       try {
         const response = await fetch(urlModelo);
+        if (!response.ok) throw new Error("Modelo não encontrado");
         const arrayBuffer = await response.arrayBuffer();
         workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
       } catch (e) {
         workbook = await XlsxPopulate.fromBlankAsync();
       }
       
-      const nomeModulo = modulo === 'proativo' ? "Pró Ativo Frios" : "Relatório de Trocas";
-      const nomeLoja = listaLojas[lojaAtualIndex];
-      let sheetOriginal = workbook.sheet(0);
+      const sheet = workbook.sheet(0);
       
-      if (modulo === 'proativo') {
-        const digitou = el('pro_digitou').value;
-        const gerente = el('pro_gerente').value;
-        const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
+      if (modulo === 'trocas') {
+        const responsavel = el('trc_digitou').value || '';
+        const fornecedor = el('trc_fornecedor').value || '';
+        const loja = el('lblLojaTrc').value || '';
+        const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : '';
         
-        const itensPorPagina = 24; 
-        const totalPaginas = Math.ceil(listaData.length / itensPorPagina);
-        
-        for (let pagina = 0; pagina < totalPaginas; pagina++) {
-          let sheet = pagina === 0 ? sheetOriginal : workbook.addSheet(`Página_${pagina + 1}`, sheetOriginal);
-          
-          sheet.cell("H1").value(nomeLoja);
-          sheet.cell("H2").value(gerente);
-          sheet.cell("H3").value(dataLev);
-          sheet.cell("H4").value(digitou);
-          
-          const inicio = pagina * itensPorPagina;
-          const fim = Math.min(inicio + itensPorPagina, listaData.length);
-          const paginaItens = listaData.slice(inicio, fim);
-          
-          paginaItens.forEach((item, index) => {
-            const row = 7 + index;
-            const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
-            
-            sheet.cell(`A${row}`).value(inicio + index + 1);
-            sheet.cell(`B${row}`).value("");
-            sheet.cell(`C${row}`).value(nomeLoja);
-            sheet.cell(`D${row}`).value(item.codigo);
-            sheet.cell(`E${row}`).value(formatarTextoPadrao(item.descricao));
-            sheet.cell(`F${row}`).value(item.quantidade);
-            sheet.cell(`G${row}`).value(String(item.unidade || 'und').trim());
-            sheet.cell(`H${row}`).value(dataFmt);
-            sheet.cell(`I${row}`).value(item.valor);
-          });
-        }
-        
+        let linhaInicial = 10;
+        listaData.forEach((item, index) => {
+          let linha = linhaInicial + index;
+          sheet.cell(`A${linha}`).value(item.codigo);
+          sheet.cell(`B${linha}`).value(item.descricao);
+          sheet.cell(`C${linha}`).value(item.quantidade);
+          sheet.cell(`D${linha}`).value(item.unidade);
+          sheet.cell(`E${linha}`).value(item.valor);
+          sheet.cell(`F${linha}`).value(item.total);
+          sheet.cell(`G${linha}`).value(item.validade ? item.validade.split('-').reverse().join('/') : '');
+          sheet.cell(`H${linha}`).value(item.motivo === 1 ? 'Avaria' : 'Vencido');
+          sheet.cell(`I${linha}`).value(fornecedor);
+          sheet.cell(`J${linha}`).value(responsavel);
+          sheet.cell(`K${linha}`).value(loja);
+          sheet.cell(`L${linha}`).value(dataTroca);
+        });
       } else {
-        const responsavel = el('trc_digitou').value;
-        const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
+        const digitou = el('pro_digitou').value || '';
+        const gerente = el('pro_gerente').value || '';
+        const comprador = el('pro_comprador').value || '';
+        const loja = el('lblLojaPro').value || '';
+        const dataLevantamento = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : '';
         
-        const itensPorPaginaTrc = 38; 
-        const totalPaginas = Math.ceil(listaData.length / itensPorPaginaTrc);
-        
-        for (let pagina = 0; pagina < totalPaginas; pagina++) {
-          let sheet = pagina === 0 ? sheetOriginal : workbook.addSheet(`Trocas_${pagina + 1}`, sheetOriginal);
-          
-          sheet.cell("B7").value("X");
-          sheet.cell("A10").value(nomeLoja);
-          sheet.cell("A12").value(dataTroca);
-          sheet.cell("A41").value(responsavel);
-          
-          const inicio = pagina * itensPorPaginaTrc;
-          const fim = Math.min(inicio + itensPorPaginaTrc, listaData.length);
-          const paginaItens = listaData.slice(inicio, fim);
-          
-          paginaItens.forEach((item, index) => {
-            const row = 17 + index;
-            if (row <= 54) {
-              sheet.cell(`A${row}`).value(String(item.codigo).trim());
-              sheet.cell(`B${row}`).value(formatarTextoPadrao(String(item.descricao)).replace(/\s+/g, ' ').trim());
-              sheet.cell(`C${row}`).value(item.quantidade);
-              sheet.cell(`D${row}`).value(item.motivo);
-            }
-          });
-        }
+        let linhaInicial = 10;
+        listaData.forEach((item, index) => {
+          let linha = linhaInicial + index;
+          sheet.cell(`A${linha}`).value(item.codigo);
+          sheet.cell(`B${linha}`).value(item.descricao);
+          sheet.cell(`C${linha}`).value(item.quantidade);
+          sheet.cell(`D${linha}`).value(item.unidade);
+          sheet.cell(`E${linha}`).value(item.validade ? item.validade.split('-').reverse().join('/') : '');
+          sheet.cell(`F${linha}`).value(item.valor);
+          sheet.cell(`G${linha}`).value(item.total);
+          sheet.cell(`H${linha}`).value(digitou);
+          sheet.cell(`I${linha}`).value(gerente);
+          sheet.cell(`J${linha}`).value(comprador);
+          sheet.cell(`K${linha}`).value(loja);
+          sheet.cell(`L${linha}`).value(dataLevantamento);
+        });
       }
       
       const blob = await workbook.outputAsync();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${modulo === 'trocas' ? 'Relatorio_Trocas' : 'Relatorio_ProAtivo'}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
-      alert("Relatório gerado com sucesso!");
-    } catch (e) {
-      alert("Erro ao exportar Excel: " + e.message);
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      alert("Erro ao gerar planilha Excel: " + err.message);
     }
   }
   </script>
-  <script>
-  if (typeof navigator.serviceWorker !== 'undefined') {
-    navigator.serviceWorker.register('sw.js')
-  }
-</script>
 </body>
 </html>
