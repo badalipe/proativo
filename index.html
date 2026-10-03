@@ -1315,7 +1315,7 @@
       quantidade: qtd,
       unidade: el(prefix + 'unidade').value || 'und',
       validade: validade,
-      valor: 0, // Valor sempre zero conforme solicitado
+      valor: 0,
       total: 0,
       imagem: imgUrl
     };
@@ -1523,18 +1523,20 @@
       } else {
         const loja = el('lblLojaPro').value || '';
         
-        let linhaInicial = 7; // Começa a partir da linha 7 conforme solicitado
+        let linhaInicial = 7; // Começa rigorosamente a partir da linha 7
         listaData.forEach((item, index) => {
           let linha = linhaInicial + index;
-          // Mapeamento exato estruturado:
+          // Mapeamento correto e alinhado conforme solicitado:
           sheet.cell(`A${linha}`).value('');                                              // Coluna A: Em branco (sem comprador)
-          sheet.cell(`B${linha}`).value(loja);                                              // Coluna B: Nome da Loja selecionada (repetido)
+          sheet.cell(`B${linha}`).value(loja);                                              // Coluna B: Nome da Loja selecionada
           sheet.cell(`C${linha}`).value(item.codigo);                                       // Coluna C: Código de barras do produto
+          
           const celDesc = sheet.cell(`D${linha}`);                                          // Coluna D: Descrição do produto
           celDesc.value(item.descricao);
           celDesc.style("horizontalAlignment", "left");                                     // Alinhado à esquerda
-          sheet.cell(`E${linha}`).value(item.quantidade);                                   // Coluna E: Quantidade encontrada
-          sheet.cell(`F${linha}`).value(item.unidade);                                      // Coluna F: Unidade coletada (ex: und)
+          
+          sheet.cell(`F${linha}`).value(item.quantidade);                                   // Coluna F: Quantidade encontrada
+          sheet.cell(`G${linha}`).value(item.unidade);                                      // Coluna G: Unidade coletada (und)
           sheet.cell(`H${linha}`).value(item.validade ? item.validade.split('-').reverse().join('/') : ''); // Coluna H: Data de validade
           sheet.cell(`I${linha}`).value(0);                                                 // Coluna I: Valor sempre zero
         });
