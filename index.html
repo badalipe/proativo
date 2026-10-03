@@ -6,7 +6,6 @@
   <meta name="theme-color" content="#090d16">
   <title>Sistema de Gestão - Rede Market</title>
   
-  <!-- Configurações de PWA adicionadas -->
   <link rel="manifest" href="manifest.json">
   <script>
     if ('serviceWorker' in navigator) {
@@ -298,7 +297,6 @@
   }
   .item-main-row { display: flex; align-items: flex-start; gap: 12px; width: 100%; }
   
-  /* TAMANHO DA FOTO AMPLIADO NOS ITENS SALVOS */
   .item-thumb { 
     width: 80px; 
     height: 100px; 
@@ -357,7 +355,6 @@
   .empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
   .pill { display: inline-block; padding: 4px 10px; border-radius: 99px; background: #e0f2fe; color: var(--primary); font-size: 11px; font-weight: 700; }
 
-  /* REGRAS DE IMPRESSÃO EM GRADE 2x2 (PAISAGEM A4) */
   @media print {
     @page {
       size: A4 landscape;
@@ -1539,18 +1536,15 @@
         let linhaInicial = 10;
         listaData.forEach((item, index) => {
           let linha = linhaInicial + index;
-          sheet.cell(`A${linha}`).value(item.codigo);
-          sheet.cell(`B${linha}`).value(item.descricao);
-          sheet.cell(`C${linha}`).value(item.quantidade);
-          sheet.cell(`D${linha}`).value(item.unidade);
-          sheet.cell(`E${linha}`).value(item.validade ? item.validade.split('-').reverse().join('/') : '');
-          sheet.cell(`F${linha}`).value(item.valor);
-          sheet.cell(`G${linha}`).value(item.total);
-          sheet.cell(`H${linha}`).value(digitou);
-          sheet.cell(`I${linha}`).value(gerente);
-          sheet.cell(`J${linha}`).value(comprador);
-          sheet.cell(`K${linha}`).value(loja);
-          sheet.cell(`L${linha}`).value(dataLevantamento);
+          // Mapeamento correto corrigido milimetricamente conforme o modelo original:
+          sheet.cell(`D${linha}`).value(item.codigo);
+          sheet.cell(`E${linha}`).value(item.descricao);
+          sheet.cell(`H${linha}`).value(item.quantidade);
+          sheet.cell(`J${linha}`).value(item.unidade);
+          sheet.cell(`L${linha}`).value(item.validade ? item.validade.split('-').reverse().join('/') : '');
+          sheet.cell(`N${linha}`).value(item.valor);
+          sheet.cell(`V${linha}`).value(loja);
+          sheet.cell(`W${linha}`).value(dataLevantamento);
         });
       }
       
