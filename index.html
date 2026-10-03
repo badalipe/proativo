@@ -536,7 +536,7 @@
         </section>
         
         <section class="card">
-          <div class="card-header"><span class="card-icon icon-conf">✏️️</span><h3>2. Conferência</h3></div>
+          <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
           
           <div class="product-img-container" id="pro_foto_box">
             <span class="product-img-placeholder">Sem foto</span>
@@ -1523,10 +1523,13 @@
       } else {
         const loja = el('lblLojaPro').value || '';
         
+        // Ajustando a largura da coluna H para exibir a data completa sem cortar os anos ("26")
+        sheet.column("H").width(14);
+        
         let linhaInicial = 7; // Começa rigorosamente a partir da linha 7
         listaData.forEach((item, index) => {
           let linha = linhaInicial + index;
-          // Mapeamento corrigido: Validade na Coluna G e Valor Unitário (0) na Coluna H
+          
           sheet.cell(`A${linha}`).value('');                                              // Coluna A: Em branco (sem comprador)
           sheet.cell(`B${linha}`).value(loja);                                              // Coluna B: Nome da Loja selecionada
           sheet.cell(`C${linha}`).value(item.codigo);                                       // Coluna C: Código de barras do produto
@@ -1536,9 +1539,19 @@
           celDesc.style("horizontalAlignment", "left");                                     // Alinhado à esquerda
           
           sheet.cell(`E${linha}`).value(item.quantidade);                                   // Coluna E: Quantidade encontrada
-          sheet.cell(`F${linha}`).value(item.unidade);                                      // Coluna F: Unidade coletada (und)
-          sheet.cell(`G${linha}`).value(item.validade ? item.validade.split('-').reverse().join('/') : ''); // Coluna G: Data de validade
-          sheet.cell(`H${linha}`).value(0);                                                 // Coluna H: Valor unitário sempre zero
+          
+          // Coluna F: Unidade (centralizada igual à F)
+          const celUnidade = sheet.cell(`F${linha}`);
+          celUnidade.value(item.unidade);
+          celUnidade.style("horizontalAlignment", "center");
+          
+          // Coluna G: Data de Validade (centralizada)
+          const celValidade = sheet.cell(`G${linha}`);
+          celValidade.value(item.validade ? item.validade.split('-').reverse().join('/') : '');
+          celValidade.style("horizontalAlignment", "center");
+          
+          // Coluna H: Valor unitário sempre zero (com espaço suficiente agora)
+          sheet.cell(`H${linha}`).value(0);
         });
       }
       
