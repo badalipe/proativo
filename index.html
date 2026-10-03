@@ -646,7 +646,7 @@
         </section>
         
         <section class="card">
-          <div class="card-header"><span class="card-icon icon-conf">✏</span><h3>2. Dados da Troca</h3></div>
+          <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Dados da Troca</h3></div>
           
           <div class="product-img-container" id="trc_foto_box">
             <span class="product-img-placeholder">Sem foto</span>
@@ -1298,7 +1298,6 @@
     const code = el(prefix + 'codigo').value.trim() || 'S/C';
     const desc = formatarTextoPadrao(el(prefix + 'descricao').value.trim());
     const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
-    const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
     const validade = el(prefix + 'validade').value;
     const boxId = modulo === 'proativo' ? 'pro_foto_box' : 'trc_foto_box';
     const fotoBox = el(boxId);
@@ -1316,8 +1315,8 @@
       quantidade: qtd,
       unidade: el(prefix + 'unidade').value || 'und',
       validade: validade,
-      valor: val,
-      total: qtd * val,
+      valor: 0, // Valor sempre zero conforme solicitado
+      total: 0,
       imagem: imgUrl
     };
 
@@ -1341,7 +1340,6 @@
     el(prefix + 'descricao').value = '';
     el(prefix + 'quantidade').value = '';
     el(prefix + 'validade').value = '';
-    el(prefix + 'valor').value = '0.00';
     el(prefix + 'status').innerHTML = '';
     atualizarFotoProduto(modulo, null);
   }
@@ -1392,7 +1390,7 @@
             <small>Cód: ${item.codigo} | Val: ${dataFmt}</small>
           </div>
           <div class="item-right">
-            <span class="item-total" id="total_${item.id}">R$ ${item.total.toFixed(2)}</span>
+            <span class="item-total" id="total_${item.id}">R$ 0.00</span>
             <button type="button" class="danger" style="padding: 6px 10px; font-size: 11px; border-radius: 8px;" onclick="removerItem('${modulo}', ${item.id})">🗑️</button>
           </div>
         </div>
@@ -1421,13 +1419,9 @@
     if (novaQtd < 0.1) novaQtd = 1;
     
     item.quantidade = Number(novaQtd.toFixed(2));
-    item.total = item.quantidade * item.valor;
 
     const qtdSpan = el(`qtd_val_${id}`);
     if (qtdSpan) qtdSpan.innerText = item.quantidade;
-
-    const totalSpan = el(`total_${id}`);
-    if (totalSpan) totalSpan.innerText = `R$ ${item.total.toFixed(2)}`;
   }
 
   function salvarItemEditado(modulo, id) {
@@ -1510,7 +1504,7 @@
         const loja = el('lblLojaTrc').value || '';
         const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : '';
         
-        let linhaInicial = 10;
+        let linhaInicial = 7;
         listaData.forEach((item, index) => {
           let linha = linhaInicial + index;
           sheet.cell(`A${linha}`).value(item.codigo);
@@ -1527,25 +1521,22 @@
           sheet.cell(`L${linha}`).value(dataTroca);
         });
       } else {
-        const digitou = el('pro_digitou').value || '';
-        const gerente = el('pro_gerente').value || '';
-        const comprador = el('pro_comprador').value || '';
         const loja = el('lblLojaPro').value || '';
-        const dataLevantamento = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : '';
         
-        let linhaInicial = 10;
+        let linhaInicial = 7; // Começa a partir da linha 7 conforme solicitado
         listaData.forEach((item, index) => {
           let linha = linhaInicial + index;
-          // Mapeamento milimetricamente correto para o Pró-Ativo:
-          sheet.cell(`B${linha}`).value(item.codigo);                                       // Coluna B: Código
-          sheet.cell(`C${linha}`).value(item.descricao);                                    // Coluna C: Descrição
-          sheet.cell(`F${linha}`).value(item.quantidade);                                   // Coluna F: Quantidade
-          sheet.cell(`G${linha}`).value(item.unidade);                                      // Coluna G: Unidade
-          sheet.cell(`H${linha}`).value(item.validade ? item.validade.split('-').reverse().join('/') : ''); // Coluna H: Validade
-          sheet.cell(`I${linha}`).value(item.valor);                                        // Coluna I: Valor Unitário
-          sheet.cell(`J${linha}`).value(item.total);                                        // Coluna J: Valor Total
-          sheet.cell(`K${linha}`).value(loja);                                              // Coluna K: Loja (repetido)
-          sheet.cell(`L${linha}`).value(dataLevantamento);                                  // Coluna L: Data (repetido)
+          // Mapeamento exato estruturado:
+          sheet.cell(`A${linha}`).value('');                                              // Coluna A: Em branco (sem comprador)
+          sheet.cell(`B${linha}`).value(loja);                                              // Coluna B: Nome da Loja selecionada (repetido)
+          sheet.cell(`C${linha}`).value(item.codigo);                                       // Coluna C: Código de barras do produto
+          const celDesc = sheet.cell(`D${linha}`);                                          // Coluna D: Descrição do produto
+          celDesc.value(item.descricao);
+          celDesc.style("horizontalAlignment", "left");                                     // Alinhado à esquerda
+          sheet.cell(`E${linha}`).value(item.quantidade);                                   // Coluna E: Quantidade encontrada
+          sheet.cell(`F${linha}`).value(item.unidade);                                      // Coluna F: Unidade coletada (ex: und)
+          sheet.cell(`H${linha}`).value(item.validade ? item.validade.split('-').reverse().join('/') : ''); // Coluna H: Data de validade
+          sheet.cell(`I${linha}`).value(0);                                                 // Coluna I: Valor sempre zero
         });
       }
       
