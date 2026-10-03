@@ -1536,15 +1536,16 @@
         let linhaInicial = 10;
         listaData.forEach((item, index) => {
           let linha = linhaInicial + index;
-          // Mapeamento correto corrigido milimetricamente conforme o modelo original:
-          sheet.cell(`D${linha}`).value(item.codigo);
-          sheet.cell(`E${linha}`).value(item.descricao);
-          sheet.cell(`H${linha}`).value(item.quantidade);
-          sheet.cell(`J${linha}`).value(item.unidade);
-          sheet.cell(`L${linha}`).value(item.validade ? item.validade.split('-').reverse().join('/') : '');
-          sheet.cell(`N${linha}`).value(item.valor);
-          sheet.cell(`V${linha}`).value(loja);
-          sheet.cell(`W${linha}`).value(dataLevantamento);
+          // Mapeamento milimetricamente correto para o Pró-Ativo:
+          sheet.cell(`B${linha}`).value(item.codigo);                                       // Coluna B: Código
+          sheet.cell(`C${linha}`).value(item.descricao);                                    // Coluna C: Descrição
+          sheet.cell(`F${linha}`).value(item.quantidade);                                   // Coluna F: Quantidade
+          sheet.cell(`G${linha}`).value(item.unidade);                                      // Coluna G: Unidade
+          sheet.cell(`H${linha}`).value(item.validade ? item.validade.split('-').reverse().join('/') : ''); // Coluna H: Validade
+          sheet.cell(`I${linha}`).value(item.valor);                                        // Coluna I: Valor Unitário
+          sheet.cell(`J${linha}`).value(item.total);                                        // Coluna J: Valor Total
+          sheet.cell(`K${linha}`).value(loja);                                              // Coluna K: Loja (repetido)
+          sheet.cell(`L${linha}`).value(dataLevantamento);                                  // Coluna L: Data (repetido)
         });
       }
       
