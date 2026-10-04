@@ -1474,62 +1474,128 @@
     renderizarLista(modulo);
   }
 
+  function getModeloPlanilha(modulo) {
+    return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './Relatorio_ProAtivo_2026-10-03.SABADO.xlsx';
+  }
+  
   async function gerarExcel(modulo) {
     const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
     if (listaData.length === 0) {
-      alert("Não há itens na lista para exportar.");
+      alert("Adicione itens para exportar.");
       return;
     }
-
-    const lojaSel = el(modulo === 'proativo' ? 'lblLojaPro' : 'lblLojaTrc').value;
-    const digitou = el(modulo === 'proativo' ? 'pro_digitou' : 'trc_digitou').value || 'Não informado';
-    const dataLevantamento = el(modulo === 'proativo' ? 'pro_data' : 'trc_data').value || new Date().toISOString().split('T')[0];
-
+    
+    const urlModelo = getModeloPlanilha(modulo);
+    
     try {
-      const workbook = await XlsxPopulate.fromBlankAsync();
-      const sheet = workbook.sheet(0);
-      sheet.name(modulo === 'proativo' ? 'Pró Ativo' : 'Trocas');
-
-      sheet.cell("A1").value("REDE MARKET - " + (modulo === 'proativo' ? 'CONTROLE PRÓ ATIVO' : 'GESTÃO DE TROCAS'));
-      sheet.cell("A2").value("Loja: " + lojaSel);
-      sheet.cell("A3").value("Responsável: " + digitou);
-      sheet.cell("A4").value("Data: " + dataLevantamento.split('-').reverse().join('/'));
-
-      let cabecalho = modulo === 'proativo' 
-        ? ["Código", "Descrição do Produto", "Quantidade", "Unidade", "Validade", "Valor Unitário (R$)", "Total (R$)"]
-        : ["Código", "Descrição do Produto", "Quantidade", "Unidade", "Validade", "Custo Unitário (R$)", "Total (R$)", "Motivo"];
-
-      let rowIdx = 6;
-      cabecalho.forEach((colTitle, idx) => {
-        sheet.cell(rowIdx, idx + 1).value(colTitle);
-      });
-
-      rowIdx++;
-      listaData.forEach(item => {
-        sheet.cell(rowIdx, 1).value(item.codigo);
-        sheet.cell(rowIdx, 2).value(item.descricao);
-        sheet.cell(rowIdx, 3).value(item.quantidade);
-        sheet.cell(rowIdx, 4).value(item.unidade);
-        sheet.cell(rowIdx, 5).value(item.validade.split('-').reverse().join('/'));
-        sheet.cell(rowIdx, 6).value(item.valor);
-        sheet.cell(rowIdx, 7).value(item.quantidade * item.valor);
-        if (modulo === 'trocas') {
-          sheet.cell(rowIdx, 8).value(item.motivo === 1 ? '1 - Avaria' : '2 - Vencido');
-        }
-        rowIdx++;
-      });
-
+      let workbook;
+      try {
+        const response = await fetch(urlModelo);
+        if (!response.ok) throw new Error("Modelo não encontrado");
+        const arrayBuffer = await response.arrayBuffer();
+        workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
+      } catch (e) {
+        workbook = await XlsxPopulate.fromBlankAsync();
+      }
+      
+      let sheet;
+      try {
+        sheet = workbook.sheet("Planilha2") || workbook.sheet(1) || workbook.sheet(0);
+      } catch (err) {
+        sheet = workbook.sheet(0);
+      }
+      
+      if (modulo === 'trocas') {
+        const responsavel = el('trc_digitou').value || '';
+        const fornecedor = el('trc_fornecedor').value || '';
+        const loja = el('lblLojaTrc').value || '';
+        const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : '';
+        
+        let linhaInicial = 7;
+        listaData.forEach((item, index) => {
+          let linha = linhaInicial + index;
+          sheet.cell(`A${linha}`).value(item.codigo);
+          sheet.cell(`B${linha}`).value(item.descricao);
+          sheet.cell(`C${linha}`).value(item.quantidade);
+          sheet.cell(`D${linha}`).value(item.unidade);
+          sheet.cell(`E${linha}`).value(item.valor);
+          sheet.cell(`F${linha}`).value(item.total);
+          sheet.cell(`G${linha}`).value(item.validade ? item.validade.split('-').reverse().join('/') : '');
+          sheet.cell(`H${linha}`).value(item.motivo === 1 ? 'Avaria' : 'Vencido');
+          sheet.cell(`I${linha}`).value(fornecedor);
+          sheet.cell(`J${linha}`).value(responsavel);
+          sheet.cell(`K${linha}`).value(loja);
+          sheet.cell(`L${linha}`).value(dataTroca);
+        });
+      } else {
+        const loja = el('lblLojaPro').value || '';
+        const digitou = el('pro_digitou').value || 'Não informado';
+        const dataLevantamento = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : '';
+        
+        // Reconstrói perfeitamente o cabeçalho superior original mantendo o layout e as informações corretas
+        try { 
+          sheet.cell("A1").value("Pró Ativos                                                                           (Envio todas as Segundas Feiras até as 10:00 )");
+          sheet.cell("F1").value("Loja");
+          sheet.cell("G1").value(loja);
+          
+          sheet.cell("F2").value("Gerente / Avaliação");
+          sheet.cell("G2").value(el('pro_gerente').value || 'Encarregado');
+          
+          sheet.cell("F3").value("Data");
+          sheet.cell("G3").value(dataLevantamento);
+          
+          sheet.cell("F4").value("Quem Digitou?");
+          sheet.cell("G4").value(digitou);
+          
+          sheet.cell("A5").value("Comprador");
+          sheet.cell("B5").value("Loja");
+          sheet.cell("C5").value("Código do Produto");
+          sheet.cell("D5").value("Descrição do produto");
+          sheet.cell("E5").value("Quantidade no Estoque");
+          sheet.cell("F5").value("Unidade / Caixa / Fardo");
+          sheet.cell("G5").value("Data de Validade");
+          sheet.cell("H5").value("Valor Unitário");
+        } catch(e) {}
+        
+        sheet.column("H").width(14);
+        
+        let linhaInicial = 7; 
+        listaData.forEach((item, index) => {
+          let linha = linhaInicial + index;
+          
+          sheet.cell(`A${linha}`).value('');                                              // Coluna A: Comprador (vazio)
+          sheet.cell(`B${linha}`).value(loja);                                              // Coluna B: Loja
+          sheet.cell(`C${linha}`).value(String(item.codigo));                                // Coluna C: Código de Barras
+          
+          const celDesc = sheet.cell(`D${linha}`);                                          // Coluna D: Descrição do Produto
+          celDesc.value(item.descricao);
+          celDesc.style("horizontalAlignment", "left");
+          
+          sheet.cell(`E${linha}`).value(Number(item.quantidade));                           // Coluna E: Quantidade
+          
+          const celUnidade = sheet.cell(`F${linha}`);                                       // Coluna F: Unidade
+          celUnidade.value(item.unidade);
+          celUnidade.style("horizontalAlignment", "center");
+          
+          const celValidade = sheet.cell(`G${linha}`);                                      // Coluna G: Data de Validade
+          celValidade.value(item.validade ? item.validade.split('-').reverse().join('/') : '');
+          celValidade.style("horizontalAlignment", "center");
+          
+          sheet.cell(`H${linha}`).value(item.valor !== undefined ? Number(item.valor) : 0);  // Coluna H: Valor Unitário
+        });
+      }
+      
       const blob = await workbook.outputAsync();
-      const url = URL.createObjectURL(blob);
+      const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
-      a.download = `${modulo === 'proativo' ? 'ProAtivo' : 'Trocas'}_${lojaSel}_${dataLevantamento}.xlsx`;
+      a.href = blobUrl;
+      a.download = `Relatorio_ProAtivo_${new Date().toISOString().split('T')[0]}.xlsx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(blobUrl);
     } catch (err) {
-      alert("Erro ao gerar o arquivo Excel: " + err.message);
+      alert("Erro ao gerar planilha Excel: " + err.message);
     }
   }
   </script>
