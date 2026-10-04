@@ -1609,10 +1609,10 @@
           const linha = linhaInicial + (index % itensPorPagina);
           const sheet = abas[pagina];
 
-          sheet.cell(`A${linha}`).value(String(item.codigo).trim());
-          sheet.cell(`B${linha}`).value(String(item.descricao).replace(/\s+/g, ' ').trim());
-          sheet.cell(`C${linha}`).value(Number(item.quantidade));
-          sheet.cell(`D${linha}`).value(item.motivo === 2 ? 2 : 1);
+          sheet.cell(`A${linha}`).value(String(item.codigo).trim()).style({ horizontalAlignment: 'center' });
+          sheet.cell(`B${linha}`).value(String(item.descricao).replace(/\s+/g, ' ').trim()).style({ horizontalAlignment: 'left' });
+          sheet.cell(`C${linha}`).value(Number(item.quantidade)).style({ horizontalAlignment: 'center' });
+          sheet.cell(`D${linha}`).value(item.motivo === 2 ? 2 : 1).style({ horizontalAlignment: 'center' });
         });
 
         // Reordena as abas: página 1 (original) primeiro, depois as páginas clonadas
