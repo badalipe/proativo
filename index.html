@@ -1299,6 +1299,7 @@
     const desc = formatarTextoPadrao(el(prefix + 'descricao').value.trim());
     const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
     const validade = el(prefix + 'validade').value;
+    const valorUnitario = parseFloat((el(prefix + 'valor').value || '0').replace(',', '.')) || 0;
     const boxId = modulo === 'proativo' ? 'pro_foto_box' : 'trc_foto_box';
     const fotoBox = el(boxId);
     const imgUrl = fotoBox ? (fotoBox.getAttribute('data-img') || '') : '';
@@ -1315,7 +1316,7 @@
       quantidade: qtd,
       unidade: el(prefix + 'unidade').value || 'und',
       validade: validade,
-      valor: 0,
+      valor: valorUnitario,
       total: 0,
       imagem: imgUrl
     };
@@ -1340,6 +1341,7 @@
     el(prefix + 'descricao').value = '';
     el(prefix + 'quantidade').value = '';
     el(prefix + 'validade').value = '';
+    el(prefix + 'valor').value = '0.00';
     el(prefix + 'status').innerHTML = '';
     atualizarFotoProduto(modulo, null);
   }
@@ -1387,10 +1389,10 @@
           ${thumbHtml}
           <div class="item-info">
             <input type="text" class="item-desc-input" id="desc_${item.id}" value="${item.descricao}">
-            <small>Cód: ${item.codigo} | Val: ${dataFmt}</small>
+            <small>Cód: ${item.codigo} | Val: ${dataFmt} | R$ ${item.valor.toFixed(2)}</small>
           </div>
           <div class="item-right">
-            <span class="item-total" id="total_${item.id}">R$ 0.00</span>
+            <span class="item-total" id="total_${item.id}">R$ ${(item.quantidade * item.valor).toFixed(2)}</span>
             <button type="button" class="danger" style="padding: 6px 10px; font-size: 11px; border-radius: 8px;" onclick="removerItem('${modulo}', ${item.id})">🗑️</button>
           </div>
         </div>
@@ -1473,7 +1475,7 @@
   }
   
   function getModeloPlanilha(modulo) {
-    return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './planilha_padrao_original.xlsx';
+    return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './Relatorio_ProAtivo_2026-10-03.SABADO.xlsx';
   }
   
   async function gerarExcel(modulo) {
@@ -1523,14 +1525,14 @@
       } else {
         const loja = el('lblLojaPro').value || '';
         
-        // Ajustando a largura da coluna H para exibir a data completa sem cortar os anos ("26")
+        // Assegurar largura correta para H exibir a data completa sem cortes
         sheet.column("H").width(14);
         
-        let linhaInicial = 7; // Começa rigorosamente a partir da linha 7
+        let linhaInicial = 6; // Começa na linha 6 conforme o layout do arquivo modelo oficial
         listaData.forEach((item, index) => {
           let linha = linhaInicial + index;
           
-          sheet.cell(`A${linha}`).value('');                                              // Coluna A: Em branco (sem comprador)
+          sheet.cell(`A${linha}`).value('');                                              // Coluna A: Em branco (Comprador)
           sheet.cell(`B${linha}`).value(loja);                                              // Coluna B: Nome da Loja selecionada
           sheet.cell(`C${linha}`).value(item.codigo);                                       // Coluna C: Código de barras do produto
           
@@ -1538,9 +1540,9 @@
           celDesc.value(item.descricao);
           celDesc.style("horizontalAlignment", "left");                                     // Alinhado à esquerda
           
-          sheet.cell(`E${linha}`).value(item.quantidade);                                   // Coluna E: Quantidade encontrada
+          sheet.cell(`E${linha}`).value(item.quantidade);                                   // Coluna E: Quantidade no Estoque
           
-          // Coluna F: Unidade (centralizada igual à F)
+          // Coluna F: Unidade (centralizada)
           const celUnidade = sheet.cell(`F${linha}`);
           celUnidade.value(item.unidade);
           celUnidade.style("horizontalAlignment", "center");
@@ -1550,8 +1552,8 @@
           celValidade.value(item.validade ? item.validade.split('-').reverse().join('/') : '');
           celValidade.style("horizontalAlignment", "center");
           
-          // Coluna H: Valor unitário sempre zero (com espaço suficiente agora)
-          sheet.cell(`H${linha}`).value(0);
+          // Coluna H: Valor Unitário (recebe o valor catalogado ou 0)
+          sheet.cell(`H${linha}`).value(item.valor !== undefined ? item.valor : 0);
         });
       }
       
@@ -1559,7 +1561,7 @@
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
-      a.download = `${modulo === 'trocas' ? 'Relatorio_Trocas' : 'Relatorio_ProAtivo'}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.download = `Relatorio_ProAtivo_${new Date().toISOString().split('T')[0]}.xlsx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
