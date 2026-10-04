@@ -1251,30 +1251,6 @@
     }
     
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
-      const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, { signal: controller.signal });
-      clearTimeout(timeoutId);
-      const data = await res.json();
-      
-      if (data.status === 1 && data.product) {
-        const prod = data.product;
-        const nomeProd = formatarTextoPadrao(prod.product_name_pt || prod.product_name || prod.generic_name || '');
-        
-        if (nomeProd) {
-          el(prefix + 'descricao').value = nomeProd;
-          const imgUrl = prod.image_front_url || prod.image_front_small_url || prod.image_url || '';
-          atualizarFotoProduto(modulo, imgUrl);
-          statusEl.innerHTML = '<span class="ok">⚡ Encontrado online!</span>';
-          
-          catalogoLocal[code] = { nome: nomeProd, img: imgUrl };
-          localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
-          focarCalendario(prefix);
-          return;
-        }
-      }
-    } catch (e) {}
-
     try {
       const controllerBeep = new AbortController();
       const timeoutBeep = setTimeout(() => controllerBeep.abort(), 6000);
@@ -1296,6 +1272,30 @@
         localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
         focarCalendario(prefix);
         return;
+      }
+    } catch (e) {}
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      const data = await res.json();
+      
+      if (data.status === 1 && data.product) {
+        const prod = data.product;
+        const nomeProd = formatarTextoPadrao(prod.product_name_pt || prod.product_name || prod.generic_name || '');
+        
+        if (nomeProd) {
+          el(prefix + 'descricao').value = nomeProd;
+          const imgUrl = prod.image_front_url || prod.image_front_small_url || prod.image_url || '';
+          atualizarFotoProduto(modulo, imgUrl);
+          statusEl.innerHTML = '<span class="ok">⚡ Encontrado online!</span>';
+          
+          catalogoLocal[code] = { nome: nomeProd, img: imgUrl };
+          localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
+          focarCalendario(prefix);
+          return;
+        }
       }
     } catch (e) {}
 
