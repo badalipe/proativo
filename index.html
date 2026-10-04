@@ -1010,7 +1010,7 @@
     sx = Math.max(0, sx); sy = Math.max(0, sy);
     sw = Math.min(vw - sx, sw); sh = Math.min(vh - sy, sh);
     if (sw <= 0 || sh <= 0) return null;
-    const fatorEscala = Math.min(1280 / sw, Math.max(1, 720 / sw));
+    const fatorEscala = Math.min(1920 / sw, Math.max(1, 1080 / sw));
     scannerCanvas.width = Math.round(sw * fatorEscala);
     scannerCanvas.height = Math.round(sh * fatorEscala);
     const ctx = scannerCanvas.getContext('2d', { willReadFrequently: true });
@@ -1019,21 +1019,43 @@
   }
 
   async function obterStreamCamera() {
+    const altaResolucao = { width: { ideal: 3840 }, height: { ideal: 2160 }, frameRate: { ideal: 30 } };
     const tentativas = [
-      { audio: false, video: { facingMode: { exact: 'environment' }, width: { ideal: 3840 }, height: { ideal: 2160 } } },
-      { audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 3840 }, height: { ideal: 2160 } } },
+      { audio: false, video: { facingMode: { exact: 'environment' }, ...altaResolucao } },
+      { audio: false, video: { facingMode: { ideal: 'environment' }, ...altaResolucao } },
+      { audio: false, video: { facingMode: 'environment', ...altaResolucao } },
       { audio: false, video: true }
     ];
+    let stream = null;
     let ultimoErro = null;
     for (const constraints of tentativas) {
       try {
-        return await navigator.mediaDevices.getUserMedia(constraints);
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        break;
       } catch (e) {
         ultimoErro = e;
         if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) break;
       }
     }
-    throw ultimoErro;
+    if (!stream) throw ultimoErro;
+
+    // Agora que a permissão foi concedida, tenta trocar para a câmera traseira PRINCIPAL
+    // (evita cair na ultrawide/macro, que tem menor qualidade no Samsung A54)
+    try {
+      const trackAtual = stream.getVideoTracks()[0];
+      const settings = trackAtual && trackAtual.getSettings ? trackAtual.getSettings() : {};
+      await new Promise(r => setTimeout(r, 300));
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const traseiras = devices.filter(d => d.kind === 'videoinput' && /back|rear|traseira/i.test(d.label));
+      const principal = traseiras.find(d => !/ultra|wide|macro|depth|0\.5|tele|front|fren/i.test(d.label));
+      if (principal && principal.deviceId && principal.deviceId !== settings.deviceId) {
+        const novoStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { deviceId: { exact: principal.deviceId }, ...altaResolucao } });
+        stream.getTracks().forEach(t => t.stop());
+        stream = novoStream;
+      }
+    } catch (e) {}
+
+    return stream;
   }
 
   const ZOOM_SCANNER = 2.8;
