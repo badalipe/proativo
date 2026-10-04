@@ -1531,34 +1531,19 @@
         const loja = el('lblLojaPro').value || '';
         const digitou = el('pro_digitou').value || 'Não informado';
         const dataLevantamento = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : '';
+        const gerente = el('pro_gerente').value || 'Encarregado';
         
-        // Reconstrói perfeitamente o cabeçalho superior original mantendo o layout e as informações corretas
+        // Atualiza apenas os metadados superiores do modelo exato do repositório
         try { 
-          sheet.cell("A1").value("Pró Ativos                                                                           (Envio todas as Segundas Feiras até as 10:00 )");
-          sheet.cell("F1").value("Loja");
           sheet.cell("G1").value(loja);
-          
-          sheet.cell("F2").value("Gerente / Avaliação");
-          sheet.cell("G2").value(el('pro_gerente').value || 'Encarregado');
-          
-          sheet.cell("F3").value("Data");
+          sheet.cell("G2").value(gerente);
           sheet.cell("G3").value(dataLevantamento);
-          
-          sheet.cell("F4").value("Quem Digitou?");
           sheet.cell("G4").value(digitou);
-          
-          sheet.cell("A5").value("Comprador");
-          sheet.cell("B5").value("Loja");
-          sheet.cell("C5").value("Código do Produto");
-          sheet.cell("D5").value("Descrição do produto");
-          sheet.cell("E5").value("Quantidade no Estoque");
-          sheet.cell("F5").value("Unidade / Caixa / Fardo");
-          sheet.cell("G5").value("Data de Validade");
-          sheet.cell("H5").value("Valor Unitário");
         } catch(e) {}
         
         sheet.column("H").width(14);
         
+        // Insere os produtos rigorosamente a partir da linha 7 para baixo nas colunas exatas da sua planilha padrão
         let linhaInicial = 7; 
         listaData.forEach((item, index) => {
           let linha = linhaInicial + index;
@@ -1567,7 +1552,7 @@
           sheet.cell(`B${linha}`).value(loja);                                              // Coluna B: Loja
           sheet.cell(`C${linha}`).value(String(item.codigo));                                // Coluna C: Código de Barras
           
-          const celDesc = sheet.cell(`D${linha}`);                                          // Coluna D: Descrição do Produto
+          const celDesc = sheet.cell(`D${linha}`);                                          // Coluna D: Descrição
           celDesc.value(item.descricao);
           celDesc.style("horizontalAlignment", "left");
           
@@ -1577,7 +1562,7 @@
           celUnidade.value(item.unidade);
           celUnidade.style("horizontalAlignment", "center");
           
-          const celValidade = sheet.cell(`G${linha}`);                                      // Coluna G: Data de Validade
+          const celValidade = sheet.cell(`G${linha}`);                                      // Coluna G: Validade (DD/MM/AAAA)
           celValidade.value(item.validade ? item.validade.split('-').reverse().join('/') : '');
           celValidade.style("horizontalAlignment", "center");
           
