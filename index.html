@@ -563,7 +563,7 @@
               <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2l-10 18h5L12 11V2z" fill="#188038"/><path d="M12 2l10 18h-5L12 11V2z" fill="#F9AB00"/><path d="M2 20h20l-2.5-4H4.5L2 20z" fill="#4285F4"/></svg>
               Configurar Nuvem
             </button>
-            <button type="button" class="secondary" onclick="sincronizarItensNuvem()" style="width:auto; display:inline-flex; align-items:center; gap:6px;">
+            <button type="button" class="secondary" onclick="salvarPlanilhaNaNuvem('proativo')" style="width:auto; display:inline-flex; align-items:center; gap:6px;">
               <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2l-10 18h5L12 11V2z" fill="#188038"/><path d="M12 2l10 18h-5L12 11V2z" fill="#F9AB00"/><path d="M2 20h20l-2.5-4H4.5L2 20z" fill="#4285F4"/></svg>
               Salvar Nuvem
             </button>
@@ -681,7 +681,7 @@
               <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2l-10 18h5L12 11V2z" fill="#188038"/><path d="M12 2l10 18h-5L12 11V2z" fill="#F9AB00"/><path d="M2 20h20l-2.5-4H4.5L2 20z" fill="#4285F4"/></svg>
               Configurar Nuvem
             </button>
-            <button type="button" class="secondary" onclick="sincronizarItensNuvem()" style="width:auto; display:inline-flex; align-items:center; gap:6px;">
+            <button type="button" class="secondary" onclick="salvarPlanilhaNaNuvem('trocas')" style="width:auto; display:inline-flex; align-items:center; gap:6px;">
               <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2l-10 18h5L12 11V2z" fill="#188038"/><path d="M12 2l10 18h-5L12 11V2z" fill="#F9AB00"/><path d="M2 20h20l-2.5-4H4.5L2 20z" fill="#4285F4"/></svg>
               Salvar Nuvem
             </button>
@@ -1449,6 +1449,42 @@
     } catch (e) {}
   }
 
+  async function salvarPlanilhaNaNuvem(modulo) {
+    if (!nuvemUrl) {
+      alert('Configure primeiro a URL da nuvem no botão "Configurar Nuvem".');
+      return;
+    }
+    const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
+    if (listaData.length === 0) {
+      alert('Adicione itens para salvar na nuvem.');
+      return;
+    }
+    try {
+      alert('⏳ Gerando planilha... aguarde');
+      const blob = await gerarExcel(modulo, true);
+      if (!blob) return;
+      const buffer = await blob.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      let binario = '';
+      const parte = 8192;
+      for (let i = 0; i < bytes.length; i += parte) {
+        binario += String.fromCharCode.apply(null, bytes.subarray(i, i + parte));
+      }
+      const base64 = btoa(binario);
+      const nome = modulo === 'trocas' ? 'Trocas' : 'ProAtivo';
+      const arquivo = `Relatorio_${nome}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      await fetch(nuvemUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ tipoArquivo: true, arquivo: arquivo, modulo: modulo === 'trocas' ? 'Trocas' : 'Proativo', base64: base64 })
+      });
+      alert(`✅ A planilha foi salva na pasta "Planilha" do seu Google Drive!\nArquivo: ${arquivo}`);
+    } catch (e) {
+      alert('Erro ao salvar na nuvem: ' + e.message);
+    }
+  }
+
   async function sincronizarItensNuvem() {
     if (!nuvemUrl) {
       alert('Configure primeiro a nuvem pelo botão ☁️ Nuvem.');
@@ -1607,7 +1643,7 @@
     return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './planilha_padrao_original.xlsx';
   }
   
-  async function gerarExcel(modulo) {
+  async function gerarExcel(modulo, somenteArquivo = false) {
     const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
     if (listaData.length === 0) {
       alert("Adicione itens para exportar.");
@@ -1703,6 +1739,7 @@
       }
       
       const blob = await workbook.outputAsync();
+      if (somenteArquivo) return blob;
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
