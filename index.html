@@ -1459,7 +1459,7 @@
   }
   
   function getModeloPlanilha(modulo) {
-    return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './planilha_padrao_original.xlsx';
+    return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './Relatorio_ProAtivo_2026-10-03.SABADO.xlsx';
   }
   
   async function gerarExcel(modulo) {
@@ -1475,88 +1475,88 @@
       let workbook;
       try {
         const response = await fetch(urlModelo);
+        if (!response.ok) throw new Error("Modelo não encontrado");
         const arrayBuffer = await response.arrayBuffer();
         workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
       } catch (e) {
         workbook = await XlsxPopulate.fromBlankAsync();
       }
       
-      const nomeModulo = modulo === 'proativo' ? "Pró Ativo Frios" : "Relatório de Trocas";
       const nomeLoja = listaLojas[lojaAtualIndex];
       let sheetOriginal = workbook.sheet(0);
       
       if (modulo === 'proativo') {
-        const digitou = el('pro_digitou').value;
-        const gerente = el('pro_gerente').value;
+        const digitou = el('pro_digitou').value || 'Não informado';
+        const gerente = el('pro_gerente').value || 'Encarregado';
         const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        const itensPorPagina = 24; 
-        const totalPaginas = Math.ceil(listaData.length / itensPorPagina);
+        // Atualiza os metadados superiores do modelo exato do repositório
+        try { 
+          sheetOriginal.cell("G1").value(nomeLoja);
+          sheetOriginal.cell("G2").value(gerente);
+          sheetOriginal.cell("G3").value(dataLev);
+          sheetOriginal.cell("G4").value(digitou);
+        } catch(e) {}
         
-        for (let pagina = 0; pagina < totalPaginas; pagina++) {
-          let sheet = pagina === 0 ? sheetOriginal : workbook.addSheet(`Página_${pagina + 1}`, sheetOriginal);
+        sheetOriginal.column("H").width(14);
+        
+        // Insere os produtos rigorosamente a partir da linha 7 para baixo nas colunas exatas da sua planilha padrão
+        let linhaInicial = 7; 
+        listaData.forEach((item, index) => {
+          let linha = linhaInicial + index;
+          const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
           
-          sheet.cell("H1").value(nomeLoja);
-          sheet.cell("H2").value(gerente);
-          sheet.cell("H3").value(dataLev);
-          sheet.cell("H4").value(digitou);
+          sheetOriginal.cell(`A${linha}`).value('');                                              // Coluna A: Comprador (Em branco)
+          sheetOriginal.cell(`B${linha}`).value(nomeLoja);                                        // Coluna B: Loja
+          sheetOriginal.cell(`C${linha}`).value(String(item.codigo));                             // Coluna C: Código de Barras
           
-          const inicio = pagina * itensPorPagina;
-          const fim = Math.min(inicio + itensPorPagina, listaData.length);
-          const paginaItens = listaData.slice(inicio, fim);
+          const celDesc = sheetOriginal.cell(`D${linha}`);                                        // Coluna D: Descrição do Produto
+          celDesc.value(formatarTextoPadrao(item.descricao));
+          celDesc.style("horizontalAlignment", "left");
           
-          paginaItens.forEach((item, index) => {
-            const row = 7 + index;
-            const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
-            
-            sheet.cell(`A${row}`).value(inicio + index + 1);
-            sheet.cell(`B${row}`).value("");
-            sheet.cell(`C${row}`).value(nomeLoja);
-            sheet.cell(`D${row}`).value(item.codigo);
-            sheet.cell(`E${row}`).value(formatarTextoPadrao(item.descricao));
-            sheet.cell(`F${row}`).value(item.quantidade);
-            sheet.cell(`G${row}`).value(String(item.unidade || 'und').trim());
-            sheet.cell(`H${row}`).value(dataFmt);
-            sheet.cell(`I${row}`).value(item.valor);
-          });
-        }
+          sheetOriginal.cell(`E${linha}`).value(Number(item.quantidade));                         // Coluna E: Quantidade no Estoque
+          
+          const celUnidade = sheetOriginal.cell(`F${linha}`);                                     // Coluna F: Unidade
+          celUnidade.value(String(item.unidade || 'und').trim());
+          celUnidade.style("horizontalAlignment", "center");
+          
+          const celValidade = sheetOriginal.cell(`G${linha}`);                                    // Coluna G: Data de Validade
+          celValidade.value(dataFmt);
+          celValidade.style("horizontalAlignment", "center");
+          
+          sheetOriginal.cell(`H${linha}`).value(item.valor !== undefined ? Number(item.valor) : 0); // Coluna H: Valor Unitário
+        });
         
       } else {
-        const responsavel = el('trc_digitou').value;
+        const responsavel = el('trc_digitou').value || '';
+        const fornecedor = el('trc_fornecedor').value || '';
         const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        const itensPorPaginaTrc = 38; 
-        const totalPaginas = Math.ceil(listaData.length / itensPorPaginaTrc);
-        
-        for (let pagina = 0; pagina < totalPaginas; pagina++) {
-          let sheet = pagina === 0 ? sheetOriginal : workbook.addSheet(`Trocas_${pagina + 1}`, sheetOriginal);
+        let linhaInicial = 7;
+        listaData.forEach((item, index) => {
+          let linha = linhaInicial + index;
+          const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
           
-          sheet.cell("B7").value("X");
-          sheet.cell("A10").value(nomeLoja);
-          sheet.cell("A12").value(dataTroca);
-          sheet.cell("A41").value(responsavel);
-          
-          const inicio = pagina * itensPorPaginaTrc;
-          const fim = Math.min(inicio + itensPorPaginaTrc, listaData.length);
-          const paginaItens = listaData.slice(inicio, fim);
-          
-          paginaItens.forEach((item, index) => {
-            const row = 17 + index;
-            if (row <= 54) {
-              sheet.cell(`A${row}`).value(String(item.codigo).trim());
-              sheet.cell(`B${row}`).value(formatarTextoPadrao(String(item.descricao)).replace(/\s+/g, ' ').trim());
-              sheet.cell(`C${row}`).value(item.quantidade);
-              sheet.cell(`D${row}`).value(item.motivo);
-            }
-          });
-        }
+          sheetOriginal.cell(`A${linha}`).value(item.codigo);
+          sheetOriginal.cell(`B${linha}`).value(item.descricao);
+          sheetOriginal.cell(`C${linha}`).value(item.quantidade);
+          sheetOriginal.cell(`D${linha}`).value(item.unidade);
+          sheetOriginal.cell(`E${linha}`).value(item.valor);
+          sheetOriginal.cell(`F${linha}`).value(item.total);
+          sheetOriginal.cell(`G${linha}`).value(dataFmt);
+          sheetOriginal.cell(`H${linha}`).value(item.motivo === 1 ? 'Avaria' : 'Vencido');
+          sheetOriginal.cell(`I${linha}`).value(fornecedor);
+          sheetOriginal.cell(`J${linha}`).value(responsavel);
+          sheetOriginal.cell(`K${linha}`).value(nomeLoja);
+          sheetOriginal.cell(`L${linha}`).value(dataTroca);
+        });
       }
       
       const blob = await workbook.outputAsync();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.download = `Relatorio_ProAtivo_${new Date().toISOString().split('T')[0]}.xlsx`;
       a.click();
       window.URL.revokeObjectURL(url);
       alert("Relatório gerado com sucesso!");
