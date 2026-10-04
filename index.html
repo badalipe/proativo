@@ -490,7 +490,10 @@
                 <div class="sub">Validades e Estoque</div>
               </div>
             </div>
-            <button type="button" class="btn-menu-pro" onclick="configurarNuvem()" title="Configurar salvamento na nuvem" style="margin-right:6px;">☁️ Nuvem</button>
+            <button type="button" class="btn-menu-pro" onclick="configurarNuvem()" title="Configurar salvamento na nuvem" style="margin-right:6px; display:inline-flex; align-items:center; gap:6px;">
+              <svg width="16" height="16" viewBox="0 0 48 48" fill="none"><path d="M29 6H14a2 2 0 0 0-2 2v32a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V14L29 6z" fill="#0F9D58"/><path d="M29 6v8a2 2 0 0 0 2 2h8" fill="#87CEAC"/><path d="M18 22h12M18 27h12M18 32h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
+              Nuvem
+            </button>
             <button type="button" class="btn-menu-pro" onclick="voltarAoMenu()">Menu</button>
           </div>
           <div class="header-sub-row">
@@ -560,7 +563,10 @@
           <div class="actions" style="margin-top: 14px;">
             <button type="button" class="primary" onclick="gerarExcel('proativo')" style="width:auto">📊 Gerar Excel Pró Ativo</button>
             <button type="button" class="danger" onclick="limparLista('proativo')" style="width:auto">Limpar</button>
-            <button type="button" class="secondary" onclick="sincronizarItensNuvem()" style="width:auto">☁️ Sincronizar agora</button>
+            <button type="button" class="secondary" onclick="sincronizarItensNuvem()" style="width:auto; display:inline-flex; align-items:center; gap:6px;">
+              <svg width="16" height="16" viewBox="0 0 48 48" fill="none"><path d="M29 6H14a2 2 0 0 0-2 2v32a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V14L29 6z" fill="#0F9D58"/><path d="M29 6v8a2 2 0 0 0 2 2h8" fill="#87CEAC"/><path d="M18 22h12M18 27h12M18 32h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
+              Sincronizar agora
+            </button>
           </div>
         </section>
       </main>
@@ -596,7 +602,10 @@
                 <div class="sub">Devoluções</div>
               </div>
             </div>
-            <button type="button" class="btn-menu-pro" onclick="configurarNuvem()" title="Configurar salvamento na nuvem" style="margin-right:6px;">☁️ Nuvem</button>
+            <button type="button" class="btn-menu-pro" onclick="configurarNuvem()" title="Configurar salvamento na nuvem" style="margin-right:6px; display:inline-flex; align-items:center; gap:6px;">
+              <svg width="16" height="16" viewBox="0 0 48 48" fill="none"><path d="M29 6H14a2 2 0 0 0-2 2v32a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V14L29 6z" fill="#0F9D58"/><path d="M29 6v8a2 2 0 0 0 2 2h8" fill="#87CEAC"/><path d="M18 22h12M18 27h12M18 32h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
+              Nuvem
+            </button>
             <button type="button" class="btn-menu-pro" onclick="voltarAoMenu()">Menu</button>
           </div>
           <div class="header-sub-row">
@@ -672,7 +681,10 @@
           <div class="actions" style="margin-top: 14px;">
             <button type="button" class="primary" onclick="gerarExcel('trocas')" style="width:auto">📊 Exportar Planilha de Trocas</button>
             <button type="button" class="danger" onclick="limparLista('trocas')" style="width:auto">Limpar</button>
-            <button type="button" class="secondary" onclick="sincronizarItensNuvem()" style="width:auto">☁️ Sincronizar agora</button>
+            <button type="button" class="secondary" onclick="sincronizarItensNuvem()" style="width:auto; display:inline-flex; align-items:center; gap:6px;">
+              <svg width="16" height="16" viewBox="0 0 48 48" fill="none"><path d="M29 6H14a2 2 0 0 0-2 2v32a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V14L29 6z" fill="#0F9D58"/><path d="M29 6v8a2 2 0 0 0 2 2h8" fill="#87CEAC"/><path d="M18 22h12M18 27h12M18 32h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
+              Sincronizar agora
+            </button>
           </div>
         </section>
       </main>
@@ -1455,7 +1467,7 @@
       await enviarItemNuvem(it._m, it);
       enviados++;
     }
-    alert(`${enviados} item(ns) sincronizado(s) com a nuvem.`);
+    alert(`✅ ${enviados} item(ns) salvo(s) na nuvem com sucesso!`);
   }
   // ===== FIM SALVAMENTO NA NUVEM =====
   
