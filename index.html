@@ -1592,15 +1592,31 @@
         const fornecedor = el('trc_fornecedor').value || '';
         const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        let linhaInicial = 16;
+        // Inserção sempre a partir da linha 17; ao chegar na linha 54, abre nova aba com o mesmo modelo e o logotipo
+        const linhaInicial = 17;
+        const ultimaLinha = 54;
+        const itensPorPagina = ultimaLinha - linhaInicial + 1;
+        const totalPaginas = Math.ceil(listaData.length / itensPorPagina);
+
+        // Cria uma aba-clone (com logo e formatação) para cada página antes de preencher
+        const abas = [sheetOriginal];
+        for (let pag = 1; pag < totalPaginas; pag++) {
+          abas.push(workbook.addSheet(`Trocas_${pag + 1}`, sheetOriginal));
+        }
+
         listaData.forEach((item, index) => {
-          let linha = linhaInicial + index;
-          
-          sheetOriginal.cell(`A${linha}`).value(String(item.codigo).trim());
-          sheetOriginal.cell(`B${linha}`).value(String(item.descricao).replace(/\s+/g, ' ').trim());
-          sheetOriginal.cell(`C${linha}`).value(Number(item.quantidade));
-          sheetOriginal.cell(`D${linha}`).value(item.motivo === 2 ? 2 : 1);
+          const pagina = Math.floor(index / itensPorPagina);
+          const linha = linhaInicial + (index % itensPorPagina);
+          const sheet = abas[pagina];
+
+          sheet.cell(`A${linha}`).value(String(item.codigo).trim());
+          sheet.cell(`B${linha}`).value(String(item.descricao).replace(/\s+/g, ' ').trim());
+          sheet.cell(`C${linha}`).value(Number(item.quantidade));
+          sheet.cell(`D${linha}`).value(item.motivo === 2 ? 2 : 1);
         });
+
+        // Reordena as abas: página 1 (original) primeiro, depois as páginas clonadas
+        workbook._sheets = [abas[0], ...abas.slice(1)];
       }
       
       const blob = await workbook.outputAsync();
