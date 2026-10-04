@@ -1277,7 +1277,7 @@
       const controllerBeep = new AbortController();
       const timeoutBeep = setTimeout(() => controllerBeep.abort(), 6000);
       const urlBeep = 'https://www.beepscan.com/barcode/' + encodeURIComponent(code);
-      const resBeep = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(urlBeep), { signal: controllerBeep.signal });
+      const resBeep = await fetch(urlBeep, { signal: controllerBeep.signal });
       clearTimeout(timeoutBeep);
       const htmlBeep = await resBeep.text();
 
