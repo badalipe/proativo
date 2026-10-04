@@ -490,6 +490,7 @@
                 <div class="sub">Validades e Estoque</div>
               </div>
             </div>
+            <button type="button" class="btn-menu-pro" onclick="configurarNuvem()" title="Configurar salvamento na nuvem" style="margin-right:6px;">☁️ Nuvem</button>
             <button type="button" class="btn-menu-pro" onclick="voltarAoMenu()">Menu</button>
           </div>
           <div class="header-sub-row">
@@ -559,6 +560,7 @@
           <div class="actions" style="margin-top: 14px;">
             <button type="button" class="primary" onclick="gerarExcel('proativo')" style="width:auto">📊 Gerar Excel Pró Ativo</button>
             <button type="button" class="danger" onclick="limparLista('proativo')" style="width:auto">Limpar</button>
+            <button type="button" class="secondary" onclick="sincronizarItensNuvem()" style="width:auto">☁️ Sincronizar agora</button>
           </div>
         </section>
       </main>
@@ -594,6 +596,7 @@
                 <div class="sub">Devoluções</div>
               </div>
             </div>
+            <button type="button" class="btn-menu-pro" onclick="configurarNuvem()" title="Configurar salvamento na nuvem" style="margin-right:6px;">☁️ Nuvem</button>
             <button type="button" class="btn-menu-pro" onclick="voltarAoMenu()">Menu</button>
           </div>
           <div class="header-sub-row">
@@ -669,6 +672,7 @@
           <div class="actions" style="margin-top: 14px;">
             <button type="button" class="primary" onclick="gerarExcel('trocas')" style="width:auto">📊 Exportar Planilha de Trocas</button>
             <button type="button" class="danger" onclick="limparLista('trocas')" style="width:auto">Limpar</button>
+            <button type="button" class="secondary" onclick="sincronizarItensNuvem()" style="width:auto">☁️ Sincronizar agora</button>
           </div>
         </section>
       </main>
@@ -1377,6 +1381,8 @@
       localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
     }
     
+    enviarItemNuvem(modulo, item);
+    
     renderizarLista(modulo);
     
     el(prefix + 'codigo').value = '';
@@ -1387,6 +1393,71 @@
     el(prefix + 'status').innerHTML = '';
     atualizarFotoProduto(modulo, null);
   }
+
+  // ===== SALVAMENTO NA NUVEM (Google Sheets via Apps Script) =====
+  let nuvemUrl = localStorage.getItem('sys_nuvem_url') || '';
+
+  function configurarNuvem() {
+    const nova = prompt('Cole aqui a URL do Web App do Google Sheets (ver instruções). Para remover, deixe em branco:', nuvemUrl);
+    if (nova === null) return;
+    nuvemUrl = nova.trim();
+    if (nuvemUrl) {
+      localStorage.setItem('sys_nuvem_url', nuvemUrl);
+      alert('URL da nuvem salva. Novos itens serão enviados automaticamente.');
+    } else {
+      localStorage.removeItem('sys_nuvem_url');
+      alert('Integração com a nuvem removida.');
+    }
+  }
+
+  async function enviarItemNuvem(modulo, item) {
+    if (!nuvemUrl) return;
+    try {
+      const agora = new Date();
+      const payload = {
+        modulo: modulo === 'trocas' ? 'Trocas' : 'Proativo',
+        dataEnvio: agora.toLocaleString('pt-BR'),
+        loja: listaLojas[lojaAtualIndex] || '',
+        digitou: modulo === 'trocas' ? (el('trc_digitou') ? el('trc_digitou').value : '') : (el('pro_digitou') ? el('pro_digitou').value : ''),
+        codigo: item.codigo,
+        descricao: item.descricao,
+        quantidade: item.quantidade,
+        unidade: item.unidade || 'und',
+        validade: item.validade || '',
+        valor: item.valor || 0,
+        total: item.total || 0,
+        motivo: item.motivo === 2 ? 'Vencido' : (item.motivo === 1 ? 'Avaria' : '')
+      };
+      await fetch(nuvemUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {}
+  }
+
+  async function sincronizarItensNuvem() {
+    if (!nuvemUrl) {
+      alert('Configure primeiro a nuvem pelo botão ☁️ Nuvem.');
+      return;
+    }
+    const todos = [
+      ...itensProAtivo.map(it => ({ ...it, _m: 'proativo' })),
+      ...itensTrocas.map(it => ({ ...it, _m: 'trocas' }))
+    ];
+    if (todos.length === 0) {
+      alert('Nenhum item para sincronizar.');
+      return;
+    }
+    let enviados = 0;
+    for (const it of todos) {
+      await enviarItemNuvem(it._m, it);
+      enviados++;
+    }
+    alert(`${enviados} item(ns) sincronizado(s) com a nuvem.`);
+  }
+  // ===== FIM SALVAMENTO NA NUVEM =====
   
   function renderizarLista(modulo) {
     const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
