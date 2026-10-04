@@ -1592,23 +1592,14 @@
         const fornecedor = el('trc_fornecedor').value || '';
         const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        let linhaInicial = 7;
+        let linhaInicial = 16;
         listaData.forEach((item, index) => {
           let linha = linhaInicial + index;
-          const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
           
-          sheetOriginal.cell(`A${linha}`).value(item.codigo);
-          sheetOriginal.cell(`B${linha}`).value(item.descricao);
-          sheetOriginal.cell(`C${linha}`).value(item.quantidade);
-          sheetOriginal.cell(`D${linha}`).value(item.unidade);
-          sheetOriginal.cell(`E${linha}`).value(item.valor);
-          sheetOriginal.cell(`F${linha}`).value(item.total);
-          sheetOriginal.cell(`G${linha}`).value(dataFmt);
-          sheetOriginal.cell(`H${linha}`).value(item.motivo === 1 ? 'Avaria' : 'Vencido');
-          sheetOriginal.cell(`I${linha}`).value(fornecedor);
-          sheetOriginal.cell(`J${linha}`).value(responsavel);
-          sheetOriginal.cell(`K${linha}`).value(nomeLoja);
-          sheetOriginal.cell(`L${linha}`).value(dataTroca);
+          sheetOriginal.cell(`A${linha}`).value(String(item.codigo).trim());
+          sheetOriginal.cell(`B${linha}`).value(String(item.descricao).replace(/\s+/g, ' ').trim());
+          sheetOriginal.cell(`C${linha}`).value(Number(item.quantidade));
+          sheetOriginal.cell(`D${linha}`).value(item.motivo === 2 ? 2 : 1);
         });
       }
       
