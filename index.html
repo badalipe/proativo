@@ -536,7 +536,7 @@
         </section>
         
         <section class="card">
-          <div class="card-header"><span class="card-icon icon-conf">✏️️</span><h3>2. Conferência</h3></div>
+          <div class="card-header"><span class="card-icon icon-conf">✏</span><h3>2. Conferência</h3></div>
           
           <div class="product-img-container" id="pro_foto_box">
             <span class="product-img-placeholder">Sem foto</span>
@@ -1376,7 +1376,7 @@
         controlesExtraHtml = `
           <div style="display:flex; align-items:center; gap:6px;">
             <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">MOTIVO:</span>
-            <select class="item-select-motivo" id="motivo_${item.id}">
+            <select class="item-select-motivo" id="motivo_${item.id}" onchange="salvarItemEditado('${modulo}', ${item.id})">
               <option value="1" ${item.motivo === 1 ? 'selected' : ''}>1 - Avaria</option>
               <option value="2" ${item.motivo === 2 ? 'selected' : ''}>2 - Vencido</option>
             </select>
@@ -1388,7 +1388,7 @@
         <div class="item-main-row">
           ${thumbHtml}
           <div class="item-info">
-            <input type="text" class="item-desc-input" id="desc_${item.id}" value="${item.descricao}">
+            <input type="text" class="item-desc-input" id="desc_${item.id}" value="${item.descricao}" onblur="salvarItemEditado('${modulo}', ${item.id})">
             <small>Cód: ${item.codigo} | Val: ${dataFmt} | R$ ${item.valor.toFixed(2)}</small>
           </div>
           <div class="item-right">
@@ -1402,10 +1402,8 @@
             <button type="button" class="qty-btn" onclick="ajustarQtdItem('${modulo}', ${item.id}, -1)">-</button>
             <span class="qty-val" id="qtd_val_${item.id}">${item.quantidade}</span>
             <button type="button" class="qty-btn" onclick="ajustarQtdItem('${modulo}', ${item.id}, 1)">+</button>
-            <span style="font-size: 11px; font-weight: 600; color: var(--text-muted);">${item.unidade}</span>
           </div>
           ${controlesExtraHtml}
-          <button type="button" class="primary" style="padding: 6px 14px; font-size: 12px; width: auto;" onclick="salvarItemEditado('${modulo}', ${item.id})">✔ Salvar</button>
         </div>
       `;
       listContainer.appendChild(itemEl);
@@ -1416,14 +1414,17 @@
     const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
     const item = listaData.find(i => i.id === id);
     if (!item) return;
-
-    let novaQtd = item.quantidade + delta;
-    if (novaQtd < 0.1) novaQtd = 1;
     
-    item.quantidade = Number(novaQtd.toFixed(2));
-
-    const qtdSpan = el(`qtd_val_${id}`);
-    if (qtdSpan) qtdSpan.innerText = item.quantidade;
+    item.quantidade = Math.max(0.01, item.quantidade + delta);
+    item.quantidade = parseFloat(item.quantidade.toFixed(2));
+    
+    if (modulo === 'proativo') {
+      localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
+    } else {
+      localStorage.setItem('sys_trocas_itens', JSON.stringify(itensTrocas));
+    }
+    
+    renderizarLista(modulo);
   }
 
   function salvarItemEditado(modulo, id) {
@@ -1431,25 +1432,25 @@
     const item = listaData.find(i => i.id === id);
     if (!item) return;
 
-    const inputDesc = el(`desc_${id}`);
-    if (inputDesc) {
-      item.descricao = formatarTextoPadrao(inputDesc.value.trim());
+    const descInput = el(`desc_${id}`);
+    if (descInput) {
+      item.descricao = formatarTextoPadrao(descInput.value);
     }
 
     if (modulo === 'trocas') {
-      const selectMotivo = el(`motivo_${id}`);
-      if (selectMotivo) {
-        item.motivo = parseInt(selectMotivo.value);
+      const motivoSelect = el(`motivo_${id}`);
+      if (motivoSelect) {
+        item.motivo = parseInt(motivoSelect.value);
       }
-      localStorage.setItem('sys_trocas_itens', JSON.stringify(itensTrocas));
-    } else {
-      localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
     }
 
-    renderizarLista(modulo);
-    alert("Alterações salvas com sucesso!");
+    if (modulo === 'proativo') {
+      localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
+    } else {
+      localStorage.setItem('sys_trocas_itens', JSON.stringify(itensTrocas));
+    }
   }
-  
+
   function removerItem(modulo, id) {
     if (modulo === 'proativo') {
       itensProAtivo = itensProAtivo.filter(i => i.id !== id);
@@ -1460,119 +1461,75 @@
     }
     renderizarLista(modulo);
   }
-  
+
   function limparLista(modulo) {
-    if (confirm("Deseja apagar todos os lançamentos deste módulo?")) {
-      if (modulo === 'proativo') {
-        itensProAtivo = [];
-        localStorage.removeItem('sys_proative_itens');
-      } else {
-        itensTrocas = [];
-        localStorage.removeItem('sys_trocas_itens');
-      }
-      renderizarLista(modulo);
+    if (!confirm("Deseja realmente limpar todos os itens da lista?")) return;
+    if (modulo === 'proativo') {
+      itensProAtivo = [];
+      localStorage.removeItem('sys_proative_itens');
+    } else {
+      itensTrocas = [];
+      localStorage.removeItem('sys_trocas_itens');
     }
+    renderizarLista(modulo);
   }
-  
-  function getModeloPlanilha(modulo) {
-    return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './Relatorio_ProAtivo_2026-10-03.SABADO.xlsx';
-  }
-  
+
   async function gerarExcel(modulo) {
     const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
     if (listaData.length === 0) {
-      alert("Adicione itens para exportar.");
+      alert("Não há itens na lista para exportar.");
       return;
     }
-    
-    const urlModelo = getModeloPlanilha(modulo);
-    
+
+    const lojaSel = el(modulo === 'proativo' ? 'lblLojaPro' : 'lblLojaTrc').value;
+    const digitou = el(modulo === 'proativo' ? 'pro_digitou' : 'trc_digitou').value || 'Não informado';
+    const dataLevantamento = el(modulo === 'proativo' ? 'pro_data' : 'trc_data').value || new Date().toISOString().split('T')[0];
+
     try {
-      let workbook;
-      try {
-        const response = await fetch(urlModelo);
-        if (!response.ok) throw new Error("Modelo não encontrado");
-        const arrayBuffer = await response.arrayBuffer();
-        workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
-      } catch (e) {
-        workbook = await XlsxPopulate.fromBlankAsync();
-      }
-      
+      const workbook = await XlsxPopulate.fromBlankAsync();
       const sheet = workbook.sheet(0);
-      
-      if (modulo === 'trocas') {
-        const responsavel = el('trc_digitou').value || '';
-        const fornecedor = el('trc_fornecedor').value || '';
-        const loja = el('lblLojaTrc').value || '';
-        const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : '';
-        
-        let linhaInicial = 7;
-        listaData.forEach((item, index) => {
-          let linha = linhaInicial + index;
-          sheet.cell(`A${linha}`).value(item.codigo);
-          sheet.cell(`B${linha}`).value(item.descricao);
-          sheet.cell(`C${linha}`).value(item.quantidade);
-          sheet.cell(`D${linha}`).value(item.unidade);
-          sheet.cell(`E${linha}`).value(item.valor);
-          sheet.cell(`F${linha}`).value(item.total);
-          sheet.cell(`G${linha}`).value(item.validade ? item.validade.split('-').reverse().join('/') : '');
-          sheet.cell(`H${linha}`).value(item.motivo === 1 ? 'Avaria' : 'Vencido');
-          sheet.cell(`I${linha}`).value(fornecedor);
-          sheet.cell(`J${linha}`).value(responsavel);
-          sheet.cell(`K${linha}`).value(loja);
-          sheet.cell(`L${linha}`).value(dataTroca);
-        });
-      } else {
-        const loja = el('lblLojaPro').value || '';
-        
-        // Assegurar largura correta para H exibir a data completa sem cortes
-        sheet.column("H").width(14);
-        
-        // Atualiza a célula da Loja no cabeçalho superior original do modelo
-        try { sheet.cell("G1").value(loja); } catch(e) {}
-        try { sheet.cell("G2").value(loja); } catch(e) {}
-        
-        // Os produtos começam rigorosamente a partir da LINHA 7 em diante
-        let linhaInicial = 7; 
-        listaData.forEach((item, index) => {
-          let linha = linhaInicial + index;
-          
-          sheet.cell(`A${linha}`).value('');                                              // Coluna A: Em branco (Comprador)
-          sheet.cell(`B${linha}`).value(loja);                                              // Coluna B: Nome da Loja selecionada
-          sheet.cell(`C${linha}`).value(item.codigo);                                       // Coluna C: Código de barras do produto
-          
-          const celDesc = sheet.cell(`D${linha}`);                                          // Coluna D: Descrição do produto
-          celDesc.value(item.descricao);
-          celDesc.style("horizontalAlignment", "left");                                     // Alinhado à esquerda
-          
-          sheet.cell(`E${linha}`).value(item.quantidade);                                   // Coluna E: Quantidade no Estoque
-          
-          // Coluna F: Unidade (centralizada)
-          const celUnidade = sheet.cell(`F${linha}`);
-          celUnidade.value(item.unidade);
-          celUnidade.style("horizontalAlignment", "center");
-          
-          // Coluna G: Data de Validade (centralizada)
-          const celValidade = sheet.cell(`G${linha}`);
-          celValidade.value(item.validade ? item.validade.split('-').reverse().join('/') : '');
-          celValidade.style("horizontalAlignment", "center");
-          
-          // Coluna H: Valor Unitário (recebe o valor catalogado ou 0)
-          sheet.cell(`H${linha}`).value(item.valor !== undefined ? item.valor : 0);
-        });
-      }
-      
+      sheet.name(modulo === 'proativo' ? 'Pró Ativo' : 'Trocas');
+
+      sheet.cell("A1").value("REDE MARKET - " + (modulo === 'proativo' ? 'CONTROLE PRÓ ATIVO' : 'GESTÃO DE TROCAS'));
+      sheet.cell("A2").value("Loja: " + lojaSel);
+      sheet.cell("A3").value("Responsável: " + digitou);
+      sheet.cell("A4").value("Data: " + dataLevantamento.split('-').reverse().join('/'));
+
+      let cabecalho = modulo === 'proativo' 
+        ? ["Código", "Descrição do Produto", "Quantidade", "Unidade", "Validade", "Valor Unitário (R$)", "Total (R$)"]
+        : ["Código", "Descrição do Produto", "Quantidade", "Unidade", "Validade", "Custo Unitário (R$)", "Total (R$)", "Motivo"];
+
+      let rowIdx = 6;
+      cabecalho.forEach((colTitle, idx) => {
+        sheet.cell(rowIdx, idx + 1).value(colTitle);
+      });
+
+      rowIdx++;
+      listaData.forEach(item => {
+        sheet.cell(rowIdx, 1).value(item.codigo);
+        sheet.cell(rowIdx, 2).value(item.descricao);
+        sheet.cell(rowIdx, 3).value(item.quantidade);
+        sheet.cell(rowIdx, 4).value(item.unidade);
+        sheet.cell(rowIdx, 5).value(item.validade.split('-').reverse().join('/'));
+        sheet.cell(rowIdx, 6).value(item.valor);
+        sheet.cell(rowIdx, 7).value(item.quantidade * item.valor);
+        if (modulo === 'trocas') {
+          sheet.cell(rowIdx, 8).value(item.motivo === 1 ? '1 - Avaria' : '2 - Vencido');
+        }
+        rowIdx++;
+      });
+
       const blob = await workbook.outputAsync();
-      const blobUrl = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = `Relatorio_ProAtivo_${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.href = url;
+      a.download = `${modulo === 'proativo' ? 'ProAtivo' : 'Trocas'}_${lojaSel}_${dataLevantamento}.xlsx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
+      URL.revokeObjectURL(url);
     } catch (err) {
-      alert("Erro ao gerar planilha Excel: " + err.message);
+      alert("Erro ao gerar o arquivo Excel: " + err.message);
     }
   }
   </script>
