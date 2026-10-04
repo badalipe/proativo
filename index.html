@@ -6,7 +6,6 @@
   <meta name="theme-color" content="#090d16">
   <title>Sistema de Gestão - Rede Market</title>
   
-  <!-- Configurações de PWA adicionadas -->
   <link rel="manifest" href="manifest.json">
   <script>
     if ('serviceWorker' in navigator) {
@@ -334,7 +333,6 @@
   .empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
   .pill { display: inline-block; padding: 4px 10px; border-radius: 99px; background: #e0f2fe; color: var(--primary); font-size: 11px; font-weight: 700; }
 
-  /* ADICIONADO: REGRAS DE IMPRESSÃO EM GRADE 2x2 (PAISAGEM A4) */
   @media print {
     @page {
       size: A4 landscape;
@@ -1459,7 +1457,7 @@
   }
   
   function getModeloPlanilha(modulo) {
-    return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './Relatorio_ProAtivo_2026-10-03.SABADO.xlsx';
+    return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './planilha_padrao_original.xlsx';
   }
   
   async function gerarExcel(modulo) {
@@ -1490,7 +1488,7 @@
         const gerente = el('pro_gerente').value || 'Encarregado';
         const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        // Atualiza os metadados superiores do modelo exato do repositório
+        // Atualiza os metadados do cabeçalho mantendo o logo e o design intactos
         try { 
           sheetOriginal.cell("G1").value(nomeLoja);
           sheetOriginal.cell("G2").value(gerente);
@@ -1500,7 +1498,7 @@
         
         sheetOriginal.column("H").width(14);
         
-        // Insere os produtos rigorosamente a partir da linha 7 para baixo nas colunas exatas da sua planilha padrão
+        // Inserção rigorosa a partir da linha 7 nas colunas exatas da planilha padrão original
         let linhaInicial = 7; 
         listaData.forEach((item, index) => {
           let linha = linhaInicial + index;
@@ -1565,10 +1563,5 @@
     }
   }
   </script>
-  <script>
-  if (typeof navigator.serviceWorker !== 'undefined') {
-    navigator.serviceWorker.register('sw.js')
-  }
-</script>
 </body>
 </html>
