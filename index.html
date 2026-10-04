@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#090d16">
   <title>Sistema de Gestão - Rede Market</title>
   
+  <!-- Configurações de PWA adicionadas -->
   <link rel="manifest" href="manifest.json">
   <script>
     if ('serviceWorker' in navigator) {
@@ -295,31 +296,9 @@
     flex-direction: column; gap: 10px; background: #fff; 
     box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: transform 0.1s ease;
   }
-  .item-main-row { display: flex; align-items: flex-start; gap: 12px; width: 100%; }
-  
-  .item-thumb { 
-    width: 80px; 
-    height: 100px; 
-    border-radius: 10px; 
-    border: 1px solid var(--border-color); 
-    object-fit: cover; 
-    flex-shrink: 0; 
-    background: #f8fafc; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 10px; 
-    color: var(--text-muted); 
-    text-align: center; 
-    overflow: hidden; 
-  }
-  .item-thumb img { 
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover; 
-    object-position: center; 
-  }
-  
+  .item-main-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
+  .item-thumb { width: 48px; height: 48px; border-radius: 10px; border: 1px solid var(--border-color); object-fit: cover; flex-shrink: 0; background: #f8fafc; display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--text-muted); text-align: center; overflow: hidden; }
+  .item-thumb img { width: 100%; height: 100%; object-fit: contain; }
   .item-info { min-width: 0; flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
   
   .item-desc-input {
@@ -355,6 +334,7 @@
   .empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
   .pill { display: inline-block; padding: 4px 10px; border-radius: 99px; background: #e0f2fe; color: var(--primary); font-size: 11px; font-weight: 700; }
 
+  /* ADICIONADO: REGRAS DE IMPRESSÃO EM GRADE 2x2 (PAISAGEM A4) */
   @media print {
     @page {
       size: A4 landscape;
@@ -536,7 +516,7 @@
         </section>
         
         <section class="card">
-          <div class="card-header"><span class="card-icon icon-conf">✏</span><h3>2. Conferência</h3></div>
+          <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
           
           <div class="product-img-container" id="pro_foto_box">
             <span class="product-img-placeholder">Sem foto</span>
@@ -646,7 +626,7 @@
         </section>
         
         <section class="card">
-          <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Dados da Troca</h3></div>
+          <div class="card-header"><span class="card-icon icon-conf">✏</span><h3>2. Dados da Troca</h3></div>
           
           <div class="product-img-container" id="trc_foto_box">
             <span class="product-img-placeholder">Sem foto</span>
@@ -1298,8 +1278,8 @@
     const code = el(prefix + 'codigo').value.trim() || 'S/C';
     const desc = formatarTextoPadrao(el(prefix + 'descricao').value.trim());
     const qtd = parseFloat(el(prefix + 'quantidade').value.replace(',', '.'));
+    const val = parseFloat(el(prefix + 'valor').value.replace(',', '.')) || 0;
     const validade = el(prefix + 'validade').value;
-    const valorUnitario = parseFloat((el(prefix + 'valor').value || '0').replace(',', '.')) || 0;
     const boxId = modulo === 'proativo' ? 'pro_foto_box' : 'trc_foto_box';
     const fotoBox = el(boxId);
     const imgUrl = fotoBox ? (fotoBox.getAttribute('data-img') || '') : '';
@@ -1316,8 +1296,8 @@
       quantidade: qtd,
       unidade: el(prefix + 'unidade').value || 'und',
       validade: validade,
-      valor: valorUnitario,
-      total: 0,
+      valor: val,
+      total: qtd * val,
       imagem: imgUrl
     };
 
@@ -1376,7 +1356,7 @@
         controlesExtraHtml = `
           <div style="display:flex; align-items:center; gap:6px;">
             <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">MOTIVO:</span>
-            <select class="item-select-motivo" id="motivo_${item.id}" onchange="salvarItemEditado('${modulo}', ${item.id})">
+            <select class="item-select-motivo" id="motivo_${item.id}">
               <option value="1" ${item.motivo === 1 ? 'selected' : ''}>1 - Avaria</option>
               <option value="2" ${item.motivo === 2 ? 'selected' : ''}>2 - Vencido</option>
             </select>
@@ -1388,11 +1368,11 @@
         <div class="item-main-row">
           ${thumbHtml}
           <div class="item-info">
-            <input type="text" class="item-desc-input" id="desc_${item.id}" value="${item.descricao}" onblur="salvarItemEditado('${modulo}', ${item.id})">
-            <small>Cód: ${item.codigo} | Val: ${dataFmt} | R$ ${item.valor.toFixed(2)}</small>
+            <input type="text" class="item-desc-input" id="desc_${item.id}" value="${item.descricao}">
+            <small>Cód: ${item.codigo} | Val: ${dataFmt}</small>
           </div>
           <div class="item-right">
-            <span class="item-total" id="total_${item.id}">R$ ${(item.quantidade * item.valor).toFixed(2)}</span>
+            <span class="item-total" id="total_${item.id}">R$ ${item.total.toFixed(2)}</span>
             <button type="button" class="danger" style="padding: 6px 10px; font-size: 11px; border-radius: 8px;" onclick="removerItem('${modulo}', ${item.id})">🗑️</button>
           </div>
         </div>
@@ -1402,8 +1382,10 @@
             <button type="button" class="qty-btn" onclick="ajustarQtdItem('${modulo}', ${item.id}, -1)">-</button>
             <span class="qty-val" id="qtd_val_${item.id}">${item.quantidade}</span>
             <button type="button" class="qty-btn" onclick="ajustarQtdItem('${modulo}', ${item.id}, 1)">+</button>
+            <span style="font-size: 11px; font-weight: 600; color: var(--text-muted);">${item.unidade}</span>
           </div>
           ${controlesExtraHtml}
+          <button type="button" class="primary" style="padding: 6px 14px; font-size: 12px; width: auto;" onclick="salvarItemEditado('${modulo}', ${item.id})">✔ Salvar</button>
         </div>
       `;
       listContainer.appendChild(itemEl);
@@ -1414,17 +1396,18 @@
     const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
     const item = listaData.find(i => i.id === id);
     if (!item) return;
+
+    let novaQtd = item.quantidade + delta;
+    if (novaQtd < 0.1) novaQtd = 1;
     
-    item.quantidade = Math.max(0.01, item.quantidade + delta);
-    item.quantidade = parseFloat(item.quantidade.toFixed(2));
-    
-    if (modulo === 'proativo') {
-      localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
-    } else {
-      localStorage.setItem('sys_trocas_itens', JSON.stringify(itensTrocas));
-    }
-    
-    renderizarLista(modulo);
+    item.quantidade = Number(novaQtd.toFixed(2));
+    item.total = item.quantidade * item.valor;
+
+    const qtdSpan = el(`qtd_val_${id}`);
+    if (qtdSpan) qtdSpan.innerText = item.quantidade;
+
+    const totalSpan = el(`total_${id}`);
+    if (totalSpan) totalSpan.innerText = `R$ ${item.total.toFixed(2)}`;
   }
 
   function salvarItemEditado(modulo, id) {
@@ -1432,25 +1415,25 @@
     const item = listaData.find(i => i.id === id);
     if (!item) return;
 
-    const descInput = el(`desc_${id}`);
-    if (descInput) {
-      item.descricao = formatarTextoPadrao(descInput.value);
+    const inputDesc = el(`desc_${id}`);
+    if (inputDesc) {
+      item.descricao = formatarTextoPadrao(inputDesc.value.trim());
     }
 
     if (modulo === 'trocas') {
-      const motivoSelect = el(`motivo_${id}`);
-      if (motivoSelect) {
-        item.motivo = parseInt(motivoSelect.value);
+      const selectMotivo = el(`motivo_${id}`);
+      if (selectMotivo) {
+        item.motivo = parseInt(selectMotivo.value);
       }
-    }
-
-    if (modulo === 'proativo') {
-      localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
-    } else {
       localStorage.setItem('sys_trocas_itens', JSON.stringify(itensTrocas));
+    } else {
+      localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
     }
-  }
 
+    renderizarLista(modulo);
+    alert("Alterações salvas com sucesso!");
+  }
+  
   function removerItem(modulo, id) {
     if (modulo === 'proativo') {
       itensProAtivo = itensProAtivo.filter(i => i.id !== id);
@@ -1461,21 +1444,22 @@
     }
     renderizarLista(modulo);
   }
-
+  
   function limparLista(modulo) {
-    if (!confirm("Deseja realmente limpar todos os itens da lista?")) return;
-    if (modulo === 'proativo') {
-      itensProAtivo = [];
-      localStorage.removeItem('sys_proative_itens');
-    } else {
-      itensTrocas = [];
-      localStorage.removeItem('sys_trocas_itens');
+    if (confirm("Deseja apagar todos os lançamentos deste módulo?")) {
+      if (modulo === 'proativo') {
+        itensProAtivo = [];
+        localStorage.removeItem('sys_proative_itens');
+      } else {
+        itensTrocas = [];
+        localStorage.removeItem('sys_trocas_itens');
+      }
+      renderizarLista(modulo);
     }
-    renderizarLista(modulo);
   }
-
+  
   function getModeloPlanilha(modulo) {
-    return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './Relatorio_ProAtivo_2026-10-03.SABADO.xlsx';
+    return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './planilha_padrao_original.xlsx';
   }
   
   async function gerarExcel(modulo) {
@@ -1491,98 +1475,100 @@
       let workbook;
       try {
         const response = await fetch(urlModelo);
-        if (!response.ok) throw new Error("Modelo não encontrado");
         const arrayBuffer = await response.arrayBuffer();
         workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
       } catch (e) {
         workbook = await XlsxPopulate.fromBlankAsync();
       }
       
-      let sheet;
-      try {
-        sheet = workbook.sheet("Planilha2") || workbook.sheet(1) || workbook.sheet(0);
-      } catch (err) {
-        sheet = workbook.sheet(0);
-      }
+      const nomeModulo = modulo === 'proativo' ? "Pró Ativo Frios" : "Relatório de Trocas";
+      const nomeLoja = listaLojas[lojaAtualIndex];
+      let sheetOriginal = workbook.sheet(0);
       
-      if (modulo === 'trocas') {
-        const responsavel = el('trc_digitou').value || '';
-        const fornecedor = el('trc_fornecedor').value || '';
-        const loja = el('lblLojaTrc').value || '';
-        const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : '';
+      if (modulo === 'proativo') {
+        const digitou = el('pro_digitou').value;
+        const gerente = el('pro_gerente').value;
+        const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        let linhaInicial = 7;
-        listaData.forEach((item, index) => {
-          let linha = linhaInicial + index;
-          sheet.cell(`A${linha}`).value(item.codigo);
-          sheet.cell(`B${linha}`).value(item.descricao);
-          sheet.cell(`C${linha}`).value(item.quantidade);
-          sheet.cell(`D${linha}`).value(item.unidade);
-          sheet.cell(`E${linha}`).value(item.valor);
-          sheet.cell(`F${linha}`).value(item.total);
-          sheet.cell(`G${linha}`).value(item.validade ? item.validade.split('-').reverse().join('/') : '');
-          sheet.cell(`H${linha}`).value(item.motivo === 1 ? 'Avaria' : 'Vencido');
-          sheet.cell(`I${linha}`).value(fornecedor);
-          sheet.cell(`J${linha}`).value(responsavel);
-          sheet.cell(`K${linha}`).value(loja);
-          sheet.cell(`L${linha}`).value(dataTroca);
-        });
+        const itensPorPagina = 24; 
+        const totalPaginas = Math.ceil(listaData.length / itensPorPagina);
+        
+        for (let pagina = 0; pagina < totalPaginas; pagina++) {
+          let sheet = pagina === 0 ? sheetOriginal : workbook.addSheet(`Página_${pagina + 1}`, sheetOriginal);
+          
+          sheet.cell("H1").value(nomeLoja);
+          sheet.cell("H2").value(gerente);
+          sheet.cell("H3").value(dataLev);
+          sheet.cell("H4").value(digitou);
+          
+          const inicio = pagina * itensPorPagina;
+          const fim = Math.min(inicio + itensPorPagina, listaData.length);
+          const paginaItens = listaData.slice(inicio, fim);
+          
+          paginaItens.forEach((item, index) => {
+            const row = 7 + index;
+            const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
+            
+            sheet.cell(`A${row}`).value(inicio + index + 1);
+            sheet.cell(`B${row}`).value("");
+            sheet.cell(`C${row}`).value(nomeLoja);
+            sheet.cell(`D${row}`).value(item.codigo);
+            sheet.cell(`E${row}`).value(formatarTextoPadrao(item.descricao));
+            sheet.cell(`F${row}`).value(item.quantidade);
+            sheet.cell(`G${row}`).value(String(item.unidade || 'und').trim());
+            sheet.cell(`H${row}`).value(dataFmt);
+            sheet.cell(`I${row}`).value(item.valor);
+          });
+        }
+        
       } else {
-        const loja = el('lblLojaPro').value || '';
-        const digitou = el('pro_digitou').value || 'Não informado';
-        const dataLevantamento = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : '';
-        const gerente = el('pro_gerente').value || 'Encarregado';
+        const responsavel = el('trc_digitou').value;
+        const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        // Atualiza apenas os metadados superiores do modelo exato do repositório
-        try { 
-          sheet.cell("G1").value(loja);
-          sheet.cell("G2").value(gerente);
-          sheet.cell("G3").value(dataLevantamento);
-          sheet.cell("G4").value(digitou);
-        } catch(e) {}
+        const itensPorPaginaTrc = 38; 
+        const totalPaginas = Math.ceil(listaData.length / itensPorPaginaTrc);
         
-        sheet.column("H").width(14);
-        
-        // Insere os produtos rigorosamente a partir da linha 7 para baixo nas colunas exatas da sua planilha padrão
-        let linhaInicial = 7; 
-        listaData.forEach((item, index) => {
-          let linha = linhaInicial + index;
+        for (let pagina = 0; pagina < totalPaginas; pagina++) {
+          let sheet = pagina === 0 ? sheetOriginal : workbook.addSheet(`Trocas_${pagina + 1}`, sheetOriginal);
           
-          sheet.cell(`A${linha}`).value('');                                              // Coluna A: Comprador (vazio)
-          sheet.cell(`B${linha}`).value(loja);                                              // Coluna B: Loja
-          sheet.cell(`C${linha}`).value(String(item.codigo));                                // Coluna C: Código de Barras
+          sheet.cell("B7").value("X");
+          sheet.cell("A10").value(nomeLoja);
+          sheet.cell("A12").value(dataTroca);
+          sheet.cell("A41").value(responsavel);
           
-          const celDesc = sheet.cell(`D${linha}`);                                          // Coluna D: Descrição
-          celDesc.value(item.descricao);
-          celDesc.style("horizontalAlignment", "left");
+          const inicio = pagina * itensPorPaginaTrc;
+          const fim = Math.min(inicio + itensPorPaginaTrc, listaData.length);
+          const paginaItens = listaData.slice(inicio, fim);
           
-          sheet.cell(`E${linha}`).value(Number(item.quantidade));                           // Coluna E: Quantidade
-          
-          const celUnidade = sheet.cell(`F${linha}`);                                       // Coluna F: Unidade
-          celUnidade.value(item.unidade);
-          celUnidade.style("horizontalAlignment", "center");
-          
-          const celValidade = sheet.cell(`G${linha}`);                                      // Coluna G: Validade (DD/MM/AAAA)
-          celValidade.value(item.validade ? item.validade.split('-').reverse().join('/') : '');
-          celValidade.style("horizontalAlignment", "center");
-          
-          sheet.cell(`H${linha}`).value(item.valor !== undefined ? Number(item.valor) : 0);  // Coluna H: Valor Unitário
-        });
+          paginaItens.forEach((item, index) => {
+            const row = 17 + index;
+            if (row <= 54) {
+              sheet.cell(`A${row}`).value(String(item.codigo).trim());
+              sheet.cell(`B${row}`).value(formatarTextoPadrao(String(item.descricao)).replace(/\s+/g, ' ').trim());
+              sheet.cell(`C${row}`).value(item.quantidade);
+              sheet.cell(`D${row}`).value(item.motivo);
+            }
+          });
+        }
       }
       
       const blob = await workbook.outputAsync();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = `Relatorio_ProAtivo_${new Date().toISOString().split('T')[0]}.xlsx`;
-      document.body.appendChild(a);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${nomeModulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
       a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-    } catch (err) {
-      alert("Erro ao gerar planilha Excel: " + err.message);
+      window.URL.revokeObjectURL(url);
+      alert("Relatório gerado com sucesso!");
+    } catch (e) {
+      alert("Erro ao exportar Excel: " + e.message);
     }
   }
   </script>
+  <script>
+  if (typeof navigator.serviceWorker !== 'undefined') {
+    navigator.serviceWorker.register('sw.js')
+  }
+</script>
 </body>
 </html>
