@@ -536,7 +536,7 @@
         </section>
         
         <section class="card">
-          <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
+          <div class="card-header"><span class="card-icon icon-conf">✏️️</span><h3>2. Conferência</h3></div>
           
           <div class="product-img-container" id="pro_foto_box">
             <span class="product-img-placeholder">Sem foto</span>
@@ -1528,7 +1528,12 @@
         // Assegurar largura correta para H exibir a data completa sem cortes
         sheet.column("H").width(14);
         
-        let linhaInicial = 6; // Começa na linha 6 conforme o layout do arquivo modelo oficial
+        // Atualiza a célula da Loja no cabeçalho superior original do modelo
+        try { sheet.cell("G1").value(loja); } catch(e) {}
+        try { sheet.cell("G2").value(loja); } catch(e) {}
+        
+        // Os produtos começam rigorosamente a partir da LINHA 7 em diante
+        let linhaInicial = 7; 
         listaData.forEach((item, index) => {
           let linha = linhaInicial + index;
           
