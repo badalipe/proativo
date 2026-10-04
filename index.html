@@ -1470,15 +1470,13 @@
     const urlModelo = getModeloPlanilha(modulo);
     
     try {
-      let workbook;
-      try {
-        const response = await fetch(urlModelo);
-        if (!response.ok) throw new Error("Modelo não encontrado");
-        const arrayBuffer = await response.arrayBuffer();
-        workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
-      } catch (e) {
-        workbook = await XlsxPopulate.fromBlankAsync();
+      const response = await fetch(urlModelo);
+      if (!response.ok) {
+        throw new Error(`Não foi possível carregar o modelo (${urlModelo}). Verifique se o arquivo está na raiz do repositório.`);
       }
+      
+      const arrayBuffer = await response.arrayBuffer();
+      const workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
       
       const nomeLoja = listaLojas[lojaAtualIndex];
       let sheetOriginal = workbook.sheet(0);
@@ -1488,7 +1486,7 @@
         const gerente = el('pro_gerente').value || 'Encarregado';
         const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        // Atualiza os metadados do cabeçalho mantendo o logo e o design intactos
+        // Atualiza os metadados do cabeçalho preservando o logotipo e o template original
         try { 
           sheetOriginal.cell("G1").value(nomeLoja);
           sheetOriginal.cell("G2").value(gerente);
@@ -1498,7 +1496,7 @@
         
         sheetOriginal.column("H").width(14);
         
-        // Inserção rigorosa a partir da linha 7 nas colunas exatas da planilha padrão original
+        // Inserção estrita a partir da linha 7 nas colunas exatas da planilha padrão original
         let linhaInicial = 7; 
         listaData.forEach((item, index) => {
           let linha = linhaInicial + index;
