@@ -491,8 +491,8 @@
               </div>
             </div>
             <button type="button" class="btn-menu-pro" onclick="configurarNuvem()" title="Configurar salvamento na nuvem" style="margin-right:6px; display:inline-flex; align-items:center; gap:6px;">
-              <svg width="16" height="16" viewBox="0 0 48 48" fill="none"><path d="M29 6H14a2 2 0 0 0-2 2v32a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V14L29 6z" fill="#0F9D58"/><path d="M29 6v8a2 2 0 0 0 2 2h8" fill="#87CEAC"/><path d="M18 22h12M18 27h12M18 32h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
-              Nuvem
+              <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2l-10 18h5L12 11V2z" fill="#188038"/><path d="M12 2l10 18h-5L12 11V2z" fill="#F9AB00"/><path d="M2 20h20l-2.5-4H4.5L2 20z" fill="#4285F4"/></svg>
+              Configurar Nuvem
             </button>
             <button type="button" class="btn-menu-pro" onclick="voltarAoMenu()">Menu</button>
           </div>
@@ -564,8 +564,8 @@
             <button type="button" class="primary" onclick="gerarExcel('proativo')" style="width:auto">📊 Gerar Excel Pró Ativo</button>
             <button type="button" class="danger" onclick="limparLista('proativo')" style="width:auto">Limpar</button>
             <button type="button" class="secondary" onclick="sincronizarItensNuvem()" style="width:auto; display:inline-flex; align-items:center; gap:6px;">
-              <svg width="16" height="16" viewBox="0 0 48 48" fill="none"><path d="M29 6H14a2 2 0 0 0-2 2v32a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V14L29 6z" fill="#0F9D58"/><path d="M29 6v8a2 2 0 0 0 2 2h8" fill="#87CEAC"/><path d="M18 22h12M18 27h12M18 32h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
-              Sincronizar agora
+              <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2l-10 18h5L12 11V2z" fill="#188038"/><path d="M12 2l10 18h-5L12 11V2z" fill="#F9AB00"/><path d="M2 20h20l-2.5-4H4.5L2 20z" fill="#4285F4"/></svg>
+              Salvar Nuvem
             </button>
           </div>
         </section>
@@ -603,8 +603,8 @@
               </div>
             </div>
             <button type="button" class="btn-menu-pro" onclick="configurarNuvem()" title="Configurar salvamento na nuvem" style="margin-right:6px; display:inline-flex; align-items:center; gap:6px;">
-              <svg width="16" height="16" viewBox="0 0 48 48" fill="none"><path d="M29 6H14a2 2 0 0 0-2 2v32a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V14L29 6z" fill="#0F9D58"/><path d="M29 6v8a2 2 0 0 0 2 2h8" fill="#87CEAC"/><path d="M18 22h12M18 27h12M18 32h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
-              Nuvem
+              <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2l-10 18h5L12 11V2z" fill="#188038"/><path d="M12 2l10 18h-5L12 11V2z" fill="#F9AB00"/><path d="M2 20h20l-2.5-4H4.5L2 20z" fill="#4285F4"/></svg>
+              Configurar Nuvem
             </button>
             <button type="button" class="btn-menu-pro" onclick="voltarAoMenu()">Menu</button>
           </div>
@@ -682,8 +682,8 @@
             <button type="button" class="primary" onclick="gerarExcel('trocas')" style="width:auto">📊 Exportar Planilha de Trocas</button>
             <button type="button" class="danger" onclick="limparLista('trocas')" style="width:auto">Limpar</button>
             <button type="button" class="secondary" onclick="sincronizarItensNuvem()" style="width:auto; display:inline-flex; align-items:center; gap:6px;">
-              <svg width="16" height="16" viewBox="0 0 48 48" fill="none"><path d="M29 6H14a2 2 0 0 0-2 2v32a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V14L29 6z" fill="#0F9D58"/><path d="M29 6v8a2 2 0 0 0 2 2h8" fill="#87CEAC"/><path d="M18 22h12M18 27h12M18 32h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
-              Sincronizar agora
+              <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2l-10 18h5L12 11V2z" fill="#188038"/><path d="M12 2l10 18h-5L12 11V2z" fill="#F9AB00"/><path d="M2 20h20l-2.5-4H4.5L2 20z" fill="#4285F4"/></svg>
+              Salvar Nuvem
             </button>
           </div>
         </section>
@@ -1467,7 +1467,7 @@
       await enviarItemNuvem(it._m, it);
       enviados++;
     }
-    alert(`✅ ${enviados} item(ns) salvo(s) na nuvem com sucesso!`);
+    alert(`✅ A planilha foi salva na Nuvem com sucesso! (${enviados} item(ns))`);
   }
   // ===== FIM SALVAMENTO NA NUVEM =====
   
