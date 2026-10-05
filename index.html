@@ -125,7 +125,7 @@
   
   .top {
     background: linear-gradient(135deg, #090d16 0%, #1e293b 100%);
-    color: #fff; padding: 14px 16px; flex-shrink: 0;
+    color: #fff; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 14px; flex-shrink: 0;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     z-index: 100;
   }
@@ -152,14 +152,14 @@
   .select-loja-pro option { background: #0f172a !important; color: #ffffff !important; }
   
   .wrap { 
-    width: 100%; max-width: 600px; margin: 0 auto; padding: 14px 12px 100px; 
+    width: 100%; max-width: 600px; margin: 0 auto; padding: 14px 12px 140px; 
     flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
 
   .system-footer {
     position: absolute; bottom: 0; left: 0; right: 0;
     background: #090d16; border-top: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 10px 16px; text-align: center; z-index: 105;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); text-align: center; z-index: 105;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
   }
   .footer-inner {
@@ -952,22 +952,7 @@
   const FORMATOS_NATIVOS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'itf'];
 
   async function criarDecoderBarcode() {
-    if ('BarcodeDetector' in window) {
-      try {
-        const suportados = await BarcodeDetector.getSupportedFormats();
-        const formatos = FORMATOS_NATIVOS.filter(f => suportados.includes(f));
-        if (formatos.length) {
-          const detector = new BarcodeDetector({ formats: formatos });
-          return {
-            nativo: true,
-            ler: async (canvas) => {
-              const resultados = await detector.detect(canvas);
-              return resultados.length ? resultados[0].rawValue : null;
-            }
-          };
-        }
-      } catch (e) {}
-    }
+    // ZXing prioritário - BarcodeDetector pode ser inconsistente em alguns WebViews Android
     if (window.ZXing) {
       const hints = new Map();
       hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
