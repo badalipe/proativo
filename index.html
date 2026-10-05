@@ -912,7 +912,7 @@
     const senhaDigitada = el('cartazSenhaInput').value;
     if (senhaDigitada === "190505") {
       fecharModalCartaz();
-      window.open('https://rmarket.cartazfacil.pro/unitario.php', '_blank');
+      window.location.href = 'https://rmarket.cartazfacil.pro/unitario.php';
     } else {
       el('cartazError').classList.remove('hidden');
       el('cartazSenhaInput').focus();
