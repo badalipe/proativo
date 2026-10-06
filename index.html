@@ -234,9 +234,10 @@
   }
   .fab-camera:active { cursor: grabbing !important; transform: scale(0.95); }
 
-    #beep-reader { width: 100%; height: 100%; }
+  #beep-reader { width: 100%; height: 100%; }
   #beep-reader video { width: 100%; height: 100%; object-fit: cover; }
-#beep-scanner-overlay {
+  
+  #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 99999;
     display: flex; flex-direction: column;
   }
@@ -702,17 +703,17 @@
     </div>
   </div>
   
-  <!-- SCANNER -->
+  <!-- SCANNER (COM SUPORTE AO GOOGLE ML KIT / BARCODEDETECTOR) -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()" aria-label="Voltar">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
-      <span class="beep-title">Escanear...</span>
+      <span class="beep-title">Escanear (ML Kit)...</span>
       <button type="button" class="beep-manual-btn" onclick="digitarCodigoManualmente()">DIGITAR MANUALMENTE</button>
     </div>
-    <div class="beep-camera-area" onclick="">
-      <div id="beep-reader" style="width:100%;height:100%;"></div>
+    <div class="beep-camera-area" onclick="focarCameraNoToque()">
+      <video id="beep-video" autoplay muted playsinline></video>
       <div class="beep-target-container">
         <div class="beep-scanner-frame">
           <div class="beep-corner tl"></div>
@@ -778,8 +779,10 @@
   }
 
   let moduloAtual = null;
-  let scannerHtml5 = null;
+  let scannerStream = null;
   let scannerSessao = 0;
+  let scannerDecoder = null;
+  const scannerCanvas = document.createElement('canvas');
   
   const el = id => document.getElementById(id);
   
@@ -952,6 +955,147 @@
   
   const FORMATOS_NATIVOS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'itf'];
 
+  // INTEGRAÇÃO DO GOOGLE ML KIT (BarcodeDetector API nativa com fallback ZXing)
+  async function criarDecoderBarcode() {
+    if ('BarcodeDetector' in window) {
+      try {
+        const suportados = await BarcodeDetector.getSupportedFormats();
+        const formatos = FORMATOS_NATIVOS.filter(f => suportados.includes(f));
+        if (formatos.length) {
+          const detector = new BarcodeDetector({ formats: formatos });
+          return {
+            nativo: true,
+            ler: async (canvas) => {
+              const resultados = await detector.detect(canvas);
+              return resultados.length ? resultados[0].rawValue : null;
+            }
+          };
+        }
+      } catch (e) {}
+    }
+    if (window.ZXing) {
+      const hints = new Map();
+      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+        ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8, ZXing.BarcodeFormat.UPC_A,
+        ZXing.BarcodeFormat.UPC_E, ZXing.BarcodeFormat.CODE_128, ZXing.BarcodeFormat.CODE_39, ZXing.BarcodeFormat.ITF
+      ]);
+      hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+      const reader = new ZXing.MultiFormatReader();
+      reader.setHints(hints);
+      const recorte = document.createElement('canvas');
+      const decodificar = (fonte) => {
+        try {
+          const luminance = new ZXing.HTMLCanvasElementLuminanceSource(fonte);
+          const bitmap = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(luminance));
+          return reader.decodeWithState(bitmap).getText();
+        } catch (e) {
+          return null;
+        } finally {
+          reader.reset();
+        }
+      };
+      return { nativo: false, ler: async (canvas) => {
+        for (const corte of [0, 0.08, 0.16]) {
+          let fonte = canvas;
+          if (corte) {
+            const x = Math.round(canvas.width * corte);
+            recorte.width = canvas.width - 2 * x;
+            recorte.height = canvas.height;
+            recorte.getContext('2d', { willReadFrequently: true })
+              .drawImage(canvas, x, 0, recorte.width, canvas.height, 0, 0, recorte.width, canvas.height);
+            fonte = recorte;
+          }
+          const texto = decodificar(fonte);
+          if (texto) return texto;
+        }
+        return null;
+      } };
+    }
+    return null;
+  }
+
+  function capturarAreaDoQuadro(video, margem) {
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if (!vw || !vh) return null;
+    const vr = video.getBoundingClientRect();
+    const frame = document.querySelector('.beep-scanner-frame');
+    const fr = frame ? frame.getBoundingClientRect() : vr;
+    const escala = Math.max(vr.width / vw, vr.height / vh);
+    const offX = (vr.width - vw * escala) / 2;
+    const offY = (vr.height - vh * escala) / 2;
+    const mx = fr.width * margem, my = fr.height * margem;
+    let sx = (fr.left - mx - vr.left - offX) / escala;
+    let sy = (fr.top - my - vr.top - offY) / escala;
+    let sw = (fr.width + 2 * mx) / escala;
+    let sh = (fr.height + 2 * my) / escala;
+    sx = Math.max(0, sx); sy = Math.max(0, sy);
+    sw = Math.min(vw - sx, sw); sh = Math.min(vh - sy, sh);
+    if (sw <= 0 || sh <= 0) return null;
+    const fatorEscala = Math.min(1280 / sw, Math.max(1, 720 / sw));
+    scannerCanvas.width = Math.round(sw * fatorEscala);
+    scannerCanvas.height = Math.round(sh * fatorEscala);
+    const ctx = scannerCanvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, scannerCanvas.width, scannerCanvas.height);
+    return scannerCanvas;
+  }
+
+  async function obterStreamCamera() {
+    const tentativas = [
+      { audio: false, video: { facingMode: { exact: 'environment' }, width: { ideal: 3840 }, height: { ideal: 2160 } } },
+      { audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 3840 }, height: { ideal: 2160 } } },
+      { audio: false, video: true }
+    ];
+    let ultimoErro = null;
+    for (const constraints of tentativas) {
+      try {
+        return await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (e) {
+        ultimoErro = e;
+        if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) break;
+      }
+    }
+    throw ultimoErro;
+  }
+
+  const ZOOM_SCANNER = 2.8;
+
+  async function aplicarZoomEFoco(track, video) {
+    let caps = {};
+    try { if (track.getCapabilities) caps = track.getCapabilities() || {}; } catch (e) {}
+
+    if (caps.focusMode && caps.focusMode.includes('continuous')) {
+      try { await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }); } catch (e) {}
+    }
+
+    let zoomCamera = 1;
+    if (caps.zoom && caps.zoom.max > 1) {
+      const alvo = Math.max(caps.zoom.min || 1, Math.min(ZOOM_SCANNER, caps.zoom.max));
+      try {
+        await track.applyConstraints({ advanced: [{ zoom: alvo }] });
+        zoomCamera = alvo;
+      } catch (e) {}
+    }
+    const zoomDigital = ZOOM_SCANNER / zoomCamera;
+    video.style.transform = zoomDigital > 1.01 ? `scale(${zoomDigital})` : '';
+  }
+
+  async function focarCameraNoToque() {
+    const track = scannerStream && scannerStream.getVideoTracks()[0];
+    if (!track || !track.getCapabilities) return;
+    let caps = {};
+    try { caps = track.getCapabilities() || {}; } catch (e) { return; }
+    if (!caps.focusMode) return;
+    try {
+      if (caps.focusMode.includes('single-shot')) {
+        await track.applyConstraints({ advanced: [{ focusMode: 'single-shot' }] });
+        await new Promise(r => setTimeout(r, 900));
+      }
+      if (caps.focusMode.includes('continuous')) {
+        await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
+      }
+    } catch (e) {}
+  }
+
   async function abrirScanner(modulo) {
     pararScanner();
     const sessao = ++scannerSessao;
@@ -959,66 +1103,83 @@
     el('beep-scanner-overlay').classList.remove('hidden');
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert('Este navegador nao permite acessar a camera. Abra o site pelo endereco HTTPS no Chrome ou Safari.');
+      alert("Este navegador não permite acessar a câmera. Abra o site pelo endereço HTTPS no Chrome ou Safari.");
       pararScanner();
       return;
     }
 
     try {
-      if (!scannerHtml5) {
-        scannerHtml5 = new Html5Qrcode('beep-reader');
-      }
-      const config = {
-        fps: 15,
-        qrbox: { width: Math.floor(280 * (window.innerWidth / 360)), height: Math.floor(180 * (window.innerWidth / 360)) },
-        aspectRatio: 1.777778,
-        formatsToSupport: [
-          Html5QrcodeSupportedFormats.EAN_13,
-          Html5QrcodeSupportedFormats.EAN_8,
-          Html5QrcodeSupportedFormats.UPC_A,
-          Html5QrcodeSupportedFormats.UPC_E,
-          Html5QrcodeSupportedFormats.CODE_128,
-          Html5QrcodeSupportedFormats.CODE_39,
-          Html5QrcodeSupportedFormats.ITF,
-          Html5QrcodeSupportedFormats.QR_CODE
-        ]
-      };
+      if (!scannerDecoder) scannerDecoder = await criarDecoderBarcode();
+      if (!scannerDecoder) throw new Error('Leitor de código de barras indisponível');
 
-      await scannerHtml5.start(
-        { facingMode: 'environment' },
-        config,
-        (codigo) => {
-          tocarBipe();
-          dispararFlashScan();
-          if (navigator.vibrate) navigator.vibrate(100);
-          const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
-          el(prefix + 'codigo').value = codigo;
-          pararScanner();
-          buscarProduto(modulo);
-        },
-        () => {}
-      );
+      const stream = await obterStreamCamera();
+      if (sessao !== scannerSessao) {
+        stream.getTracks().forEach(t => t.stop());
+        return;
+      }
+      scannerStream = stream;
+
+      const video = el('beep-video');
+      await aplicarZoomEFoco(stream.getVideoTracks()[0], video);
+
+      video.srcObject = stream;
+      await video.play();
+      loopLeituraScanner(sessao, modulo);
     } catch (e) {
       if (sessao !== scannerSessao) return;
-      console.error('Erro abrir scanner:', e);
-      alert('Nao foi possivel acessar a camera. Verifique se e permita no navegador.');
+      const nome = e && e.name;
+      if (nome === 'NotAllowedError' || nome === 'SecurityError') {
+        alert("Permissão da câmera negada. Libere a câmera para este site nas configurações do navegador.");
+      } else if (nome === 'NotFoundError' || nome === 'OverconstrainedError') {
+        alert("Nenhuma câmera encontrada neste aparelho.");
+      } else if (nome === 'NotReadableError') {
+        alert("A câmera está sendo usada por outro aplicativo. Feche-o e tente novamente.");
+      } else {
+        alert("Não foi possível acessar a câmera." + (e && e.message ? "\n" + e.message : ""));
+      }
       pararScanner();
     }
   }
 
+  async function loopLeituraScanner(sessao, modulo) {
+    const video = el('beep-video');
+    while (sessao === scannerSessao) {
+      let codigo = null;
+      try {
+        const canvas = capturarAreaDoQuadro(video, scannerDecoder.nativo ? 0.15 : 0);
+        if (canvas) codigo = await scannerDecoder.ler(canvas);
+      } catch (e) {}
+      if (sessao !== scannerSessao) return;
+      if (codigo) {
+        codigo = String(codigo).trim();
+        tocarBipe();
+        dispararFlashScan();
+        if (navigator.vibrate) navigator.vibrate(100);
+        const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
+        el(prefix + 'codigo').value = codigo;
+        pararScanner();
+        buscarProduto(modulo);
+        return;
+      }
+      await new Promise(r => setTimeout(r, scannerDecoder.nativo ? 30 : 80));
+    }
+  }
+  
   function pararScanner() {
     scannerSessao++;
-    if (scannerHtml5) {
-      try {
-        scannerHtml5.stop().then(() => scannerHtml5.clear()).catch(() => {});
-      } catch (e) {}
-      scannerHtml5 = null;
+    if (scannerStream) {
+      scannerStream.getTracks().forEach(t => t.stop());
+      scannerStream = null;
     }
-    const reader = el('beep-reader');
-    if (reader) reader.innerHTML = '';
+    const video = el('beep-video');
+    if (video) {
+      video.pause();
+      video.srcObject = null;
+      video.style.transform = '';
+    }
     el('beep-scanner-overlay').classList.add('hidden');
   }
-
+  
   function digitarCodigoManualmente() {
     const prefix = moduloAtual === 'proativo' ? 'pro_' : 'trc_';
     pararScanner();
@@ -1111,7 +1272,6 @@
     }
     
     try {
-    try {
       const controllerBeep = new AbortController();
       const timeoutBeep = setTimeout(() => controllerBeep.abort(), 6000);
       const urlBeep = 'https://www.beepscan.com/barcode/' + encodeURIComponent(code);
@@ -1135,6 +1295,7 @@
       }
     } catch (e) {}
 
+    try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000);
       const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, { signal: controller.signal });
@@ -1306,27 +1467,6 @@
       alert('Erro ao salvar na nuvem: ' + e.message);
     }
   }
-
-  async function sincronizarItensNuvem() {
-    if (!nuvemUrl) {
-      alert('Configure primeiro a nuvem pelo botão ☁️ Nuvem.');
-      return;
-    }
-    const todos = [
-      ...itensProAtivo.map(it => ({ ...it, _m: 'proativo' })),
-      ...itensTrocas.map(it => ({ ...it, _m: 'trocas' }))
-    ];
-    if (todos.length === 0) {
-      alert('Nenhum item para sincronizar.');
-      return;
-    }
-    let enviados = 0;
-    for (const it of todos) {
-      await enviarItemNuvem(it._m, it);
-      enviados++;
-    }
-    alert(`✅ A planilha foi salva na Nuvem com sucesso! (${enviados} item(ns))`);
-  }
   // ===== FIM SALVAMENTO NA NUVEM =====
   
   function renderizarLista(modulo) {
@@ -1491,7 +1631,6 @@
         const gerente = el('pro_gerente').value || 'Encarregado';
         const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
         
-        // Atualiza os metadados do cabeçalho preservando o logotipo e o template original
         try { 
           sheetOriginal.cell("G1").value(nomeLoja);
           sheetOriginal.cell("G2").value(gerente);
@@ -1501,45 +1640,38 @@
         
         sheetOriginal.column("H").width(14);
         
-        // Inserção estrita a partir da linha 7 nas colunas exatas da planilha padrão original
         let linhaInicial = 7; 
         listaData.forEach((item, index) => {
           let linha = linhaInicial + index;
           const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
           
-          sheetOriginal.cell(`A${linha}`).value('');                                              // Coluna A: Comprador (Em branco)
-          sheetOriginal.cell(`B${linha}`).value(nomeLoja);                                        // Coluna B: Loja
-          sheetOriginal.cell(`C${linha}`).value(String(item.codigo));                             // Coluna C: Código de Barras
+          sheetOriginal.cell(`A${linha}`).value('');                                              
+          sheetOriginal.cell(`B${linha}`).value(nomeLoja);                                        
+          sheetOriginal.cell(`C${linha}`).value(String(item.codigo));                             
           
-          const celDesc = sheetOriginal.cell(`D${linha}`);                                        // Coluna D: Descrição do Produto
+          const celDesc = sheetOriginal.cell(`D${linha}`);                                        
           celDesc.value(formatarTextoPadrao(item.descricao));
           celDesc.style("horizontalAlignment", "left");
           
-          sheetOriginal.cell(`E${linha}`).value(Number(item.quantidade));                         // Coluna E: Quantidade no Estoque
+          sheetOriginal.cell(`E${linha}`).value(Number(item.quantidade));                         
           
-          const celUnidade = sheetOriginal.cell(`F${linha}`);                                     // Coluna F: Unidade
+          const celUnidade = sheetOriginal.cell(`F${linha}`);                                     
           celUnidade.value(String(item.unidade || 'und').trim());
           celUnidade.style("horizontalAlignment", "center");
           
-          const celValidade = sheetOriginal.cell(`G${linha}`);                                    // Coluna G: Data de Validade
+          const celValidade = sheetOriginal.cell(`G${linha}`);                                    
           celValidade.value(dataFmt);
           celValidade.style("horizontalAlignment", "center");
           
-          sheetOriginal.cell(`H${linha}`).value(item.valor !== undefined ? Number(item.valor) : 0); // Coluna H: Valor Unitário
+          sheetOriginal.cell(`H${linha}`).value(item.valor !== undefined ? Number(item.valor) : 0); 
         });
         
       } else {
-        const responsavel = el('trc_digitou').value || '';
-        const fornecedor = el('trc_fornecedor').value || '';
-        const dataTroca = el('trc_data').value ? el('trc_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
-        
-        // Inserção sempre a partir da linha 17; ao chegar na linha 54, abre nova aba com o mesmo modelo e o logotipo
         const linhaInicial = 17;
         const ultimaLinha = 54;
         const itensPorPagina = ultimaLinha - linhaInicial + 1;
         const totalPaginas = Math.ceil(listaData.length / itensPorPagina);
 
-        // Cria uma aba-clone (com logo e formatação) para cada página antes de preencher
         const abas = [sheetOriginal];
         for (let pag = 1; pag < totalPaginas; pag++) {
           abas.push(workbook.addSheet(`Trocas_${pag + 1}`, sheetOriginal));
@@ -1556,7 +1688,6 @@
           sheet.cell(`D${linha}`).value(item.motivo === 2 ? 2 : 1).style({ horizontalAlignment: 'center' });
         });
 
-        // Reordena as abas: página 1 (original) primeiro, depois as páginas clonadas
         workbook._sheets = [abas[0], ...abas.slice(1)];
       }
       
@@ -1565,7 +1696,7 @@
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `Relatorio_ProAtivo_${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.download = `Relatorio_${modulo === 'trocas' ? 'Trocas' : 'ProAtivo'}_${new Date().toISOString().split('T')[0]}.xlsx`;
       a.click();
       window.URL.revokeObjectURL(url);
       alert("Relatório gerado com sucesso!");
