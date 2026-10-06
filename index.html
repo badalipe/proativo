@@ -247,9 +247,9 @@
     background: #262626; color: #fff; z-index: 30; flex-shrink: 0;
   }
   .beep-back-btn { background: none; border: none; color: #fff; padding: 4px; cursor: pointer; display: flex; align-items: center; }
-  .beep-title { flex: 1; font-size: 20px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .beep-title { flex: 1; font-size: 18px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .beep-manual-btn {
-    background: none; border: none; color: #fff; font-size: 15px; font-weight: 600;
+    background: none; border: none; color: #fff; font-size: 13px; font-weight: 600;
     letter-spacing: 0.3px; padding: 6px 0; cursor: pointer; white-space: nowrap;
   }
 
@@ -286,7 +286,7 @@
   }
   .beep-btn-bottom-action {
     background: transparent; border: 1.5px solid #fff; color: #fff;
-    border-radius: 99px; padding: 12px 20px; font-size: 16px; font-weight: 500; cursor: pointer;
+    border-radius: 99px; padding: 12px 20px; font-size: 15px; font-weight: 500; cursor: pointer;
   }
   
   .notice { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
@@ -301,7 +301,6 @@
   }
   .item-main-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; }
   
-  /* TAMANHO DA MINIATURA AUMENTADO PARA 85px */
   .item-thumb { 
     width: 85px; 
     height: 85px; 
@@ -703,13 +702,13 @@
     </div>
   </div>
   
-  <!-- SCANNER (COM SUPORTE AO GOOGLE ML KIT / BARCODEDETECTOR) -->
+  <!-- SCANNER COM GOOGLE ML KIT / BARCODEDETECTOR -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
       <button type="button" class="beep-back-btn" onclick="pararScanner()" aria-label="Voltar">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
-      <span class="beep-title">Escanear (ML Kit)...</span>
+      <span class="beep-title" id="beep-scanner-title">Escanear (ML Kit IA)...</span>
       <button type="button" class="beep-manual-btn" onclick="digitarCodigoManualmente()">DIGITAR MANUALMENTE</button>
     </div>
     <div class="beep-camera-area" onclick="focarCameraNoToque()">
@@ -953,9 +952,9 @@
     setTimeout(() => flash.classList.remove('active'), 350);
   }
   
-  const FORMATOS_NATIVOS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'itf'];
+  const FORMATOS_NATIVOS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'itf', 'qr_code'];
 
-  // INTEGRAÇÃO DO GOOGLE ML KIT (BarcodeDetector API nativa com fallback ZXing)
+  // LEITOR GOOGLE ML KIT (BarcodeDetector nativo + Fallback avançado ZXing)
   async function criarDecoderBarcode() {
     if ('BarcodeDetector' in window) {
       try {
@@ -964,7 +963,7 @@
         if (formatos.length) {
           const detector = new BarcodeDetector({ formats: formatos });
           return {
-            nativo: true,
+            tipo: 'ML Kit (Nativo Google)',
             ler: async (canvas) => {
               const resultados = await detector.detect(canvas);
               return resultados.length ? resultados[0].rawValue : null;
@@ -994,22 +993,25 @@
           reader.reset();
         }
       };
-      return { nativo: false, ler: async (canvas) => {
-        for (const corte of [0, 0.08, 0.16]) {
-          let fonte = canvas;
-          if (corte) {
-            const x = Math.round(canvas.width * corte);
-            recorte.width = canvas.width - 2 * x;
-            recorte.height = canvas.height;
-            recorte.getContext('2d', { willReadFrequently: true })
-              .drawImage(canvas, x, 0, recorte.width, canvas.height, 0, 0, recorte.width, canvas.height);
-            fonte = recorte;
+      return { 
+        tipo: 'ZXing (Fallback Inteligente)', 
+        ler: async (canvas) => {
+          for (const corte of [0, 0.08, 0.16]) {
+            let fonte = canvas;
+            if (corte) {
+              const x = Math.round(canvas.width * corte);
+              recorte.width = canvas.width - 2 * x;
+              recorte.height = canvas.height;
+              recorte.getContext('2d', { willReadFrequently: true })
+                .drawImage(canvas, x, 0, recorte.width, canvas.height, 0, 0, recorte.width, canvas.height);
+              fonte = recorte;
+            }
+            const texto = decodificar(fonte);
+            if (texto) return texto;
           }
-          const texto = decodificar(fonte);
-          if (texto) return texto;
-        }
-        return null;
-      } };
+          return null;
+        } 
+      };
     }
     return null;
   }
@@ -1112,6 +1114,12 @@
       if (!scannerDecoder) scannerDecoder = await criarDecoderBarcode();
       if (!scannerDecoder) throw new Error('Leitor de código de barras indisponível');
 
+      // Atualiza o título do scanner com o motor ativo
+      const titleEl = el('beep-scanner-title');
+      if (titleEl) {
+        titleEl.innerText = `Escanear • ${scannerDecoder.tipo.includes('ML Kit') ? 'Google ML Kit' : 'Leitor IA'}`;
+      }
+
       const stream = await obterStreamCamera();
       if (sessao !== scannerSessao) {
         stream.getTracks().forEach(t => t.stop());
@@ -1146,7 +1154,7 @@
     while (sessao === scannerSessao) {
       let codigo = null;
       try {
-        const canvas = capturarAreaDoQuadro(video, scannerDecoder.nativo ? 0.15 : 0);
+        const canvas = capturarAreaDoQuadro(video, scannerDecoder.tipo.includes('ML Kit') ? 0.15 : 0);
         if (canvas) codigo = await scannerDecoder.ler(canvas);
       } catch (e) {}
       if (sessao !== scannerSessao) return;
@@ -1161,7 +1169,7 @@
         buscarProduto(modulo);
         return;
       }
-      await new Promise(r => setTimeout(r, scannerDecoder.nativo ? 30 : 80));
+      await new Promise(r => setTimeout(r, scannerDecoder.tipo.includes('ML Kit') ? 30 : 80));
     }
   }
   
@@ -1389,7 +1397,6 @@
     atualizarFotoProduto(modulo, null);
   }
 
-  // ===== SALVAMENTO NA NUVEM (Google Sheets via Apps Script) =====
   let nuvemUrl = localStorage.getItem('sys_nuvem_url') || '';
 
   function configurarNuvem() {
@@ -1467,7 +1474,6 @@
       alert('Erro ao salvar na nuvem: ' + e.message);
     }
   }
-  // ===== FIM SALVAMENTO NA NUVEM =====
   
   function renderizarLista(modulo) {
     const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
