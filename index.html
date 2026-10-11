@@ -47,6 +47,7 @@
   }
 
   .hidden { display: none !important; }
+  .apk-mode .fab-camera { display: none !important; }
 
   #login-screen {
     position: fixed; inset: 0; background: #090d16;
@@ -770,6 +771,7 @@
   const el = id => document.getElementById(id);
 
   window.addEventListener('DOMContentLoaded', () => {
+    if (window.Android) { document.body.classList.add('apk-mode'); }
     const estaLogado = sessionStorage.getItem('sys_logado') === 'true';
     if (estaLogado) {
       el('login-screen').classList.add('hidden');
