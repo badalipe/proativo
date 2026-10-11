@@ -59,6 +59,7 @@ jobs:
 
           cat > app-src/gradle.properties <<'EOF'
           org.gradle.jvmargs=-Xmx2048m
+          android.useAndroidX=true
           EOF
 
           cat > app-src/app/build.gradle <<'EOF'
@@ -84,6 +85,16 @@ jobs:
                   }
               }
           }
+
+          dependencies {
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+              def camerax_version = '1.3.1'
+              implementation "androidx.camera:camera-core:$camerax_version"
+              implementation "androidx.camera:camera-camera2:$camerax_version"
+              implementation "androidx.camera:camera-lifecycle:$camerax_version"
+              implementation "androidx.camera:camera-view:$camerax_version"
+              implementation 'com.google.mlkit:barcode-scanning:17.2.0'
+          }
           EOF
 
           cat > app-src/app/src/main/AndroidManifest.xml <<'EOF'
@@ -96,7 +107,8 @@ jobs:
               <application
                   android:label="Pro-Ativo"
                   android:icon="@drawable/ic_launcher"
-                  android:allowBackup="true">
+                  android:allowBackup="true"
+                  android:theme="@style/Theme.AppCompat.NoActionBar">
                   <activity
                       android:name=".MainActivity"
                       android:exported="true"
@@ -114,14 +126,18 @@ jobs:
           package com.bdtecnologia.proativo;
 
           import android.Manifest;
-          import android.app.Activity;
+          import android.annotation.SuppressLint;
           import android.app.DownloadManager;
           import android.content.ContentValues;
           import android.content.pm.PackageManager;
+          import android.media.AudioManager;
+          import android.media.ToneGenerator;
           import android.net.Uri;
           import android.os.Build;
           import android.os.Bundle;
           import android.os.Environment;
+          import android.os.VibrationEffect;
+          import android.os.Vibrator;
           import android.provider.MediaStore;
           import android.view.Gravity;
           import android.view.MotionEvent;
@@ -136,16 +152,35 @@ jobs:
           import android.webkit.WebViewClient;
           import android.widget.Button;
           import android.widget.FrameLayout;
+          import android.widget.TextView;
           import android.widget.Toast;
+
+          import androidx.appcompat.app.AppCompatActivity;
+          import androidx.camera.core.CameraSelector;
+          import androidx.camera.core.ImageAnalysis;
+          import androidx.camera.core.ImageProxy;
+          import androidx.camera.core.Preview;
+          import androidx.camera.lifecycle.ProcessCameraProvider;
+          import androidx.camera.view.PreviewView;
+          import androidx.core.content.ContextCompat;
+
+          import com.google.common.util.concurrent.ListenableFuture;
+          import com.google.mlkit.vision.barcode.Barcode;
+          import com.google.mlkit.vision.barcode.BarcodeScanner;
+          import com.google.mlkit.vision.barcode.BarcodeScanning;
+          import com.google.mlkit.vision.common.InputImage;
 
           import java.io.File;
           import java.io.FileOutputStream;
           import java.io.OutputStream;
 
-          public class MainActivity extends Activity {
+          public class MainActivity extends AppCompatActivity {
               private WebView web;
               private Button btnMenuFlutuante;
               private Button btnCamera;
+              private FrameLayout overlayScanner;
+              private PreviewView previewView;
+              private ProcessCameraProvider cameraProvider;
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
@@ -207,15 +242,7 @@ jobs:
                   btnCamera.setTextColor(0xFFFFFFFF);
                   btnCamera.setBackgroundColor(0xE60066B2);
                   btnCamera.setVisibility(View.GONE);
-                  btnCamera.setOnClickListener(v -> {
-                      String js = "(function(){"
-                              + "var p=document.getElementById('proativo-modal');"
-                              + "var t=document.getElementById('trocas-modal');"
-                              + "if(p&&!p.classList.contains('hidden')){abrirScanner('proativo');return 'ok';}"
-                              + "if(t&&!t.classList.contains('hidden')){abrirScanner('trocas');return 'ok';}"
-                              + "return 'no';})()";
-                      web.evaluateJavascript(js, null);
-                  });
+                  btnCamera.setOnClickListener(v -> abrirScannerNativo());
 
                   FrameLayout root = new FrameLayout(this);
                   root.addView(web);
@@ -246,7 +273,7 @@ jobs:
                           super.onPageFinished(view, url);
                           boolean noApp = (url != null && url.contains("badalipe.github.io"));
                           btnMenuFlutuante.setVisibility(noApp ? View.GONE : View.VISIBLE);
-                          btnCamera.setVisibility(noApp ? View.VISIBLE : View.GONE);
+                          btnCamera.setVisibility(View.VISIBLE);
                       }
                   });
 
@@ -283,19 +310,146 @@ jobs:
                   web.loadUrl("https://badalipe.github.io/proativo/");
               }
 
+              @SuppressLint("UnsafeOptInUsageError")
+              private void abrirScannerNativo() {
+                  if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                      requestPermissions(new String[]{Manifest.permission.CAMERA}, 102);
+                      Toast.makeText(this, "Permita o acesso a camera e toque novamente.", Toast.LENGTH_LONG).show();
+                      return;
+                  }
+
+                  overlayScanner = new FrameLayout(this);
+                  overlayScanner.setBackgroundColor(0xFF000000);
+
+                  previewView = new PreviewView(this);
+                  overlayScanner.addView(previewView, new FrameLayout.LayoutParams(
+                          ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+                  Button btnFechar = new Button(this);
+                  btnFechar.setText("Fechar");
+                  btnFechar.setTextColor(0xFFFFFFFF);
+                  btnFechar.setBackgroundColor(0xCC333333);
+                  FrameLayout.LayoutParams lpF = new FrameLayout.LayoutParams(
+                          ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                  lpF.gravity = Gravity.TOP | Gravity.START;
+                  lpF.setMargins(dp(16), dp(48), 0, 0);
+                  btnFechar.setLayoutParams(lpF);
+                  btnFechar.setOnClickListener(v -> fecharScannerNativo(null));
+                  overlayScanner.addView(btnFechar);
+
+                  TextView dica = new TextView(this);
+                  dica.setText("Aponte para o codigo de barras");
+                  dica.setTextColor(0xFFFFFFFF);
+                  dica.setTextSize(16);
+                  FrameLayout.LayoutParams lpD = new FrameLayout.LayoutParams(
+                          ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                  lpD.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+                  lpD.setMargins(0, 0, 0, dp(90));
+                  overlayScanner.addView(dica, lpD);
+
+                  addContentView(overlayScanner, new ViewGroup.LayoutParams(
+                          ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+                  ListenableFuture<ProcessCameraProvider> futuro = ProcessCameraProvider.getInstance(this);
+                  futuro.addListener(() -> {
+                      try {
+                          cameraProvider = futuro.get();
+                          Preview preview = new Preview.Builder().build();
+                          preview.setSurfaceProvider(previewView.getSurfaceProvider());
+
+                          BarcodeScanner leitor = BarcodeScanning.getClient();
+                          ImageAnalysis analise = new ImageAnalysis.Builder()
+                                  .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                                  .build();
+                          analise.setAnalyzer(ContextCompat.getMainExecutor(this), imageProxy -> {
+                              android.media.Image imagem = imageProxy.getImage();
+                              if (imagem != null) {
+                                  InputImage entrada = InputImage.fromMediaImage(imagem, imageProxy.getImageInfo().getRotationDegrees());
+                                  leitor.process(entrada)
+                                          .addOnSuccessListener(barcodes -> {
+                                              for (Barcode b : barcodes) {
+                                                  String codigo = b.getRawValue();
+                                                  if (codigo != null && !codigo.isEmpty()) {
+                                                      fecharScannerNativo(codigo);
+                                                      return;
+                                                  }
+                                              }
+                                          })
+                                          .addOnCompleteListener(task -> imageProxy.close());
+                              } else {
+                                  imageProxy.close();
+                              }
+                          });
+
+                          cameraProvider.unbindAll();
+                          cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, preview, analise);
+                      } catch (Exception e) {
+                          fecharScannerNativo(null);
+                          Toast.makeText(this, "Nao foi possivel abrir a camera.", Toast.LENGTH_LONG).show();
+                      }
+                  }, ContextCompat.getMainExecutor(this));
+              }
+
+              private void fecharScannerNativo(String codigo) {
+                  if (cameraProvider != null) {
+                      cameraProvider.unbindAll();
+                      cameraProvider = null;
+                  }
+                  if (overlayScanner != null) {
+                      ViewGroup pai = (ViewGroup) overlayScanner.getParent();
+                      if (pai != null) pai.removeView(overlayScanner);
+                      overlayScanner = null;
+                      previewView = null;
+                  }
+                  if (codigo != null) {
+                      try {
+                          ToneGenerator tom = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
+                          tom.startTone(ToneGenerator.TONE_PROP_BEEP, 150);
+                      } catch (Exception ignored) {}
+                      if (Build.VERSION.SDK_INT >= 26) {
+                          try {
+                              Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+                              if (v != null) v.vibrate(VibrationEffect.createOneShot(120, VibrationEffect.DEFAULT_AMPLITUDE));
+                          } catch (Exception ignored) {}
+                      }
+                      String seguro = codigo.replace("'", "").replace("\\\\", "");
+                      String js = "(function(c){try{"
+                              + "var alvo=document.activeElement;"
+                              + "if(alvo&&alvo.tagName==='INPUT'&&(alvo.type==='text'||alvo.type==='search'||alvo.type==='number'||alvo.type==='')){alvo.value=c;alvo.dispatchEvent(new Event('input',{bubbles:true}));alvo.dispatchEvent(new Event('change',{bubbles:true}));alvo.dispatchEvent(new KeyboardEvent('keyup',{bubbles:true}));return;}"
+                              + "var p=document.getElementById('proativo-modal');"
+                              + "var t=document.getElementById('trocas-modal');"
+                              + "if(p&&!p.classList.contains('hidden')){var i=document.getElementById('pro_codigo');if(i){i.value=c;i.dispatchEvent(new Event('input',{bubbles:true}));}buscarProduto('proativo');return;}"
+                              + "if(t&&!t.classList.contains('hidden')){var i2=document.getElementById('trc_codigo');if(i2){i2.value=c;i2.dispatchEvent(new Event('input',{bubbles:true}));}buscarProduto('trocas');return;}"
+                              + "var ins=document.querySelectorAll('input');"
+                              + "for(var k=0;k<ins.length;k++){var e=ins[k];var r=e.getBoundingClientRect();"
+                              + "if(r.width>0&&r.height>0&&(e.type==='text'||e.type==='search'||e.type==='number'||e.type==='')){"
+                              + "e.focus();e.value=c;"
+                              + "e.dispatchEvent(new Event('input',{bubbles:true}));"
+                              + "e.dispatchEvent(new Event('change',{bubbles:true}));"
+                              + "e.dispatchEvent(new KeyboardEvent('keyup',{bubbles:true}));"
+                              + "break;}}"
+                              + "}catch(err){}})('" + seguro + "')";
+                      web.evaluateJavascript(js, null);
+                  }
+              }
+
               private int dp(int valor) {
                   return (int) (valor * getResources().getDisplayMetrics().density + 0.5f);
               }
 
               @Override
               public void onBackPressed() {
+                  if (overlayScanner != null) {
+                      fecharScannerNativo(null);
+                      return;
+                  }
                   if (web != null && web.canGoBack()) web.goBack();
                   else super.onBackPressed();
               }
 
               public static class AndroidBridge {
-                  private final Activity activity;
-                  AndroidBridge(Activity a) { activity = a; }
+                  private final android.app.Activity activity;
+                  AndroidBridge(android.app.Activity a) { activity = a; }
 
                   @JavascriptInterface
                   public void salvarBase64(String base64, String mime) {
