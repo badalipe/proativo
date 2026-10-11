@@ -1667,6 +1667,18 @@
 
       const blob = await workbook.outputAsync();
       if (somenteArquivo) return blob;
+      if (window.Android && typeof window.Android.salvarBase64 === 'function') {
+        const buf = await blob.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+        let binario = '';
+        const parte = 8192;
+        for (let i = 0; i < bytes.length; i += parte) {
+          binario += String.fromCharCode.apply(null, bytes.subarray(i, i + parte));
+        }
+        window.Android.salvarBase64(btoa(binario), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        alert("Planilha salva na pasta Downloads do celular!");
+        return;
+      }
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
