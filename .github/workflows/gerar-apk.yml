@@ -94,7 +94,7 @@ jobs:
               implementation "androidx.camera:camera-camera2:$camerax_version"
               implementation "androidx.camera:camera-lifecycle:$camerax_version"
               implementation "androidx.camera:camera-view:$camerax_version"
-              implementation 'com.google.mlkit:barcode-scanning:17.2.0'
+              implementation 'com.google.mlkit:barcode-scanning:17.1.0'
           }
           EOF
 
@@ -166,7 +166,6 @@ jobs:
           import androidx.core.content.ContextCompat;
 
           import com.google.common.util.concurrent.ListenableFuture;
-          import com.google.mlkit.vision.barcode.Barcode;
           import com.google.mlkit.vision.barcode.BarcodeScanner;
           import com.google.mlkit.vision.barcode.BarcodeScanning;
           import com.google.mlkit.vision.common.InputImage;
@@ -368,8 +367,8 @@ jobs:
                                   InputImage entrada = InputImage.fromMediaImage(imagem, imageProxy.getImageInfo().getRotationDegrees());
                                   leitor.process(entrada)
                                           .addOnSuccessListener(barcodes -> {
-                                              for (Barcode b : barcodes) {
-                                                  String codigo = b.getRawValue();
+                                              for (int idx = 0; idx < barcodes.size(); idx++) {
+                                                  String codigo = barcodes.get(idx).getRawValue();
                                                   if (codigo != null && !codigo.isEmpty()) {
                                                       fecharScannerNativo(codigo);
                                                       return;
