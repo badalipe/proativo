@@ -123,6 +123,9 @@ jobs:
           import android.os.Bundle;
           import android.os.Environment;
           import android.provider.MediaStore;
+          import android.view.Gravity;
+          import android.view.View;
+          import android.view.ViewGroup;
           import android.webkit.JavascriptInterface;
           import android.webkit.PermissionRequest;
           import android.webkit.URLUtil;
@@ -130,6 +133,8 @@ jobs:
           import android.webkit.WebSettings;
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
+          import android.widget.Button;
+          import android.widget.FrameLayout;
           import android.widget.Toast;
 
           import java.io.File;
@@ -138,12 +143,36 @@ jobs:
 
           public class MainActivity extends Activity {
               private WebView web;
+              private Button btnMenuFlutuante;
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
                   web = new WebView(this);
-                  setContentView(web);
+
+                  btnMenuFlutuante = new Button(this);
+                  btnMenuFlutuante.setText("\u2190 Menu");
+                  FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                          ViewGroup.LayoutParams.WRAP_CONTENT,
+                          ViewGroup.LayoutParams.WRAP_CONTENT);
+                  lp.gravity = Gravity.TOP | Gravity.START;
+                  int margem = dp(12);
+                  lp.setMargins(margem, dp(44), margem, margem);
+                  btnMenuFlutuante.setLayoutParams(lp);
+                  btnMenuFlutuante.setAlpha(0.85f);
+                  btnMenuFlutuante.setVisibility(View.GONE);
+                  btnMenuFlutuante.setOnClickListener(v -> {
+                      if (web.canGoBack()) {
+                          web.goBack();
+                      } else {
+                          web.loadUrl("https://badalipe.github.io/proativo/");
+                      }
+                  });
+
+                  FrameLayout root = new FrameLayout(this);
+                  root.addView(web);
+                  root.addView(btnMenuFlutuante);
+                  setContentView(root);
 
                   WebSettings s = web.getSettings();
                   s.setJavaScriptEnabled(true);
@@ -162,7 +191,17 @@ jobs:
                       }
                   });
 
-                  web.setWebViewClient(new WebViewClient());
+                  web.setWebViewClient(new WebViewClient() {
+                      @Override
+                      public void onPageFinished(WebView view, String url) {
+                          super.onPageFinished(view, url);
+                          if (url != null && url.contains("badalipe.github.io")) {
+                              btnMenuFlutuante.setVisibility(View.GONE);
+                          } else {
+                              btnMenuFlutuante.setVisibility(View.VISIBLE);
+                          }
+                      }
+                  });
 
                   web.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
                       if (url.startsWith("blob:")) {
@@ -195,6 +234,10 @@ jobs:
                   }
 
                   web.loadUrl("https://badalipe.github.io/proativo/");
+              }
+
+              private int dp(int valor) {
+                  return (int) (valor * getResources().getDisplayMetrics().density + 0.5f);
               }
 
               @Override
