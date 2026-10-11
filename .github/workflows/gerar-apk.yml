@@ -89,12 +89,7 @@ jobs:
           dependencies {
               implementation platform('org.jetbrains.kotlin:kotlin-bom:1.8.22')
               implementation 'androidx.appcompat:appcompat:1.6.1'
-              def camerax_version = '1.3.1'
-              implementation "androidx.camera:camera-core:$camerax_version"
-              implementation "androidx.camera:camera-camera2:$camerax_version"
-              implementation "androidx.camera:camera-lifecycle:$camerax_version"
-              implementation "androidx.camera:camera-view:$camerax_version"
-              implementation 'com.google.mlkit:barcode-scanning:17.1.0'
+              implementation 'com.google.android.gms:play-services-code-scanner:16.1.0'
           }
           EOF
 
@@ -119,6 +114,9 @@ jobs:
                           <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
                   </activity>
+                  <meta-data
+                      android:name="com.google.mlkit.vision.codescanner.API_ENABLED"
+                      android:value="true" />
               </application>
           </manifest>
           EOF
@@ -127,20 +125,14 @@ jobs:
           package com.bdtecnologia.proativo;
 
           import android.Manifest;
-          import android.annotation.SuppressLint;
           import android.app.DownloadManager;
           import android.content.ContentValues;
           import android.content.pm.PackageManager;
-          import android.media.AudioManager;
-          import android.media.ToneGenerator;
           import android.net.Uri;
           import android.os.Build;
           import android.os.Bundle;
           import android.os.Environment;
-          import android.os.VibrationEffect;
-          import android.os.Vibrator;
           import android.provider.MediaStore;
-          import android.util.Size;
           import android.view.Gravity;
           import android.view.MotionEvent;
           import android.view.View;
@@ -154,25 +146,12 @@ jobs:
           import android.webkit.WebViewClient;
           import android.widget.Button;
           import android.widget.FrameLayout;
-          import android.widget.TextView;
           import android.widget.Toast;
 
           import androidx.appcompat.app.AppCompatActivity;
-          import androidx.camera.core.Camera;
-          import androidx.camera.core.CameraSelector;
-          import androidx.camera.core.ImageAnalysis;
-          import androidx.camera.core.ImageProxy;
-          import androidx.camera.core.Preview;
-          import androidx.camera.core.resolutionselector.ResolutionSelector;
-          import androidx.camera.core.resolutionselector.ResolutionStrategy;
-          import androidx.camera.lifecycle.ProcessCameraProvider;
-          import androidx.camera.view.PreviewView;
-          import androidx.core.content.ContextCompat;
 
-          import com.google.common.util.concurrent.ListenableFuture;
-          import com.google.mlkit.vision.barcode.BarcodeScanner;
-          import com.google.mlkit.vision.barcode.BarcodeScanning;
-          import com.google.mlkit.vision.common.InputImage;
+          import com.google.mlkit.vision.codescanner.GmsBarcodeScanner;
+          import com.google.mlkit.vision.codescanner.GmsBarcodeScanning;
 
           import java.io.File;
           import java.io.FileOutputStream;
@@ -182,11 +161,6 @@ jobs:
               private WebView web;
               private Button btnMenuFlutuante;
               private Button btnCamera;
-              private FrameLayout overlayScanner;
-              private PreviewView previewView;
-              private ProcessCameraProvider cameraProvider;
-              private Camera cameraAtual;
-              private boolean lanternaLigada = false;
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
@@ -344,186 +318,42 @@ jobs:
                   web.loadUrl("https://badalipe.github.io/proativo/");
               }
 
-              @SuppressLint("UnsafeOptInUsageError")
               private void abrirScannerNativo() {
-                  if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                      requestPermissions(new String[]{Manifest.permission.CAMERA}, 102);
-                      Toast.makeText(this, "Permita o acesso a camera e toque novamente.", Toast.LENGTH_LONG).show();
-                      return;
+                  try {
+                      GmsBarcodeScanner scanner = GmsBarcodeScanning.getClient(this);
+                      scanner.startScan()
+                              .addOnSuccessListener(resultado -> {
+                                  String codigo = resultado.getRawValue();
+                                  if (codigo != null && !codigo.isEmpty()) {
+                                      processarCodigo(codigo);
+                                  }
+                              })
+                              .addOnCanceledListener(() -> { })
+                              .addOnFailureListener(e -> Toast.makeText(this, "Scanner indisponivel neste aparelho.", Toast.LENGTH_LONG).show());
+                  } catch (Exception e) {
+                      Toast.makeText(this, "Scanner indisponivel neste aparelho.", Toast.LENGTH_LONG).show();
                   }
-
-                  overlayScanner = new FrameLayout(this);
-                  overlayScanner.setBackgroundColor(0xFF000000);
-
-                  previewView = new PreviewView(this);
-                  previewView.setScaleType(PreviewView.ScaleType.FILL_CENTER);
-                  overlayScanner.addView(previewView, new FrameLayout.LayoutParams(
-                          ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-                  View moldura = new View(this);
-                  android.graphics.drawable.GradientDrawable contorno = new android.graphics.drawable.GradientDrawable();
-                  contorno.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
-                  contorno.setStroke(dp(3), 0xB3FFFFFF);
-                  contorno.setCornerRadius(dp(14));
-                  moldura.setBackground(contorno);
-                  FrameLayout.LayoutParams lpM = new FrameLayout.LayoutParams(dp(280), dp(170));
-                  lpM.gravity = Gravity.CENTER;
-                  moldura.setLayoutParams(lpM);
-                  overlayScanner.addView(moldura);
-
-                  Button btnFechar = new Button(this);
-                  btnFechar.setText("Fechar");
-                  btnFechar.setTextColor(0xFFFFFFFF);
-                  btnFechar.setBackgroundColor(0xCC333333);
-                  FrameLayout.LayoutParams lpF = new FrameLayout.LayoutParams(
-                          ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                  lpF.gravity = Gravity.TOP | Gravity.START;
-                  lpF.setMargins(dp(16), dp(48), 0, 0);
-                  btnFechar.setLayoutParams(lpF);
-                  btnFechar.setOnClickListener(v -> fecharScannerNativo(null));
-                  overlayScanner.addView(btnFechar);
-
-                  Button btnLanterna = new Button(this);
-                  btnLanterna.setText("Lanterna");
-                  btnLanterna.setTextColor(0xFFFFFFFF);
-                  btnLanterna.setBackgroundColor(0xCC333333);
-                  FrameLayout.LayoutParams lpL = new FrameLayout.LayoutParams(
-                          ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                  lpL.gravity = Gravity.TOP | Gravity.END;
-                  lpL.setMargins(0, dp(48), dp(16), 0);
-                  btnLanterna.setLayoutParams(lpL);
-                  btnLanterna.setOnClickListener(v -> {
-                      if (cameraAtual != null) {
-                          lanternaLigada = !lanternaLigada;
-                          cameraAtual.getCameraControl().enableTorch(lanternaLigada);
-                      }
-                  });
-                  overlayScanner.addView(btnLanterna);
-
-                  TextView rotulo = new TextView(this);
-                  rotulo.setText("Scanner Google ML Kit");
-                  rotulo.setTextColor(0xFFFFFFFF);
-                  rotulo.setTextSize(14);
-                  FrameLayout.LayoutParams lpR = new FrameLayout.LayoutParams(
-                          ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                  lpR.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-                  lpR.setMargins(0, dp(56), 0, 0);
-                  overlayScanner.addView(rotulo, lpR);
-
-                  TextView dica = new TextView(this);
-                  dica.setText("Aponte o codigo de barras para a moldura");
-                  dica.setTextColor(0xFFFFFFFF);
-                  dica.setTextSize(15);
-                  FrameLayout.LayoutParams lpD = new FrameLayout.LayoutParams(
-                          ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                  lpD.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-                  lpD.setMargins(0, 0, 0, dp(90));
-                  overlayScanner.addView(dica, lpD);
-
-                  addContentView(overlayScanner, new ViewGroup.LayoutParams(
-                          ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-                  ListenableFuture<ProcessCameraProvider> futuro = ProcessCameraProvider.getInstance(this);
-                  futuro.addListener(() -> {
-                      try {
-                          cameraProvider = futuro.get();
-                          android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
-                          int wTela = dm.widthPixels;
-                          int hTela = dm.heightPixels;
-                          int wPrev = wTela;
-                          int hPrev = hTela;
-                          if (hPrev > wPrev && hPrev > 2560) { wPrev = wPrev * 2560 / hPrev; hPrev = 2560; }
-                          else if (wPrev >= hPrev && wPrev > 2560) { hPrev = hPrev * 2560 / wPrev; wPrev = 2560; }
-                          ResolutionSelector seletorPreview = new ResolutionSelector.Builder()
-                                  .setResolutionStrategy(new ResolutionStrategy(new Size(wPrev, hPrev), ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER))
-                                  .build();
-                          int wAn = wTela;
-                          int hAn = hTela;
-                          if (hAn > wAn && hAn > 1920) { wAn = wAn * 1920 / hAn; hAn = 1920; }
-                          else if (wAn >= hAn && wAn > 1920) { hAn = hAn * 1920 / wAn; wAn = 1920; }
-                          ResolutionSelector seletorAnalise = new ResolutionSelector.Builder()
-                                  .setResolutionStrategy(new ResolutionStrategy(new Size(wAn, hAn), ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER))
-                                  .build();
-                          Preview preview = new Preview.Builder().setResolutionSelector(seletorPreview).build();
-                          preview.setSurfaceProvider(previewView.getSurfaceProvider());
-
-                          BarcodeScanner leitor = BarcodeScanning.getClient();
-                          ImageAnalysis analise = new ImageAnalysis.Builder()
-                                  .setResolutionSelector(seletorAnalise)
-                                  .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                                  .build();
-                          analise.setAnalyzer(ContextCompat.getMainExecutor(this), imageProxy -> {
-                              android.media.Image imagem = imageProxy.getImage();
-                              if (imagem != null) {
-                                  InputImage entrada = InputImage.fromMediaImage(imagem, imageProxy.getImageInfo().getRotationDegrees());
-                                  leitor.process(entrada)
-                                          .addOnSuccessListener(barcodes -> {
-                                              for (int idx = 0; idx < barcodes.size(); idx++) {
-                                                  String codigo = barcodes.get(idx).getRawValue();
-                                                  if (codigo != null && !codigo.isEmpty()) {
-                                                      fecharScannerNativo(codigo);
-                                                      return;
-                                                  }
-                                              }
-                                          })
-                                          .addOnCompleteListener(task -> imageProxy.close());
-                              } else {
-                                  imageProxy.close();
-                              }
-                          });
-
-                          cameraProvider.unbindAll();
-                          cameraAtual = cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, preview, analise);
-                      } catch (Exception e) {
-                          fecharScannerNativo(null);
-                          Toast.makeText(this, "Nao foi possivel abrir a camera.", Toast.LENGTH_LONG).show();
-                      }
-                  }, ContextCompat.getMainExecutor(this));
               }
 
-              private void fecharScannerNativo(String codigo) {
-                  lanternaLigada = false;
-                  cameraAtual = null;
-                  if (cameraProvider != null) {
-                      cameraProvider.unbindAll();
-                      cameraProvider = null;
-                  }
-                  if (overlayScanner != null) {
-                      ViewGroup pai = (ViewGroup) overlayScanner.getParent();
-                      if (pai != null) pai.removeView(overlayScanner);
-                      overlayScanner = null;
-                      previewView = null;
-                  }
-                  if (codigo != null) {
-                      try {
-                          ToneGenerator tom = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
-                          tom.startTone(ToneGenerator.TONE_PROP_BEEP, 150);
-                      } catch (Exception ignored) {}
-                      if (Build.VERSION.SDK_INT >= 26) {
-                          try {
-                              Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-                              if (v != null) v.vibrate(VibrationEffect.createOneShot(120, VibrationEffect.DEFAULT_AMPLITUDE));
-                          } catch (Exception ignored) {}
-                      }
-                      String seguro = codigo.replace("'", "").replace("\\", "");
-                      String js = "(function(c){try{"
-                              + "var alvo=document.activeElement;"
-                              + "if(alvo&&alvo.tagName==='INPUT'&&(alvo.type==='text'||alvo.type==='search'||alvo.type==='number'||alvo.type==='')){alvo.value=c;alvo.dispatchEvent(new Event('input',{bubbles:true}));alvo.dispatchEvent(new Event('change',{bubbles:true}));alvo.dispatchEvent(new KeyboardEvent('keyup',{bubbles:true}));return;}"
-                              + "var p=document.getElementById('proativo-modal');"
-                              + "var t=document.getElementById('trocas-modal');"
-                              + "if(p&&!p.classList.contains('hidden')){var i=document.getElementById('pro_codigo');if(i){i.value=c;i.dispatchEvent(new Event('input',{bubbles:true}));}buscarProduto('proativo');return;}"
-                              + "if(t&&!t.classList.contains('hidden')){var i2=document.getElementById('trc_codigo');if(i2){i2.value=c;i2.dispatchEvent(new Event('input',{bubbles:true}));}buscarProduto('trocas');return;}"
-                              + "var ins=document.querySelectorAll('input');"
-                              + "for(var k=0;k<ins.length;k++){var e=ins[k];var r=e.getBoundingClientRect();"
-                              + "if(r.width>0&&r.height>0&&(e.type==='text'||e.type==='search'||e.type==='number'||e.type==='')){"
-                              + "e.focus();e.value=c;"
-                              + "e.dispatchEvent(new Event('input',{bubbles:true}));"
-                              + "e.dispatchEvent(new Event('change',{bubbles:true}));"
-                              + "e.dispatchEvent(new KeyboardEvent('keyup',{bubbles:true}));"
-                              + "break;}}"
-                              + "}catch(err){}})('" + seguro + "')";
-                      web.evaluateJavascript(js, null);
-                  }
+              private void processarCodigo(String codigo) {
+                  String seguro = codigo.replace("'", "").replace("\\", "");
+                  String js = "(function(c){try{"
+                          + "var alvo=document.activeElement;"
+                          + "if(alvo&&alvo.tagName==='INPUT'&&(alvo.type==='text'||alvo.type==='search'||alvo.type==='number'||alvo.type==='')){alvo.value=c;alvo.dispatchEvent(new Event('input',{bubbles:true}));alvo.dispatchEvent(new Event('change',{bubbles:true}));alvo.dispatchEvent(new KeyboardEvent('keyup',{bubbles:true}));return;}"
+                          + "var p=document.getElementById('proativo-modal');"
+                          + "var t=document.getElementById('trocas-modal');"
+                          + "if(p&&!p.classList.contains('hidden')){var i=document.getElementById('pro_codigo');if(i){i.value=c;i.dispatchEvent(new Event('input',{bubbles:true}));}buscarProduto('proativo');return;}"
+                          + "if(t&&!t.classList.contains('hidden')){var i2=document.getElementById('trc_codigo');if(i2){i2.value=c;i2.dispatchEvent(new Event('input',{bubbles:true}));}buscarProduto('trocas');return;}"
+                          + "var ins=document.querySelectorAll('input');"
+                          + "for(var k=0;k<ins.length;k++){var e=ins[k];var r=e.getBoundingClientRect();"
+                          + "if(r.width>0&&r.height>0&&(e.type==='text'||e.type==='search'||e.type==='number'||e.type==='')){"
+                          + "e.focus();e.value=c;"
+                          + "e.dispatchEvent(new Event('input',{bubbles:true}));"
+                          + "e.dispatchEvent(new Event('change',{bubbles:true}));"
+                          + "e.dispatchEvent(new KeyboardEvent('keyup',{bubbles:true}));"
+                          + "break;}}"
+                          + "}catch(err){}})('" + seguro + "')";
+                  web.evaluateJavascript(js, null);
               }
 
               private int dp(int valor) {
@@ -532,10 +362,6 @@ jobs:
 
               @Override
               public void onBackPressed() {
-                  if (overlayScanner != null) {
-                      fecharScannerNativo(null);
-                      return;
-                  }
                   if (web != null && web.canGoBack()) web.goBack();
                   else super.onBackPressed();
               }
