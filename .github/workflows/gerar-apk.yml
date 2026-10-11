@@ -124,6 +124,7 @@ jobs:
           import android.os.Environment;
           import android.provider.MediaStore;
           import android.view.Gravity;
+          import android.view.MotionEvent;
           import android.view.View;
           import android.view.ViewGroup;
           import android.webkit.JavascriptInterface;
@@ -144,6 +145,7 @@ jobs:
           public class MainActivity extends Activity {
               private WebView web;
               private Button btnMenuFlutuante;
+              private Button btnCamera;
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
@@ -159,8 +161,33 @@ jobs:
                   int margem = dp(12);
                   lp.setMargins(margem, dp(44), margem, margem);
                   btnMenuFlutuante.setLayoutParams(lp);
-                  btnMenuFlutuante.setAlpha(0.85f);
+                  btnMenuFlutuante.setAlpha(0.92f);
+                  btnMenuFlutuante.setTextColor(0xFFFFFFFF);
+                  btnMenuFlutuante.setBackgroundColor(0xCC333333);
                   btnMenuFlutuante.setVisibility(View.GONE);
+                  final float[] desl = new float[2];
+                  final boolean[] moveu = new boolean[1];
+                  btnMenuFlutuante.setOnTouchListener((v, ev) -> {
+                      switch (ev.getActionMasked()) {
+                          case MotionEvent.ACTION_DOWN:
+                              desl[0] = v.getX() - ev.getRawX();
+                              desl[1] = v.getY() - ev.getRawY();
+                              moveu[0] = false;
+                              return false;
+                          case MotionEvent.ACTION_MOVE:
+                              float nx = ev.getRawX() + desl[0];
+                              float ny = ev.getRawY() + desl[1];
+                              if (!moveu[0] && (Math.abs(nx - v.getX()) > 12 || Math.abs(ny - v.getY()) > 12)) moveu[0] = true;
+                              if (moveu[0]) {
+                                  v.setX(nx);
+                                  v.setY(ny);
+                                  return true;
+                              }
+                              return false;
+                          default:
+                              return false;
+                      }
+                  });
                   btnMenuFlutuante.setOnClickListener(v -> {
                       if (web.canGoBack()) {
                           web.goBack();
@@ -169,9 +196,31 @@ jobs:
                       }
                   });
 
+                  btnCamera = new Button(this);
+                  btnCamera.setText("\uD83D\uDCF7");
+                  FrameLayout.LayoutParams lpCam = new FrameLayout.LayoutParams(dp(58), dp(58));
+                  lpCam.gravity = Gravity.BOTTOM | Gravity.END;
+                  lpCam.setMargins(dp(20), dp(20), dp(20), dp(20));
+                  btnCamera.setLayoutParams(lpCam);
+                  btnCamera.setAlpha(0.95f);
+                  btnCamera.setTextSize(24);
+                  btnCamera.setTextColor(0xFFFFFFFF);
+                  btnCamera.setBackgroundColor(0xE60066B2);
+                  btnCamera.setVisibility(View.GONE);
+                  btnCamera.setOnClickListener(v -> {
+                      String js = "(function(){"
+                              + "var p=document.getElementById('proativo-modal');"
+                              + "var t=document.getElementById('trocas-modal');"
+                              + "if(p&&!p.classList.contains('hidden')){abrirScanner('proativo');return 'ok';}"
+                              + "if(t&&!t.classList.contains('hidden')){abrirScanner('trocas');return 'ok';}"
+                              + "return 'no';})()";
+                      web.evaluateJavascript(js, null);
+                  });
+
                   FrameLayout root = new FrameLayout(this);
                   root.addView(web);
                   root.addView(btnMenuFlutuante);
+                  root.addView(btnCamera);
                   setContentView(root);
 
                   WebSettings s = web.getSettings();
@@ -195,11 +244,9 @@ jobs:
                       @Override
                       public void onPageFinished(WebView view, String url) {
                           super.onPageFinished(view, url);
-                          if (url != null && url.contains("badalipe.github.io")) {
-                              btnMenuFlutuante.setVisibility(View.GONE);
-                          } else {
-                              btnMenuFlutuante.setVisibility(View.VISIBLE);
-                          }
+                          boolean noApp = (url != null && url.contains("badalipe.github.io"));
+                          btnMenuFlutuante.setVisibility(noApp ? View.GONE : View.VISIBLE);
+                          btnCamera.setVisibility(noApp ? View.VISIBLE : View.GONE);
                       }
                   });
 
