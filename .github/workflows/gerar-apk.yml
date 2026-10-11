@@ -338,20 +338,21 @@ jobs:
               private void processarCodigo(String codigo) {
                   String seguro = codigo.replace("'", "").replace("\\", "");
                   String js = "(function(c){try{"
-                          + "var alvo=document.activeElement;"
-                          + "if(alvo&&alvo.tagName==='INPUT'&&(alvo.type==='text'||alvo.type==='search'||alvo.type==='number'||alvo.type==='')){alvo.value=c;alvo.dispatchEvent(new Event('input',{bubbles:true}));alvo.dispatchEvent(new Event('change',{bubbles:true}));alvo.dispatchEvent(new KeyboardEvent('keyup',{bubbles:true}));return;}"
+                          + "function visivel(e){if(!e)return false;var r=e.getBoundingClientRect();var st=getComputedStyle(e);return r.width>0&&r.height>0&&st.visibility!=='hidden'&&st.display!=='none';}"
+                          + "function texto(e){return e&&e.tagName==='INPUT'&&(e.type==='text'||e.type==='search'||e.type==='number'||e.type==='');}"
+                          + "function preencher(e){e.focus();e.value=c;['input','change'].forEach(function(t){e.dispatchEvent(new Event(t,{bubbles:true}));});[13].forEach(function(k){e.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',code:'Enter',keyCode:k,which:k,bubbles:true}));e.dispatchEvent(new KeyboardEvent('keypress',{key:'Enter',code:'Enter',keyCode:k,which:k,bubbles:true}));e.dispatchEvent(new KeyboardEvent('keyup',{key:'Enter',code:'Enter',keyCode:k,which:k,bubbles:true}));});}"
+                          + "function esconderTeclado(){try{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();}catch(x){}}"
                           + "var p=document.getElementById('proativo-modal');"
                           + "var t=document.getElementById('trocas-modal');"
-                          + "if(p&&!p.classList.contains('hidden')){var i=document.getElementById('pro_codigo');if(i){i.value=c;i.dispatchEvent(new Event('input',{bubbles:true}));}buscarProduto('proativo');return;}"
-                          + "if(t&&!t.classList.contains('hidden')){var i2=document.getElementById('trc_codigo');if(i2){i2.value=c;i2.dispatchEvent(new Event('input',{bubbles:true}));}buscarProduto('trocas');return;}"
-                          + "var ins=document.querySelectorAll('input');"
-                          + "for(var k=0;k<ins.length;k++){var e=ins[k];var r=e.getBoundingClientRect();"
-                          + "if(r.width>0&&r.height>0&&(e.type==='text'||e.type==='search'||e.type==='number'||e.type==='')){"
-                          + "e.focus();e.value=c;"
-                          + "e.dispatchEvent(new Event('input',{bubbles:true}));"
-                          + "e.dispatchEvent(new Event('change',{bubbles:true}));"
-                          + "e.dispatchEvent(new KeyboardEvent('keyup',{bubbles:true}));"
-                          + "break;}}"
+                          + "if(p&&!p.classList.contains('hidden')){var i=document.getElementById('pro_codigo');if(i){preencher(i);buscarProduto('proativo');setTimeout(esconderTeclado,300);return;}}"
+                          + "if(t&&!t.classList.contains('hidden')){var i2=document.getElementById('trc_codigo');if(i2){preencher(i2);buscarProduto('trocas');setTimeout(esconderTeclado,300);return;}}"
+                          + "var inputs=Array.prototype.slice.call(document.querySelectorAll('input')).filter(function(e){return texto(e)&&visivel(e)&&!e.disabled&&!e.readOnly;});"
+                          + "if(inputs.length===0)return;"
+                          + "var alvo=null;"
+                          + "for(var k=0;k<inputs.length;k++){var el=inputs[k];var node=el.parentElement;var prof=0;while(node&&prof<6){var cls=(node.className||'')+'';var role=node.getAttribute&&node.getAttribute('role');if(/modal|dialog|popup|overlay/i.test(cls)||role==='dialog'){if(visivel(node)){alvo=el;break;}}node=node.parentElement;prof++;}if(alvo)break;}"
+                          + "if(!alvo)alvo=inputs[inputs.length-1];"
+                          + "preencher(alvo);"
+                          + "setTimeout(esconderTeclado,300);"
                           + "}catch(err){}})('" + seguro + "')";
                   web.evaluateJavascript(js, null);
               }
