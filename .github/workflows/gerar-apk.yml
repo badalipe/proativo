@@ -399,7 +399,8 @@ jobs:
                               fos.write(bytes);
                               fos.close();
                           }
-                          activity.runOnUiThread(() -> Toast.makeText(activity, "Salvo em Downloads: " + limpo, Toast.LENGTH_LONG).show());
+                          final String nomeFinal = limpo;
+                          activity.runOnUiThread(() -> Toast.makeText(activity, "Salvo em Downloads: " + nomeFinal, Toast.LENGTH_LONG).show());
                       } catch (Exception e) {
                           activity.runOnUiThread(() -> Toast.makeText(activity, "Erro ao salvar: " + e.getMessage(), Toast.LENGTH_LONG).show());
                       }
