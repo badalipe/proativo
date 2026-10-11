@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#090d16">
   <title>Sistema de Gestão - Rede Market</title>
-  
+
   <link rel="manifest" href="manifest.json">
   <script>
     if ('serviceWorker' in navigator) {
@@ -14,11 +14,11 @@
         .catch((err) => console.log("Erro ao registrar Service Worker: ", err));
     }
   </script>
-  
+
   <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
-  
+
   <style>
   :root {
     --primary: #0066b2;
@@ -33,11 +33,11 @@
     --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.05);
     --shadow-md: 0 10px 25px rgba(15, 23, 42, 0.08);
   }
-  
+
   * { 
     margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent;
   }
-  
+
   html, body {
     width: 100%; height: 100%;
     background-color: #090d16 !important;
@@ -98,7 +98,7 @@
   }
   .menu-title { color: #ffffff; font-size: 20px; font-weight: 800; margin-bottom: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
   .btn-row { display: flex; flex-direction: column; gap: 16px; width: 100%; }
-  
+
   .glass-btn {
     width: 100%; position: relative; padding: 20px; border: 1.5px solid rgba(255, 255, 255, 0.25);
     border-radius: 20px; color: #ffffff; cursor: pointer; overflow: hidden;
@@ -113,17 +113,17 @@
   .glass-content { position: relative; z-index: 2; display: flex; align-items: center; gap: 16px; width: 100%; }
   .btn-svg { width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)); flex-shrink: 0; }
   .btn-text { font-size: 18px; font-weight: 800; letter-spacing: 1.5px; color: #ffffff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); text-align: left; }
-  
+
   .glass-1 { background: linear-gradient(145deg, rgba(6,182,212,0.85) 0%, rgba(29,78,216,0.95) 100%); box-shadow: 0 10px 25px rgba(6,182,212,0.3); }
   .glass-2 { background: linear-gradient(145deg, rgba(37,99,235,0.85) 0%, rgba(79,70,229,0.95) 100%); box-shadow: 0 10px 25px rgba(99,102,241,0.3); }
   .glass-3 { background: linear-gradient(145deg, rgba(124,58,237,0.85) 0%, rgba(147,51,234,0.95) 100%); box-shadow: 0 10px 25px rgba(139,92,246,0.3); }
   .glass-4 { background: linear-gradient(145deg, rgba(217,119,6,0.85) 0%, rgba(180,83,9,0.95) 100%); box-shadow: 0 10px 25px rgba(217,119,6,0.3); }
-  
+
   .system-modal { 
     position: fixed; inset: 0; z-index: 999; background: var(--bg-main); 
     display: flex; flex-direction: column; overflow: hidden; 
   }
-  
+
   .top {
     background: linear-gradient(135deg, #090d16 0%, #1e293b 100%);
     color: #fff; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 14px; flex-shrink: 0;
@@ -133,15 +133,15 @@
   .header-content-wrapper { width: 100%; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
   .header-main-row { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 12px; }
   .header-brand-group { display: flex; align-items: center; gap: 10px; min-width: 0; }
-  
+
   .logo-container { background: rgba(255, 255, 255, 0.98); padding: 6px 12px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
   .header-logo { height: 38px; width: auto; object-fit: contain; display: block; }
-  
+
   .header-text h1 { font-size: 15px; font-weight: 700; margin: 0; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .header-text .sub { color: #38bdf8; font-size: 11px; font-weight: 500; margin-top: 1px; text-transform: uppercase; letter-spacing: 0.5px; }
-  
+
   .btn-menu-pro { background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
-  
+
   .header-sub-row { width: 100%; display: flex; align-items: center; }
   .select-loja-pro {
     appearance: none; -webkit-appearance: none; width: 100%;
@@ -151,7 +151,7 @@
     background-repeat: no-repeat; background-position: right 12px center; background-size: 14px;
   }
   .select-loja-pro option { background: #0f172a !important; color: #ffffff !important; }
-  
+
   .wrap { 
     width: 100%; max-width: 600px; margin: 0 auto; padding: 14px 12px 140px; 
     flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
@@ -169,7 +169,7 @@
   .footer-text {
     font-size: 10px; color: #cbd5e1; font-weight: 600; letter-spacing: 0.3px;
   }
-  
+
   .card { 
     background: var(--card-bg); border-radius: 18px; padding: 18px 16px; margin-bottom: 14px; 
     border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); 
@@ -180,9 +180,9 @@
   .icon-scan { background: #e0f2fe; }
   .icon-conf { background: #f3e8ff; }
   .icon-list { background: #d1fae5; }
-  
+
   label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 5px; color: var(--text-main); letter-spacing: 0.2px; }
-  
+
   input, select { 
     font: inherit; width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); 
     border-radius: 12px; background: #fafafa; color: var(--text-main); font-size: 15px;
@@ -193,7 +193,7 @@
     box-shadow: 0 0 0 4px rgba(0, 102, 178, 0.12); 
   }
   .input-codigo { font-family: 'Courier New', monospace; font-size: 18px !important; letter-spacing: 1px; font-weight: 700; }
-  
+
   .product-img-container {
     width: 100%; height: 320px; border: 1.5px solid var(--border-color); border-radius: 14px;
     background: #ffffff; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 12px 0; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
@@ -207,27 +207,27 @@
   .product-img-placeholder { font-size: 13px; color: #94a3b8; text-align: center; padding: 4px; font-weight: 500; }
 
   .scan-zone { border: 1.5px dashed var(--border-color); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; background: #fdfdfd; }
-  
+
   button { font: inherit; border: 0; border-radius: 12px; padding: 13px 16px; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: transform 0.1s ease, background 0.15s ease; }
   button:active { transform: scale(0.98); }
   .primary { background: var(--primary); color: #fff; width: 100%; box-shadow: 0 4px 12px rgba(0, 102, 178, 0.25); }
   .primary:hover { background: var(--primary-hover); }
   .secondary { background: #f0f7ff; color: var(--primary); width: 100%; }
   .danger { background: #fef2f2; color: var(--accent-red); width: 100%; }
-  
+
   .row { display: grid; grid-template-columns: 1fr; gap: 10px; }
   @media(min-width: 480px) {
     .row { grid-template-columns: 1fr 1fr; }
     .row-ident { grid-template-columns: 1fr 1fr; }
   }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-  
+
   .fab-camera {
     position: fixed !important; bottom: 58px !important; right: 20px !important;
     width: 58px !important; height: 58px !important;
     background: linear-gradient(135deg, var(--primary) 0%, #004d87 100%) !important;
     color: #ffffff !important; border-radius: 50% !important;
-    display: flex !important; align-items: center !important; justify-content: center !important;
+    display: flex !important; align-items: center; justify-content: center !important;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 102, 178, 0.5) !important;
     border: 2px solid rgba(255, 255, 255, 0.4) !important; cursor: grab !important;
     z-index: 110 !important; font-size: 24px !important; touch-action: none !important; user-select: none !important;
@@ -236,7 +236,7 @@
 
   #beep-reader { width: 100%; height: 100%; }
   #beep-reader video { width: 100%; height: 100%; object-fit: cover; }
-  
+
   #beep-scanner-overlay {
     position: fixed; inset: 0; background: #000; z-index: 99999;
     display: flex; flex-direction: column;
@@ -288,11 +288,11 @@
     background: transparent; border: 1.5px solid #fff; color: #fff;
     border-radius: 99px; padding: 12px 20px; font-size: 15px; font-weight: 500; cursor: pointer;
   }
-  
+
   .notice { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
   .ok { color: var(--accent-green); font-weight: 700; }
   .warn { color: #d97706; }
-  
+
   .item { 
     border: 1px solid var(--border-color); border-left: 4px solid var(--primary); 
     border-radius: 14px; padding: 12px 14px; margin-top: 10px; display: flex; 
@@ -300,7 +300,7 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: transform 0.1s ease;
   }
   .item-main-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; }
-  
+
   .item-thumb { 
     width: 85px; 
     height: 85px; 
@@ -320,18 +320,18 @@
   .item-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
   .item-info { min-width: 0; flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
-  
+
   .item-desc-input {
     width: 100%; font-size: 13px; font-weight: 700; color: var(--text-main);
     background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px;
     padding: 6px 8px; outline: none; font-family: inherit;
   }
   .item-desc-input:focus { background: #fff; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,102,178,0.1); }
-  
+
   .item small { color: var(--text-muted); font-size: 11px; display: block; line-height: 1.3; }
   .item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .item-total { font-weight: 700; font-size: 13px; color: var(--primary); white-space: nowrap; }
-  
+
   .item-controls-row {
     display: flex; align-items: center; justify-content: space-between; 
     background: #f8fafc; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border-color);
@@ -385,14 +385,14 @@
 
       <h2>Acesso ao Sistema</h2>
       <p>Insira suas credenciais para continuar</p>
-      
+
       <div id="loginError" class="login-error hidden">Usuário ou senha incorretos!</div>
-      
+
       <form id="loginForm" onsubmit="realizarLogin(event)">
         <div style="text-align: left;">
           <label>Usuário</label>
           <input id="usuarioInput" type="text" placeholder="Digite seu usuário" required autocomplete="username">
-          
+
           <label>Senha</label>
           <input id="senhaInput" type="password" placeholder="••••••••" required autocomplete="current-password">
         </div>
@@ -404,22 +404,6 @@
 
     <div class="global-footer">
       <span>Desenvolvido por BD Tecnologia by Encarregado Felipe Farizeli</span>
-    </div>
-  </div>
-
-  <!-- MODAL DE SENHA DO CARTAZ -->
-  <div id="cartaz-modal-senha" class="custom-modal-overlay hidden">
-    <div class="custom-modal-card">
-      <h3>Módulo Cartaz</h3>
-      <p>Digite a senha de acesso:</p>
-      <div id="cartazError" class="custom-modal-error hidden">Senha incorreta! Acesso negado.</div>
-      <div style="text-align: left;">
-        <input id="cartazSenhaInput" type="password" placeholder="••••••" autocomplete="current-password">
-      </div>
-      <div class="custom-modal-buttons">
-        <button type="button" class="secondary" onclick="fecharModalCartaz()">Cancelar</button>
-        <button type="button" class="primary" onclick="validarSenhaCartaz()">Entrar</button>
-      </div>
     </div>
   </div>
 
@@ -436,7 +420,7 @@
           <span class="btn-text">PRÓATIVO</span>
         </div>
       </button>
-      
+
       <button type="button" onclick="abrirModulo('trocas')" class="glass-btn glass-2">
         <div class="glass-shine"></div>
         <div class="glass-content">
@@ -446,7 +430,7 @@
           <span class="btn-text">TROCAS</span>
         </div>
       </button>
-      
+
       <button type="button" onclick="abrirModulo('perdas')" class="glass-btn glass-3">
         <div class="glass-shine"></div>
         <div class="glass-content">
@@ -471,7 +455,7 @@
       <button type="button" class="danger" onclick="fazerLogout()" style="width: auto; padding: 10px 20px; font-size: 13px;">Sair do Sistema</button>
     </div>
   </div>
-  
+
   <!-- MÓDULO PRÓATIVO -->
   <div id="proativo-modal" class="system-modal hidden">
     <div id="app-proativo" style="display:flex; flex-direction:column; height:100%; position:relative;">
@@ -514,7 +498,7 @@
           </div>
         </div>
       </header>
-      
+
       <main class="wrap">
         <section class="card">
           <div class="row row-ident">
@@ -524,7 +508,7 @@
             <div><label>Data do levantamento</label><input id="pro_data" type="date"></div>
           </div>
         </section>
-        
+
         <section class="card">
           <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
           <div class="scan-zone"><button type="button" class="primary" onclick="abrirScanner('proativo')">📷 Abrir câmera para escanear</button></div>
@@ -533,10 +517,10 @@
           <div class="actions"><button type="button" class="primary" onclick="buscarProduto('proativo')" style="width:auto">🔍 Buscar produto</button></div>
           <div id="pro_status" class="notice" style="margin-top:8px"></div>
         </section>
-        
+
         <section class="card">
           <div class="card-header"><span class="card-icon icon-conf">✏️</span><h3>2. Conferência</h3></div>
-          
+
           <div class="product-img-container" id="pro_foto_box">
             <span class="product-img-placeholder">Sem foto</span>
           </div>
@@ -552,7 +536,7 @@
           </div>
           <div class="actions"><button type="button" class="primary" onclick="adicionarItem('proativo')" style="width:auto">➕ Adicionar à lista</button></div>
         </section>
-        
+
         <section class="card">
           <div class="card-header" style="justify-content: space-between;">
             <div style="display:flex;align-items:center;gap:8px;"><span class="card-icon icon-list">📋</span><h3>3. Produtos lançados</h3></div>
@@ -583,7 +567,7 @@
       <button type="button" class="fab-camera drag-fab" onclick="abrirScanner('proativo')" title="Escanear com Câmera">📷</button>
     </div>
   </div>
-  
+
   <!-- MÓDULO TROCAS -->
   <div id="trocas-modal" class="system-modal hidden">
     <div id="app-trocas" style="display:flex; flex-direction:column; height:100%; position:relative;">
@@ -626,7 +610,7 @@
           </div>
         </div>
       </header>
-      
+
       <main class="wrap">
         <section class="card">
           <div class="row row-ident">
@@ -642,7 +626,7 @@
             <div><label>Data da Troca</label><input id="trc_data" type="date"></div>
           </div>
         </section>
-        
+
         <section class="card">
           <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
           <div class="scan-zone"><button type="button" class="primary" onclick="abrirScanner('trocas')">📷 Abrir câmera para escanear</button></div>
@@ -651,10 +635,10 @@
           <div class="actions"><button type="button" class="primary" onclick="buscarProduto('trocas')" style="width:auto">🔍 Buscar produto</button></div>
           <div id="trc_status" class="notice" style="margin-top:8px"></div>
         </section>
-        
+
         <section class="card">
           <div class="card-header"><span class="card-icon icon-conf">✏</span><h3>2. Dados da Troca</h3></div>
-          
+
           <div class="product-img-container" id="trc_foto_box">
             <span class="product-img-placeholder">Sem foto</span>
           </div>
@@ -670,7 +654,7 @@
           </div>
           <div class="actions"><button type="button" class="primary" onclick="adicionarItem('trocas')" style="width:auto">➕ Registrar para Troca</button></div>
         </section>
-        
+
         <section class="card">
           <div class="card-header" style="justify-content: space-between;">
             <div style="display:flex;align-items:center;gap:8px;"><span class="card-icon icon-list">📋</span><h3>3. Itens na Lista</h3></div>
@@ -701,7 +685,7 @@
       <button type="button" class="fab-camera drag-fab" onclick="abrirScanner('trocas')" title="Escanear com Câmera">📷</button>
     </div>
   </div>
-  
+
   <!-- SCANNER COM GOOGLE ML KIT / BARCODEDETECTOR -->
   <div id="beep-scanner-overlay" class="hidden">
     <div class="beep-top-bar">
@@ -728,14 +712,14 @@
       <button type="button" class="beep-btn-bottom-action" onclick="fecharScannerSemCodigo()">Adicionar sem código de barras</button>
     </div>
   </div>
-  
+
   <script>
   const usuariosPermitidos = {
     "felipe": "2026",
     "admin": "market123",
     "patitiba": "frios2026"
   };
-  
+
   const produtosPreCadastrados = {
     "7896419730705": { nome: "Produto Cadastrado Rede Market", img: "" },
     "7898996002190": { nome: "Açúcar Cristal Carioca 1kg", img: "https://images.openfoodfacts.org/images/products/789/899/600/2190/front_pt.3.400.jpg" },
@@ -758,11 +742,11 @@
     "7896009501145": { nome: "Achocolatado em Pó Nescau 400g", img: "https://images.openfoodfacts.org/images/products/789/600/950/1145/front_pt.3.400.jpg" },
     "7896045112098": { nome: "Refresco em Pó Frisco Abacaxi 18g", img: "https://images.openfoodfacts.org/images/products/789/604/511/2098/front_pt.3.400.jpg" }
   };
-  
+
   let catalogoLocal = JSON.parse(localStorage.getItem('sys_catalogo') || '{}');
   let itensProAtivo = JSON.parse(localStorage.getItem('sys_proative_itens') || '[]');
   let itensTrocas = JSON.parse(localStorage.getItem('sys_trocas_itens') || '[]');
-  
+
   const listaLojas = [
     "PATITIBA", "BANANAL", "LAPA", "CAIS", "TEXACO", 
     "BALNEÁRIO", "ENSEADA", "JAPUÍBA", "NOVA ANGRA", 
@@ -782,9 +766,9 @@
   let scannerSessao = 0;
   let scannerDecoder = null;
   const scannerCanvas = document.createElement('canvas');
-  
+
   const el = id => document.getElementById(id);
-  
+
   window.addEventListener('DOMContentLoaded', () => {
     const estaLogado = sessionStorage.getItem('sys_logado') === 'true';
     if (estaLogado) {
@@ -858,7 +842,7 @@
       window.addEventListener('mouseup', dragEnd);
     });
   }
-  
+
   function realizarLogin(e) {
     e.preventDefault();
     const user = el('usuarioInput').value.trim().toLowerCase();
@@ -873,7 +857,7 @@
       el('loginError').classList.remove('hidden');
     }
   }
-  
+
   function fazerLogout() {
     sessionStorage.removeItem('sys_logado');
     el('proativo-modal').classList.add('hidden');
@@ -883,17 +867,14 @@
     el('usuarioInput').value = '';
     el('senhaInput').value = '';
   }
-  
+
   function abrirModulo(modulo) {
     if (modulo === 'perdas') {
       alert("⚠️ Área em desenvolvimento! Em breve esta funcionalidade estará disponível.");
       return;
     }
     if (modulo === 'cartaz') {
-      el('cartazSenhaInput').value = '';
-      el('cartazError').classList.add('hidden');
-      el('cartaz-modal-senha').classList.remove('hidden');
-      setTimeout(() => el('cartazSenhaInput').focus(), 100);
+      window.location.href = 'https://rmarket.cartazfacil.pro/unitario.php';
       return;
     }
     moduloAtual = modulo;
@@ -907,28 +888,13 @@
     }
   }
 
-  function fecharModalCartaz() {
-    el('cartaz-modal-senha').classList.add('hidden');
-  }
-
-  function validarSenhaCartaz() {
-    const senhaDigitada = el('cartazSenhaInput').value;
-    if (senhaDigitada === "190505") {
-      fecharModalCartaz();
-      window.location.href = 'https://rmarket.cartazfacil.pro/unitario.php';
-    } else {
-      el('cartazError').classList.remove('hidden');
-      el('cartazSenhaInput').focus();
-    }
-  }
-
   function voltarAoMenu() {
     pararScanner();
     el('proativo-modal').classList.add('hidden');
     el('trocas-modal').classList.add('hidden');
     el('menu-screen').classList.remove('hidden');
   }
-  
+
   function tocarBipe() {
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -944,14 +910,14 @@
       osc.stop(ctx.currentTime + 0.12);
     } catch (e) {}
   }
-  
+
   function dispararFlashScan() {
     const flash = el('scanFlash');
     if (!flash) return;
     flash.classList.add('active');
     setTimeout(() => flash.classList.remove('active'), 350);
   }
-  
+
   const FORMATOS_NATIVOS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'itf', 'qr_code'];
 
   // LEITOR GOOGLE ML KIT (BarcodeDetector nativo + Fallback avançado ZXing)
@@ -1172,7 +1138,7 @@
       await new Promise(r => setTimeout(r, scannerDecoder.tipo.includes('ML Kit') ? 30 : 80));
     }
   }
-  
+
   function pararScanner() {
     scannerSessao++;
     if (scannerStream) {
@@ -1187,7 +1153,7 @@
     }
     el('beep-scanner-overlay').classList.add('hidden');
   }
-  
+
   function digitarCodigoManualmente() {
     const prefix = moduloAtual === 'proativo' ? 'pro_' : 'trc_';
     pararScanner();
@@ -1208,7 +1174,7 @@
       buscarProduto(modulo);
     }
   }
-  
+
   function formatarTextoPadrao(texto) {
     if (!texto) return '';
     const minusculas = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'no', 'na', 'nos', 'nas', 'por', 'para', 'com']);
@@ -1247,16 +1213,16 @@
     const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
     const code = el(prefix + 'codigo').value.trim();
     const statusEl = el(prefix + 'status');
-    
+
     if (!code) {
       statusEl.innerHTML = '<span class="warn">Informe um código.</span>';
       atualizarFotoProduto(modulo, null);
       return;
     }
-    
+
     statusEl.innerHTML = '⚡ Buscando produto...';
     atualizarFotoProduto(modulo, null);
-    
+
     if (catalogoLocal[code]) {
       const itemCat = catalogoLocal[code];
       const nome = typeof itemCat === 'object' ? itemCat.nome : itemCat;
@@ -1267,7 +1233,7 @@
       focarCalendario(prefix);
       return;
     }
-    
+
     if (produtosPreCadastrados[code]) {
       const itemPre = produtosPreCadastrados[code];
       const nome = typeof itemPre === 'object' ? itemPre.nome : itemPre;
@@ -1278,7 +1244,7 @@
       focarCalendario(prefix);
       return;
     }
-    
+
     try {
       const controllerBeep = new AbortController();
       const timeoutBeep = setTimeout(() => controllerBeep.abort(), 6000);
@@ -1309,17 +1275,17 @@
       const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`, { signal: controller.signal });
       clearTimeout(timeoutId);
       const data = await res.json();
-      
+
       if (data.status === 1 && data.product) {
         const prod = data.product;
         const nomeProd = formatarTextoPadrao(prod.product_name_pt || prod.product_name || prod.generic_name || '');
-        
+
         if (nomeProd) {
           el(prefix + 'descricao').value = nomeProd;
           const imgUrl = prod.image_front_url || prod.image_front_small_url || prod.image_url || '';
           atualizarFotoProduto(modulo, imgUrl);
           statusEl.innerHTML = '<span class="ok">⚡ Encontrado online!</span>';
-          
+
           catalogoLocal[code] = { nome: nomeProd, img: imgUrl };
           localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
           focarCalendario(prefix);
@@ -1341,7 +1307,7 @@
       }
     }, 250);
   }
-  
+
   function adicionarItem(modulo) {
     const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
     const code = el(prefix + 'codigo').value.trim() || 'S/C';
@@ -1352,12 +1318,12 @@
     const boxId = modulo === 'proativo' ? 'pro_foto_box' : 'trc_foto_box';
     const fotoBox = el(boxId);
     const imgUrl = fotoBox ? (fotoBox.getAttribute('data-img') || '') : '';
-    
+
     if (!desc || isNaN(qtd) || !validade) {
       alert("Preencha descrição, quantidade e validade.");
       return;
     }
-    
+
     const item = {
       id: Date.now(),
       codigo: code,
@@ -1374,7 +1340,7 @@
       catalogoLocal[code] = { nome: desc, img: imgUrl };
       localStorage.setItem('sys_catalogo', JSON.stringify(catalogoLocal));
     }
-    
+
     if (modulo === 'trocas') {
       item.motivo = parseInt(el('trc_motivo').value);
       itensTrocas.unshift(item);
@@ -1383,11 +1349,11 @@
       itensProAtivo.unshift(item);
       localStorage.setItem('sys_proative_itens', JSON.stringify(itensProAtivo));
     }
-    
+
     enviarItemNuvem(modulo, item);
-    
+
     renderizarLista(modulo);
-    
+
     el(prefix + 'codigo').value = '';
     el(prefix + 'descricao').value = '';
     el(prefix + 'quantidade').value = '';
@@ -1474,28 +1440,28 @@
       alert('Erro ao salvar na nuvem: ' + e.message);
     }
   }
-  
+
   function renderizarLista(modulo) {
     const prefix = modulo === 'proativo' ? 'pro_' : 'trc_';
     const listContainer = el(prefix + 'lista');
     const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
-    
+
     el(prefix + 'contador').innerText = listaData.length;
-    
+
     if (listaData.length === 0) {
       listContainer.className = 'empty';
       listContainer.innerHTML = 'Nenhum item registrado.';
       return;
     }
-    
+
     listContainer.className = '';
     listContainer.innerHTML = '';
-    
+
     listaData.forEach(item => {
       const itemEl = document.createElement('div');
       itemEl.className = 'item';
       const dataFmt = item.validade.split('-').reverse().join('/');
-      
+
       const thumbHtml = item.imagem && item.imagem.startsWith('http') 
         ? `<div class="item-thumb"><img src="${item.imagem}" alt="Prod"></div>` 
         : `<div class="item-thumb"><span>Sem foto</span></div>`;
@@ -1512,7 +1478,7 @@
           </div>
         `;
       }
-      
+
       itemEl.innerHTML = `
         <div class="item-main-row">
           ${thumbHtml}
@@ -1548,7 +1514,7 @@
 
     let novaQtd = item.quantidade + delta;
     if (novaQtd < 0.1) novaQtd = 1;
-    
+
     item.quantidade = Number(novaQtd.toFixed(2));
     item.total = item.quantidade * item.valor;
 
@@ -1582,7 +1548,7 @@
     renderizarLista(modulo);
     alert("Alterações salvas com sucesso!");
   }
-  
+
   function removerItem(modulo, id) {
     if (modulo === 'proativo') {
       itensProAtivo = itensProAtivo.filter(i => i.id !== id);
@@ -1593,7 +1559,7 @@
     }
     renderizarLista(modulo);
   }
-  
+
   function limparLista(modulo) {
     if (confirm("Deseja apagar todos os lançamentos deste módulo?")) {
       if (modulo === 'proativo') {
@@ -1606,72 +1572,72 @@
       renderizarLista(modulo);
     }
   }
-  
+
   function getModeloPlanilha(modulo) {
     return modulo === 'trocas' ? './PERDAS E TROCA.xlsx' : './planilha_padrao_original.xlsx';
   }
-  
+
   async function gerarExcel(modulo, somenteArquivo = false) {
     const listaData = modulo === 'proativo' ? itensProAtivo : itensTrocas;
     if (listaData.length === 0) {
       alert("Adicione itens para exportar.");
       return;
     }
-    
+
     const urlModelo = getModeloPlanilha(modulo);
-    
+
     try {
       const response = await fetch(urlModelo);
       if (!response.ok) {
         throw new Error(`Não foi possível carregar o modelo (${urlModelo}). Verifique se o arquivo está na raiz do repositório.`);
       }
-      
+
       const arrayBuffer = await response.arrayBuffer();
       const workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
-      
+
       const nomeLoja = listaLojas[lojaAtualIndex];
       let sheetOriginal = workbook.sheet(0);
-      
+
       if (modulo === 'proativo') {
         const digitou = el('pro_digitou').value || 'Não informado';
         const gerente = el('pro_gerente').value || 'Encarregado';
         const dataLev = el('pro_data').value ? el('pro_data').value.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
-        
+
         try { 
           sheetOriginal.cell("G1").value(nomeLoja);
           sheetOriginal.cell("G2").value(gerente);
           sheetOriginal.cell("G3").value(dataLev);
           sheetOriginal.cell("G4").value(digitou);
         } catch(e) {}
-        
+
         sheetOriginal.column("H").width(14);
-        
+
         let linhaInicial = 7; 
         listaData.forEach((item, index) => {
           let linha = linhaInicial + index;
           const dataFmt = item.validade ? item.validade.split('-').reverse().join('/') : '';
-          
+
           sheetOriginal.cell(`A${linha}`).value('');                                              
           sheetOriginal.cell(`B${linha}`).value(nomeLoja);                                        
           sheetOriginal.cell(`C${linha}`).value(String(item.codigo));                             
-          
+
           const celDesc = sheetOriginal.cell(`D${linha}`);                                        
           celDesc.value(formatarTextoPadrao(item.descricao));
           celDesc.style("horizontalAlignment", "left");
-          
+
           sheetOriginal.cell(`E${linha}`).value(Number(item.quantidade));                         
-          
+
           const celUnidade = sheetOriginal.cell(`F${linha}`);                                     
           celUnidade.value(String(item.unidade || 'und').trim());
           celUnidade.style("horizontalAlignment", "center");
-          
+
           const celValidade = sheetOriginal.cell(`G${linha}`);                                    
           celValidade.value(dataFmt);
           celValidade.style("horizontalAlignment", "center");
-          
+
           sheetOriginal.cell(`H${linha}`).value(item.valor !== undefined ? Number(item.valor) : 0); 
         });
-        
+
       } else {
         const linhaInicial = 17;
         const ultimaLinha = 54;
@@ -1696,7 +1662,7 @@
 
         workbook._sheets = [abas[0], ...abas.slice(1)];
       }
-      
+
       const blob = await workbook.outputAsync();
       if (somenteArquivo) return blob;
       const url = window.URL.createObjectURL(blob);
