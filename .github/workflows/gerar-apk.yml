@@ -372,6 +372,40 @@ jobs:
                   AndroidBridge(android.app.Activity a) { activity = a; }
 
                   @JavascriptInterface
+                  public void salvarArquivo(String base64, String nome, String mime) {
+                      try {
+                          byte[] bytes = android.util.Base64.decode(base64, android.util.Base64.DEFAULT);
+                          String limpo = (nome == null || nome.trim().isEmpty())
+                                  ? ("Relatorio_" + System.currentTimeMillis() + ".xlsx")
+                                  : nome.trim().replaceAll("[^a-zA-Z0-9._-]", "_");
+                          if (!limpo.toLowerCase().endsWith(".xlsx") && !limpo.toLowerCase().endsWith(".pdf") && !limpo.toLowerCase().endsWith(".csv")) {
+                              limpo = limpo + ".xlsx";
+                          }
+                          if (Build.VERSION.SDK_INT >= 29) {
+                              ContentValues values = new ContentValues();
+                              values.put(MediaStore.Downloads.DISPLAY_NAME, limpo);
+                              values.put(MediaStore.Downloads.MIME_TYPE, mime);
+                              values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+                              Uri uri = activity.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+                              if (uri == null) throw new Exception("uri nula");
+                              OutputStream out = activity.getContentResolver().openOutputStream(uri);
+                              out.write(bytes);
+                              out.close();
+                          } else {
+                              File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                              if (!dir.exists()) dir.mkdirs();
+                              File f = new File(dir, limpo);
+                              FileOutputStream fos = new FileOutputStream(f);
+                              fos.write(bytes);
+                              fos.close();
+                          }
+                          activity.runOnUiThread(() -> Toast.makeText(activity, "Salvo em Downloads: " + limpo, Toast.LENGTH_LONG).show());
+                      } catch (Exception e) {
+                          activity.runOnUiThread(() -> Toast.makeText(activity, "Erro ao salvar: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                      }
+                  }
+
+                  @JavascriptInterface
                   public void salvarBase64(String base64, String mime) {
                       try {
                           byte[] bytes = android.util.Base64.decode(base64, android.util.Base64.DEFAULT);
