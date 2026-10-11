@@ -1667,6 +1667,20 @@
 
       const blob = await workbook.outputAsync();
       if (somenteArquivo) return blob;
+      if (window.Android && typeof window.Android.salvarArquivo === 'function') {
+        const buf = await blob.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+        let binario = '';
+        const parte = 8192;
+        for (let i = 0; i < bytes.length; i += parte) {
+          binario += String.fromCharCode.apply(null, bytes.subarray(i, i + parte));
+        }
+        const hoje = new Date().toLocaleDateString('pt-BR').replace(/\//g, '.');
+        const nomeArq = 'relatorio.' + (modulo === 'trocas' ? 'troca' : 'proativo') + '.' + hoje + '.xlsx';
+        window.Android.salvarArquivo(btoa(binario), nomeArq, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        alert('Planilha salva em Downloads: ' + nomeArq);
+        return;
+      }
       if (window.Android && typeof window.Android.salvarBase64 === 'function') {
         const buf = await blob.arrayBuffer();
         const bytes = new Uint8Array(buf);
