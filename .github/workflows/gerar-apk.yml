@@ -31,6 +31,7 @@ jobs:
           mkdir -p app-src/app/src/main/java/com/bdtecnologia/proativo
           mkdir -p app-src/app/src/main/res/drawable
           cp icon-512x512.png app-src/app/src/main/res/drawable/ic_launcher.png
+          cp suporte.png app-src/app/src/main/res/drawable/suporte.png
 
           cat > app-src/settings.gradle <<'EOF'
           pluginManagement {
@@ -127,6 +128,7 @@ jobs:
           import android.Manifest;
           import android.app.DownloadManager;
           import android.content.ContentValues;
+          import android.content.Intent;
           import android.content.pm.PackageManager;
           import android.net.Uri;
           import android.os.Build;
@@ -146,10 +148,12 @@ jobs:
           import android.webkit.WebViewClient;
           import android.widget.Button;
           import android.widget.FrameLayout;
+          import android.widget.ImageButton;
           import android.widget.Toast;
 
           import androidx.appcompat.app.AppCompatActivity;
 
+          import com.bdtecnologia.proativo.R;
           import com.google.mlkit.vision.codescanner.GmsBarcodeScanner;
           import com.google.mlkit.vision.codescanner.GmsBarcodeScanning;
 
@@ -252,10 +256,61 @@ jobs:
                   });
                   btnCamera.setOnClickListener(v -> abrirScannerNativo());
 
+                  ImageButton btnSuporte = new ImageButton(this);
+                  btnSuporte.setImageResource(R.drawable.suporte);
+                  FrameLayout.LayoutParams lpSup = new FrameLayout.LayoutParams(dp(62), dp(62));
+                  lpSup.gravity = Gravity.BOTTOM | Gravity.START;
+                  lpSup.setMargins(dp(20), dp(20), dp(20), dp(20));
+                  btnSuporte.setLayoutParams(lpSup);
+                  android.graphics.drawable.GradientDrawable fundoSup = new android.graphics.drawable.GradientDrawable(
+                          android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                          new int[]{0xFF25D366, 0xFF128C7E});
+                  fundoSup.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+                  fundoSup.setStroke(dp(2), 0xB3FFFFFF);
+                  btnSuporte.setBackground(fundoSup);
+                  btnSuporte.setPadding(0, 0, 0, 0);
+                  if (Build.VERSION.SDK_INT >= 21) {
+                      btnSuporte.setElevation(dp(8));
+                      btnSuporte.setClipToOutline(true);
+                  }
+                  btnSuporte.setVisibility(View.GONE);
+                  final float[] deslSup = new float[2];
+                  final boolean[] moveuSup = new boolean[1];
+                  btnSuporte.setOnTouchListener((v, ev) -> {
+                      switch (ev.getActionMasked()) {
+                          case MotionEvent.ACTION_DOWN:
+                              deslSup[0] = v.getX() - ev.getRawX();
+                              deslSup[1] = v.getY() - ev.getRawY();
+                              moveuSup[0] = false;
+                              return false;
+                          case MotionEvent.ACTION_MOVE:
+                              float sx = ev.getRawX() + deslSup[0];
+                              float sy = ev.getRawY() + deslSup[1];
+                              if (!moveuSup[0] && (Math.abs(sx - v.getX()) > 12 || Math.abs(sy - v.getY()) > 12)) moveuSup[0] = true;
+                              if (moveuSup[0]) {
+                                  v.setX(sx);
+                                  v.setY(sy);
+                                  return true;
+                              }
+                              return false;
+                          default:
+                              return false;
+                      }
+                  });
+                  btnSuporte.setOnClickListener(v -> {
+                      try {
+                          Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/5521990706088?text=Ola!%20Preciso%20de%20suporte%20com%20o%20app%20Pro-Ativo%20da%20Rede%20Market."));
+                          startActivity(intent);
+                      } catch (Exception ex) {
+                          Toast.makeText(this, "Nao foi possivel abrir o WhatsApp.", Toast.LENGTH_LONG).show();
+                      }
+                  });
+
                   FrameLayout root = new FrameLayout(this);
                   root.addView(web);
                   root.addView(btnMenuFlutuante);
                   root.addView(btnCamera);
+                  root.addView(btnSuporte);
                   setContentView(root);
 
                   WebSettings s = web.getSettings();
@@ -282,6 +337,7 @@ jobs:
                           boolean noApp = (url != null && url.contains("badalipe.github.io"));
                           btnMenuFlutuante.setVisibility(noApp ? View.GONE : View.VISIBLE);
                           btnCamera.setVisibility(View.VISIBLE);
+                          btnSuporte.setVisibility(View.VISIBLE);
                       }
                   });
 
