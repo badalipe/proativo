@@ -1,4 +1,4 @@
-name: Gerar APK do Pro-Ativo
+name: Gerar APK do RM Gestor
 
 on:
   push:
@@ -102,7 +102,7 @@ jobs:
               <uses-feature android:name="android.hardware.camera" android:required="false" />
 
               <application
-                  android:label="Pro-Ativo"
+                  android:label="RM Gestor"
                   android:icon="@drawable/ic_launcher"
                   android:allowBackup="true"
                   android:theme="@style/Theme.AppCompat.NoActionBar">
@@ -140,6 +140,7 @@ jobs:
           import android.view.View;
           import android.view.ViewGroup;
           import android.webkit.JavascriptInterface;
+          import android.webkit.JsResult;
           import android.webkit.PermissionRequest;
           import android.webkit.URLUtil;
           import android.webkit.WebChromeClient;
@@ -328,6 +329,29 @@ jobs:
                       public void onPermissionRequest(final PermissionRequest request) {
                           runOnUiThread(() -> request.grant(request.getResources()));
                       }
+
+                      @Override
+                      public boolean onJsAlert(WebView view, String url, String message, final JsResult result) {
+                          new android.app.AlertDialog.Builder(view.getContext())
+                                  .setTitle("Rede Market")
+                                  .setMessage(message)
+                                  .setPositiveButton("OK", (dialog, which) -> result.confirm())
+                                  .setOnCancelListener(dialog -> result.cancel())
+                                  .show();
+                          return true;
+                      }
+
+                      @Override
+                      public boolean onJsConfirm(WebView view, String url, String message, final JsResult result) {
+                          new android.app.AlertDialog.Builder(view.getContext())
+                                  .setTitle("Rede Market")
+                                  .setMessage(message)
+                                  .setPositiveButton("Sim", (dialog, which) -> result.confirm())
+                                  .setNegativeButton("Nao", (dialog, which) -> result.cancel())
+                                  .setOnCancelListener(dialog -> result.cancel())
+                                  .show();
+                          return true;
+                      }
                   });
 
                   web.setWebViewClient(new WebViewClient() {
@@ -504,10 +528,10 @@ jobs:
           gradle assembleDebug --no-daemon
 
       - name: Renomear APK
-        run: cp app-src/app/build/outputs/apk/debug/app-debug.apk ProAtivo-v2.apk
+        run: cp app-src/app/build/outputs/apk/debug/app-debug.apk RMGestor-v2.apk
 
       - name: Enviar APK como artefato
         uses: actions/upload-artifact@v4
         with:
-          name: ProAtivo-APK
-          path: ProAtivo-v2.apk
+          name: RMGestor-APK
+          path: RMGestor-v2.apk
