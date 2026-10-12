@@ -262,13 +262,13 @@ jobs:
                   lpSup.gravity = Gravity.BOTTOM | Gravity.START;
                   lpSup.setMargins(dp(20), dp(20), dp(20), dp(20));
                   btnSuporte.setLayoutParams(lpSup);
-                  android.graphics.drawable.GradientDrawable fundoSup = new android.graphics.drawable.GradientDrawable(
-                          android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                          new int[]{0xFF25D366, 0xFF128C7E});
+                  android.graphics.drawable.GradientDrawable fundoSup = new android.graphics.drawable.GradientDrawable();
                   fundoSup.setShape(android.graphics.drawable.GradientDrawable.OVAL);
-                  fundoSup.setStroke(dp(2), 0xB3FFFFFF);
+                  fundoSup.setColor(0xFFFFFFFF);
+                  fundoSup.setStroke(dp(3), 0xFF25D366);
                   btnSuporte.setBackground(fundoSup);
-                  btnSuporte.setPadding(0, 0, 0, 0);
+                  btnSuporte.setPadding(dp(2), dp(2), dp(2), dp(2));
+                  btnSuporte.setScaleType(ImageButton.ScaleType.CENTER_CROP);
                   if (Build.VERSION.SDK_INT >= 21) {
                       btnSuporte.setElevation(dp(8));
                       btnSuporte.setClipToOutline(true);
