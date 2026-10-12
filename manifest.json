@@ -1,7 +1,7 @@
 {
-  "name": "Pró-Ativo Rede Market",
-  "short_name": "Pró-Ativo",
-  "description": "Aplicativo para gestão de estoque, validades e trocas da Rede Market.",
+  "name": "RM Gestor - Rede Market",
+  "short_name": "RM Gestor",
+  "description": "Aplicativo de gestão da Rede Market: pró-ativo, trocas, perdas, cartazes, scanner e planilhas.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b3d91",
