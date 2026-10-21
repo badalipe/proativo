@@ -1,0 +1,8 @@
+{
+  "minima": 1,
+  "bloquear": false,
+  "titulo": "Atualização necessária",
+  "mensagem": "Uma nova versão do app está disponível. Toque no botão abaixo para continuar usando.",
+  "botao_texto": "Atualizar agora",
+  "botao_link": "https://badalipe.github.io/proativo/"
+}
