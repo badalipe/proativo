@@ -512,7 +512,7 @@
 
         <section class="card">
           <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
-          <div class="scan-zone"><button type="button" class="primary" onclick="abrirScanner('proativo')">📷 Abrir câmera para escanear</button></div>
+          <div class="scan-zone"><button type="button" class="primary" onclick="abrirScannerMelhor('proativo')">📷 Abrir câmera para escanear</button></div>
           <label>Código de barras</label>
           <input id="pro_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789..." onkeydown="checarEnterBusca(event, 'proativo')">
           <div class="actions"><button type="button" class="primary" onclick="buscarProduto('proativo')" style="width:auto">🔍 Buscar produto</button></div>
@@ -565,7 +565,7 @@
         </div>
       </footer>
 
-      <button type="button" class="fab-camera drag-fab" onclick="abrirScanner('proativo')" title="Escanear com Câmera">📷</button>
+      <button type="button" class="fab-camera drag-fab" onclick="abrirScannerMelhor('proativo')" title="Escanear com Câmera">📷</button>
     </div>
   </div>
 
@@ -630,7 +630,7 @@
 
         <section class="card">
           <div class="card-header"><span class="card-icon icon-scan">📷</span><h3>1. Escanear produto</h3></div>
-          <div class="scan-zone"><button type="button" class="primary" onclick="abrirScanner('trocas')">📷 Abrir câmera para escanear</button></div>
+          <div class="scan-zone"><button type="button" class="primary" onclick="abrirScannerMelhor('trocas')">📷 Abrir câmera para escanear</button></div>
           <label>Código de barras</label>
           <input id="trc_codigo" class="input-codigo" inputmode="numeric" placeholder="Ex.: 789..." onkeydown="checarEnterBusca(event, 'trocas')">
           <div class="actions"><button type="button" class="primary" onclick="buscarProduto('trocas')" style="width:auto">🔍 Buscar produto</button></div>
@@ -683,7 +683,7 @@
         </div>
       </footer>
 
-      <button type="button" class="fab-camera drag-fab" onclick="abrirScanner('trocas')" title="Escanear com Câmera">📷</button>
+      <button type="button" class="fab-camera drag-fab" onclick="abrirScannerMelhor('trocas')" title="Escanear com Câmera">📷</button>
     </div>
   </div>
 
@@ -1103,6 +1103,26 @@
         await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
       }
     } catch (e) {}
+  }
+
+  // Usa o scanner nativo do app (o mesmo do botão flutuante, com a tecnologia
+  // do Google); só usa o leitor do próprio site quando abrir fora do app
+  // (por exemplo, testando pelo Chrome).
+  function abrirScannerMelhor(modulo) {
+    if (window.Android && typeof window.Android.abrirScannerNativo === 'function') {
+      try {
+        window.Android.abrirScannerNativo(modulo);
+        return;
+      } catch (e1) {
+        try {
+          window.Android.abrirScannerNativo();
+          return;
+        } catch (e2) {
+          // segue para o leitor do site, abaixo
+        }
+      }
+    }
+    abrirScanner(modulo);
   }
 
   async function abrirScanner(modulo) {
