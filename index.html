@@ -1085,6 +1085,10 @@
   }
 
   async function focarCameraNoToque() {
+    const video = el('beep-video');
+    if (video && video.paused) {
+      try { await video.play(); } catch (e) {}
+    }
     const track = scannerStream && scannerStream.getVideoTracks()[0];
     if (!track || !track.getCapabilities) return;
     let caps = {};
@@ -1133,8 +1137,16 @@
       const video = el('beep-video');
       await aplicarZoomEFoco(stream.getVideoTracks()[0], video);
 
+      video.muted = true;
+      video.playsInline = true;
       video.srcObject = stream;
-      await video.play();
+      try {
+        await video.play();
+      } catch (playErr) {
+        // Em alguns aparelhos o início automático é bloqueado na primeira vez; tenta de novo.
+        await new Promise(r => setTimeout(r, 200));
+        try { await video.play(); } catch (e2) {}
+      }
       loopLeituraScanner(sessao, modulo);
     } catch (e) {
       if (sessao !== scannerSessao) return;
