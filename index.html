@@ -1109,7 +1109,13 @@
   // do Google); só usa o leitor do próprio site quando abrir fora do app
   // (por exemplo, testando pelo Chrome).
   function abrirScannerMelhor(modulo) {
-    if (window.Android && typeof window.Android.abrirScannerNativo === 'function') {
+    // ===== DIAGNÓSTICO TEMPORÁRIO: tirar depois de descobrir o problema =====
+    if (!window.Android) {
+      alert('DIAGNÓSTICO: window.Android não existe. Isso não deveria acontecer dentro do app.');
+    } else if (typeof window.Android.abrirScannerNativo !== 'function') {
+      const metodos = Object.keys(window.Android).join(', ') || '(nenhum encontrado)';
+      alert('DIAGNÓSTICO: o app não tem a função abrirScannerNativo. Funções disponíveis: ' + metodos);
+    } else {
       try {
         window.Android.abrirScannerNativo(modulo);
         return;
@@ -1118,10 +1124,11 @@
           window.Android.abrirScannerNativo();
           return;
         } catch (e2) {
-          // segue para o leitor do site, abaixo
+          alert('DIAGNÓSTICO: abrirScannerNativo deu erro.\nCom módulo: ' + (e1 && e1.message) + '\nSem módulo: ' + (e2 && e2.message));
         }
       }
     }
+    // ===== FIM DO DIAGNÓSTICO =====
     abrirScanner(modulo);
   }
 
